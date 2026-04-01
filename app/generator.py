@@ -20,7 +20,8 @@ STYLE_SUFFIX = (
 
 NEGATIVE_PROMPT = (
     "realistic, photographic, 3D render, complex shading, dark, scary, violent, "
-    "sexual, text, watermark, logo, signature, holding hands, hand holding, touching hands"
+    "sexual, text, watermark, logo, signature, holding hands, hand holding, touching hands, "
+    "vignette, oval mask, circular crop, blob background, faded edges"
 )
 
 

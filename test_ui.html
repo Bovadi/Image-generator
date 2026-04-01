@@ -445,7 +445,7 @@
   ];
 
   const STYLE = "flat illustration style, clean lines, minimal shading, solid flat colors, educational illustration, child-friendly, friendly cartoon, detailed scene background, no text, no words";
-  const NEG   = "realistic, photographic, 3D render, complex shading, dark, scary, violent, sexual, text, watermark, holding hands, hand holding, touching hands";
+  const NEG   = "realistic, photographic, 3D render, complex shading, dark, scary, violent, sexual, text, watermark, holding hands, hand holding, touching hands, vignette, oval mask, circular crop, blob background, faded edges";
 
   let activeGender = "boy";
   let activeAge    = "child";
@@ -509,7 +509,8 @@
     const falKey   = document.getElementById("falKey").value.trim();
     const verb     = document.getElementById("verb").value.trim();
     const location = document.getElementById("location").value.trim();
-    const supportingRaw = document.getElementById("supporting").value.trim();
+    const supportingRaw = document.getElementById("supporting").value.trim().toLowerCase();
+    const hasAdult = supportingRaw && supportingRaw !== "none" && supportingRaw !== "no" && supportingRaw !== "n/a";
 
     if (!falKey)    { showError("Enter your fal.ai key at the top."); return; }
     if (!selectedId){ showError("Select a character first."); return; }
@@ -526,10 +527,11 @@
     const isTrained = !char.lora.includes("huggingface.co") && char.lora !== "PASTE_LORA_URL_HERE";
     const objectsRaw = document.getElementById("objects").value.trim();
     const objectsClause = objectsRaw ? `, ${objectsRaw} clearly visible` : "";
-    const supportingClause = supportingRaw
+    const supportingClause = hasAdult
       ? `, with a fully grown adult ${supportingRaw} nearby, adult body proportions, clearly taller than the child, mature facial features`
       : "";
-    const prompt = `${char.trigger}, ${char.desc}, actively ${verb} ${location}${objectsClause}${supportingClause}, full body, dynamic action pose, detailed background. ${STYLE}.`;
+    const soloClause = hasAdult ? "" : ", only one child in the scene, no other people";
+    const prompt = `${char.trigger}, ${char.desc}, actively ${verb} ${location}${objectsClause}${supportingClause}${soloClause}, full body, dynamic action pose, detailed background. ${STYLE}.`;
 
     setLoading(true);
     clearError();
