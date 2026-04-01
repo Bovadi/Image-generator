@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BIP Visualized — Image Generator Test</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f7fa;
+      color: #2d3748;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #4f46e5;
+    }
+
+    header span {
+      font-size: 12px;
+      background: #fef3c7;
+      color: #92400e;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-weight: 600;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px;
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 32px;
+      align-items: start;
+    }
+
+    .panel {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      padding: 24px;
+    }
+
+    .panel h2 {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #718096;
+      margin-bottom: 16px;
+    }
+
+    /* Config bar */
+    .config-bar {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .config-bar label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #718096;
+      white-space: nowrap;
+    }
+
+    .config-bar input {
+      flex: 1;
+      min-width: 200px;
+      padding: 8px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: monospace;
+      color: #2d3748;
+    }
+
+    /* Character grid */
+    .char-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 10px;
+    }
+
+    .char-card {
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+      background: #fff;
+      position: relative;
+    }
+
+    .char-card:hover {
+      border-color: #a5b4fc;
+      background: #f5f3ff;
+    }
+
+    .char-card.selected {
+      border-color: #4f46e5;
+      background: #eef2ff;
+    }
+
+    .char-card.selected::after {
+      content: "✓";
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      font-size: 11px;
+      color: #4f46e5;
+      font-weight: 700;
+    }
+
+    .char-card.has-lora .char-avatar {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .char-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #e0e7ff;
+      color: #4f46e5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin: 0 auto 8px;
+    }
+
+    .char-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: #2d3748;
+      line-height: 1.3;
+    }
+
+    .char-badge {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 1px 5px;
+      border-radius: 4px;
+      margin-top: 4px;
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    /* Right panel */
+    .right-panel { display: flex; flex-direction: column; gap: 20px; }
+
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+
+    .form-group label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #4a5568;
+    }
+
+    .form-group textarea, .form-group input[type="text"] {
+      padding: 10px 14px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      resize: vertical;
+      color: #2d3748;
+      transition: border-color 0.15s;
+    }
+
+    .form-group textarea:focus, .form-group input[type="text"]:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px #eef2ff;
+    }
+
+    .selected-char-info {
+      background: #f5f3ff;
+      border: 1px solid #c7d2fe;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #4338ca;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-generate {
+      background: #4f46e5;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 24px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      width: 100%;
+    }
+
+    .btn-generate:hover:not(:disabled) { background: #4338ca; transform: translateY(-1px); }
+    .btn-generate:disabled { background: #a5b4fc; cursor: not-allowed; transform: none; }
+
+    /* Result */
+    .result-panel { display: none; }
+    .result-panel.visible { display: block; }
+
+    .result-image {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      display: block;
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #4a5568;
+      transition: all 0.15s;
+    }
+
+    .btn-secondary:hover { background: #f5f7fa; border-color: #cbd5e0; }
+
+    /* Loading */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+      color: #718096;
+    }
+
+    .loading.visible { display: block; }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #e2e8f0;
+      border-top-color: #4f46e5;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-msg {
+      display: none;
+      background: #fff5f5;
+      border: 1px solid #fed7d7;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #c53030;
+    }
+
+    .error-msg.visible { display: block; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>BIP Visualized — Image Generator</h1>
+  <span>TEST BUILD</span>
+</header>
+
+<div class="container">
+
+  <!-- Left: Character selector -->
+  <div>
+    <div class="config-bar">
+      <label>fal.ai Key</label>
+      <input type="password" id="falKey" placeholder="paste your fal.ai key here" />
+    </div>
+
+    <div class="panel">
+      <h2>1. Select a Character</h2>
+      <div class="char-grid" id="charGrid"></div>
+    </div>
+  </div>
+
+  <!-- Right: Scenario + generate -->
+  <div class="right-panel">
+    <div class="panel">
+      <h2>2. Describe the Scene</h2>
+
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Selected character</label>
+        <div class="selected-char-info" id="selectedCharInfo">
+          No character selected
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Scenario <span style="color:#a0aec0;font-weight:400">(what is happening?)</span></label>
+        <textarea id="scenario" rows="3" placeholder="e.g. crying after being told to wait, asking for a break, feeling frustrated during math"></textarea>
+      </div>
+
+      <div class="form-group" style="margin-bottom:20px">
+        <label>Other people in the scene <span style="color:#a0aec0;font-weight:400">(optional)</span></label>
+        <input type="text" id="supporting" placeholder="e.g. a teacher with short gray hair and a green sweater" />
+      </div>
+
+      <button class="btn-generate" id="generateBtn" onclick="generate()">Generate Image</button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p style="font-weight:600">Generating image...</p>
+      <p style="font-size:13px;margin-top:4px">This takes about 15–30 seconds</p>
+    </div>
+
+    <!-- Error -->
+    <div class="error-msg" id="errorMsg"></div>
+
+    <!-- Result -->
+    <div class="panel result-panel" id="resultPanel">
+      <h2>Generated Image</h2>
+      <img class="result-image" id="resultImage" src="" alt="Generated image" />
+      <div class="result-actions">
+        <button class="btn-secondary" onclick="generate()">Regenerate</button>
+        <button class="btn-secondary" onclick="downloadImage()">Download</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ─── Character data ───────────────────────────────────────────────────────
+  // Set lora_url to the real trained URL once available.
+  // Characters with a real LoRA are marked has_lora: true.
+  const CHARACTERS = {
+    "south_asian_girl_child": {
+      label: "South Asian Girl (Child)",
+      emoji: "👧🏽",
+      trigger_word: "BIPCHAR_south_asian_girl",
+      description: "young South Asian girl, long black hair, yellow kurta top, navy leggings, gold sandals",
+      lora_url: "PASTE_LORA_URL_HERE",
+      has_lora: false,
+    },
+    "asian_boy_child": {
+      label: "Asian Boy (Child)",
+      emoji: "👦🏻",
+      trigger_word: "BIPCHAR_asian_boy",
+      description: "young Asian boy, short black hair, light blue hoodie, navy blue shorts, gray sneakers",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "asian_girl_child": {
+      label: "Asian Girl (Child)",
+      emoji: "👧🏻",
+      trigger_word: "BIPCHAR_asian_girl",
+      description: "young Asian girl, black hair in pigtails, pink t-shirt, purple leggings, white sneakers",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "black_boy_child": {
+      label: "Black Boy (Child)",
+      emoji: "👦🏾",
+      trigger_word: "BIPCHAR_black_boy",
+      description: "young Black boy, short curly black hair, yellow t-shirt, green shorts, white sneakers",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "black_girl_child": {
+      label: "Black Girl (Child)",
+      emoji: "👧🏾",
+      trigger_word: "BIPCHAR_black_girl",
+      description: "young Black girl, natural curly black hair, orange dress, white sandals",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "hispanic_boy_child": {
+      label: "Hispanic Boy (Child)",
+      emoji: "👦🏽",
+      trigger_word: "BIPCHAR_hispanic_boy",
+      description: "young Hispanic boy, dark brown hair, teal shirt, khaki shorts, brown sneakers",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "hispanic_girl_child": {
+      label: "Hispanic Girl (Child)",
+      emoji: "👧🏽",
+      trigger_word: "BIPCHAR_hispanic_girl",
+      description: "young Hispanic girl, long dark brown hair, red top, blue jeans, red sneakers",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "white_boy_child": {
+      label: "White Boy (Child)",
+      emoji: "👦🏼",
+      trigger_word: "BIPCHAR_white_boy",
+      description: "young white boy, blond hair, green t-shirt, blue jeans, green sneakers",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "white_girl_child": {
+      label: "White Girl (Child)",
+      emoji: "👧🏼",
+      trigger_word: "BIPCHAR_white_girl",
+      description: "young white girl, wavy red hair, lavender dress, purple sneakers",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "middle_eastern_boy_child": {
+      label: "Middle Eastern Boy (Child)",
+      emoji: "👦🏻",
+      trigger_word: "BIPCHAR_middle_eastern_boy",
+      description: "young Middle Eastern boy, dark wavy hair, white shirt, olive pants, brown shoes",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "middle_eastern_girl_child": {
+      label: "Middle Eastern Girl (Child)",
+      emoji: "👧🏻",
+      trigger_word: "BIPCHAR_middle_eastern_girl",
+      description: "young Middle Eastern girl, dark hair with light blue hijab, teal top, dark pants, white sneakers",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "south_asian_boy_child": {
+      label: "South Asian Boy (Child)",
+      emoji: "👦🏽",
+      trigger_word: "BIPCHAR_south_asian_boy",
+      description: "young South Asian boy, straight black hair, blue striped shirt, gray pants, blue sneakers",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "asian_boy_teen": {
+      label: "Asian Boy (Teen)",
+      emoji: "🧑🏻",
+      trigger_word: "BIPCHAR_asian_teen_boy",
+      description: "teenage Asian boy, short black hair, dark blue hoodie, black jeans, white sneakers",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "asian_girl_teen": {
+      label: "Asian Girl (Teen)",
+      emoji: "🧑🏻",
+      trigger_word: "BIPCHAR_asian_teen_girl",
+      description: "teenage Asian girl, black hair in a ponytail, pink hoodie, light jeans, white sneakers",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "black_boy_teen": {
+      label: "Black Boy (Teen)",
+      emoji: "🧑🏾",
+      trigger_word: "BIPCHAR_black_teen_boy",
+      description: "teenage Black boy, short fade haircut, gray hoodie, dark jeans, red sneakers",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "black_girl_teen": {
+      label: "Black Girl (Teen)",
+      emoji: "🧑🏾",
+      trigger_word: "BIPCHAR_black_teen_girl",
+      description: "teenage Black girl, natural afro, purple jacket, black leggings, white sneakers",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "hispanic_boy_teen": {
+      label: "Hispanic Boy (Teen)",
+      emoji: "🧑🏽",
+      trigger_word: "BIPCHAR_hispanic_teen_boy",
+      description: "teenage Hispanic boy, medium-length dark hair, green bomber jacket, dark jeans, black shoes",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "hispanic_girl_teen": {
+      label: "Hispanic Girl (Teen)",
+      emoji: "🧑🏽",
+      trigger_word: "BIPCHAR_hispanic_teen_girl",
+      description: "teenage Hispanic girl, long dark wavy hair, orange sweater, blue jeans, white sneakers",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "white_boy_teen": {
+      label: "White Boy (Teen)",
+      emoji: "🧑🏼",
+      trigger_word: "BIPCHAR_white_teen_boy",
+      description: "teenage white boy, light brown hair, navy t-shirt, khaki pants, gray sneakers",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "white_girl_teen": {
+      label: "White Girl (Teen)",
+      emoji: "🧑🏼",
+      trigger_word: "BIPCHAR_white_teen_girl",
+      description: "teenage white girl, straight blond hair, light pink cardigan, white shirt, blue jeans, tan boots",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "south_asian_boy_teen": {
+      label: "South Asian Boy (Teen)",
+      emoji: "🧑🏽",
+      trigger_word: "BIPCHAR_south_asian_teen_boy",
+      description: "teenage South Asian boy, dark hair, teal hoodie, black jeans, white sneakers",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "south_asian_girl_teen": {
+      label: "South Asian Girl (Teen)",
+      emoji: "🧑🏽",
+      trigger_word: "BIPCHAR_south_asian_teen_girl",
+      description: "teenage South Asian girl, long black hair, purple hoodie, dark jeans, purple sneakers",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "middle_eastern_boy_teen": {
+      label: "Middle Eastern Boy (Teen)",
+      emoji: "🧑🏻",
+      trigger_word: "BIPCHAR_middle_eastern_teen_boy",
+      description: "teenage Middle Eastern boy, short dark hair, olive jacket, dark pants, brown boots",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+    "middle_eastern_girl_teen": {
+      label: "Middle Eastern Girl (Teen)",
+      emoji: "🧑🏻",
+      trigger_word: "BIPCHAR_middle_eastern_teen_girl",
+      description: "teenage Middle Eastern girl, dark hair with navy blue hijab, teal jacket, dark jeans, white sneakers",
+      lora_url: "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors",
+      has_lora: false,
+    },
+  };
+
+  const STYLE_SUFFIX = "flat illustration style, clean lines, minimal shading, solid flat colors, educational illustration, child-friendly, friendly cartoon, simple background, no text, no words";
+  const NEGATIVE_PROMPT = "realistic, photographic, 3D render, complex shading, dark, scary, violent, sexual, text, watermark, logo";
+
+  // ─── State ────────────────────────────────────────────────────────────────
+  let selectedId = null;
+
+  // ─── Build character grid ─────────────────────────────────────────────────
+  function buildGrid() {
+    const grid = document.getElementById("charGrid");
+    for (const [id, char] of Object.entries(CHARACTERS)) {
+      const card = document.createElement("div");
+      card.className = "char-card" + (char.has_lora ? " has-lora" : "");
+      card.dataset.id = id;
+      card.onclick = () => selectChar(id);
+      card.innerHTML = `
+        <div class="char-avatar">${char.emoji}</div>
+        <div class="char-name">${char.label}</div>
+        ${char.has_lora ? '<div class="char-badge">✓ Trained</div>' : ''}
+      `;
+      grid.appendChild(card);
+    }
+  }
+
+  function selectChar(id) {
+    selectedId = id;
+    document.querySelectorAll(".char-card").forEach(c => c.classList.remove("selected"));
+    document.querySelector(`[data-id="${id}"]`).classList.add("selected");
+    const char = CHARACTERS[id];
+    document.getElementById("selectedCharInfo").textContent = `${char.emoji}  ${char.label}`;
+  }
+
+  // ─── Generate ─────────────────────────────────────────────────────────────
+  async function generate() {
+    const falKey = document.getElementById("falKey").value.trim();
+    const scenario = document.getElementById("scenario").value.trim();
+    const supporting = document.getElementById("supporting").value.trim();
+
+    if (!falKey) { showError("Please enter your fal.ai key at the top."); return; }
+    if (!selectedId) { showError("Please select a character first."); return; }
+    if (!scenario) { showError("Please describe the scenario."); return; }
+
+    const char = CHARACTERS[selectedId];
+    if (char.lora_url === "PASTE_LORA_URL_HERE") {
+      showError("This character's LoRA hasn't been trained yet. Paste the LoRA URL into the HTML file first.");
+      return;
+    }
+
+    let prompt = `${char.trigger_word}, ${char.description}. Scene: ${scenario}.`;
+    if (supporting) prompt += ` Also in the scene: ${supporting}.`;
+    prompt += ` ${STYLE_SUFFIX}.`;
+
+    setLoading(true);
+    clearError();
+    hideResult();
+
+    try {
+      const res = await fetch("https://fal.run/fal-ai/flux-lora", {
+        method: "POST",
+        headers: {
+          "Authorization": `Key ${falKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt,
+          negative_prompt: NEGATIVE_PROMPT,
+          loras: [{ path: char.lora_url, scale: 1.0 }],
+          image_size: "square_hd",
+          num_inference_steps: 28,
+          guidance_scale: 3.5,
+          num_images: 1,
+          enable_safety_checker: true,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`fal.ai error ${res.status}: ${err}`);
+      }
+
+      const data = await res.json();
+      const imageUrl = data?.images?.[0]?.url;
+      if (!imageUrl) throw new Error("No image returned from fal.ai");
+
+      showResult(imageUrl);
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // ─── UI helpers ───────────────────────────────────────────────────────────
+  function setLoading(on) {
+    document.getElementById("loading").classList.toggle("visible", on);
+    document.getElementById("generateBtn").disabled = on;
+  }
+
+  function showResult(url) {
+    document.getElementById("resultImage").src = url;
+    document.getElementById("resultPanel").classList.add("visible");
+  }
+
+  function hideResult() {
+    document.getElementById("resultPanel").classList.remove("visible");
+  }
+
+  function showError(msg) {
+    const el = document.getElementById("errorMsg");
+    el.textContent = msg;
+    el.classList.add("visible");
+  }
+
+  function clearError() {
+    document.getElementById("errorMsg").classList.remove("visible");
+  }
+
+  async function downloadImage() {
+    const url = document.getElementById("resultImage").src;
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `bip-${selectedId}-${Date.now()}.png`;
+    a.click();
+  }
+
+  // ─── Init ─────────────────────────────────────────────────────────────────
+  buildGrid();
+</script>
+
+</body>
+</html>
