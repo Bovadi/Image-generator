@@ -509,7 +509,7 @@
     }
 
     const isTrained = !char.lora.includes("huggingface.co") && char.lora !== "PASTE_LORA_URL_HERE";
-    const prompt = `${char.trigger}, ${char.desc}. Scene: ${scenario}. ${STYLE}.`;
+    const prompt = `${char.trigger}, ${char.desc}, actively ${scenario}, full body, dynamic action pose, appropriate setting and background. ${STYLE}.`;
 
     setLoading(true);
     clearError();

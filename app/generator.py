@@ -31,8 +31,8 @@ class GenerationError(Exception):
 
 def build_prompt(character: dict, scenario: str) -> str:
     return (
-        f"{character['trigger_word']}, {character['description']}. "
-        f"Scene: {scenario}. "
+        f"{character['trigger_word']}, {character['description']}, "
+        f"actively {scenario}, full body, dynamic action pose, appropriate setting and background. "
         f"{STYLE_SUFFIX}."
     )
 
