@@ -381,6 +381,10 @@
       <input type="text" id="location" placeholder="e.g. in a classroom, at the kitchen table, on the playground" />
     </div>
     <div class="scenario-input">
+      <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">OBJECTS</span>
+      <input type="text" id="objects" placeholder="optional — e.g. coloring book open in her lap, crayons on the floor" />
+    </div>
+    <div class="scenario-input">
       <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">ADULTS</span>
       <input type="text" id="supporting" placeholder="optional — e.g. a female teacher with short gray hair" />
     </div>
@@ -520,10 +524,12 @@
     }
 
     const isTrained = !char.lora.includes("huggingface.co") && char.lora !== "PASTE_LORA_URL_HERE";
+    const objectsRaw = document.getElementById("objects").value.trim();
+    const objectsClause = objectsRaw ? `, ${objectsRaw} clearly visible` : "";
     const supportingClause = supportingRaw
       ? `, with a fully grown adult ${supportingRaw} nearby, adult body proportions, clearly taller than the child, mature facial features`
       : "";
-    const prompt = `${char.trigger}, ${char.desc}, actively ${verb} ${location}${supportingClause}, full body, dynamic action pose, detailed background with relevant objects and furniture. ${STYLE}.`;
+    const prompt = `${char.trigger}, ${char.desc}, actively ${verb} ${location}${objectsClause}${supportingClause}, full body, dynamic action pose, detailed background. ${STYLE}.`;
 
     setLoading(true);
     clearError();
