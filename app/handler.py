@@ -37,10 +37,10 @@ def _post_callback(callback_url: str, payload: dict) -> None:
         logger.error("Failed to POST callback to %s: %s", callback_url, exc)
 
 
-def _process(character_id: str, scenario: str, callback_url: str) -> None:
+def _process(character_id: str, scenario: str, callback_url: str, supporting_characters: str = "") -> None:
     """Generate image and fire callback. Runs inline (sync) or in a thread (async)."""
     try:
-        fal_url = generate_image(character_id, scenario)
+        fal_url = generate_image(character_id, scenario, supporting_characters)
         s3_url = upload_from_url(fal_url)
         _post_callback(callback_url, {"status": "success", "image_url": s3_url})
     except GenerationError as exc:
@@ -80,6 +80,7 @@ def handler(event: dict, context) -> dict:
 
     character_id = body.get("character_id", "").strip()
     scenario = body.get("scenario", "").strip()
+    supporting_characters = body.get("supporting_characters", "").strip()
     callback_url = body.get("callback_url", "").strip()
     sync_mode = bool(body.get("sync", False))
 

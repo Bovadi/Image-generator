@@ -372,11 +372,19 @@
 
   <!-- Scenario input -->
   <div class="bottom-bar">
-    <div class="scenario-input">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-      </svg>
-      <input type="text" id="scenario" placeholder="Type a scenario... crying after being told to wait" />
+    <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+      <div class="scenario-input">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input type="text" id="scenario" placeholder="Scenario... e.g. doing homework at school" />
+      </div>
+      <div class="scenario-input">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+        <input type="text" id="supporting" placeholder="Adults in scene (optional)... e.g. a female teacher with gray hair" />
+      </div>
     </div>
     <button class="btn-generate" id="generateBtn" onclick="generate()">Generate</button>
   </div>
@@ -432,7 +440,7 @@
     { id:"middle_eastern_girl_teen",   gender:"girl", age:"teen",  label:"Middle Eastern",  emoji:"🧑🏻", trigger:"BIPCHAR_middle_eastern_teen_girl", desc:"teenage Middle Eastern girl, dark hair with navy blue hijab, teal jacket, dark jeans, white sneakers",          lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
   ];
 
-  const STYLE = "flat illustration style, clean lines, minimal shading, solid flat colors, educational illustration, child-friendly, friendly cartoon, simple white background, no text, no words";
+  const STYLE = "flat illustration style, clean lines, minimal shading, solid flat colors, educational illustration, child-friendly, friendly cartoon, detailed scene background, no text, no words";
   const NEG   = "realistic, photographic, 3D render, complex shading, dark, scary, violent, sexual, text, watermark";
 
   let activeGender = "boy";
@@ -509,7 +517,11 @@
     }
 
     const isTrained = !char.lora.includes("huggingface.co") && char.lora !== "PASTE_LORA_URL_HERE";
-    const prompt = `${char.trigger}, ${char.desc}, actively ${scenario}, full body, dynamic action pose, appropriate setting and background. ${STYLE}.`;
+    const supportingRaw = document.getElementById("supporting").value.trim();
+    const supportingClause = supportingRaw
+      ? `, with a fully grown adult ${supportingRaw} nearby, adult body proportions, clearly taller than the child, mature facial features`
+      : "";
+    const prompt = `${char.trigger}, ${char.desc}, actively ${scenario}${supportingClause}, full body, dynamic action pose, detailed background with relevant objects and furniture. ${STYLE}.`;
 
     setLoading(true);
     clearError();

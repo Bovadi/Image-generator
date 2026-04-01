@@ -15,7 +15,7 @@ BACKOFF_SECONDS = [2, 4, 8]
 
 STYLE_SUFFIX = (
     "flat illustration style, clean lines, minimal shading, solid flat colors, "
-    "educational illustration, child-friendly, friendly cartoon, simple background, no text, no words"
+    "educational illustration, child-friendly, friendly cartoon, detailed scene background, no text, no words"
 )
 
 NEGATIVE_PROMPT = (
@@ -29,15 +29,21 @@ class GenerationError(Exception):
     pass
 
 
-def build_prompt(character: dict, scenario: str) -> str:
+def build_prompt(character: dict, scenario: str, supporting_characters: str = "") -> str:
+    supporting_clause = (
+        f", with a fully grown adult {supporting_characters} nearby, "
+        f"adult body proportions, clearly taller than the child, mature facial features"
+        if supporting_characters else ""
+    )
     return (
         f"{character['trigger_word']}, {character['description']}, "
-        f"actively {scenario}, full body, dynamic action pose, appropriate setting and background. "
+        f"actively {scenario}{supporting_clause}, full body, dynamic action pose, "
+        f"detailed background with relevant objects and furniture. "
         f"{STYLE_SUFFIX}."
     )
 
 
-def generate_image(character_id: str, scenario: str) -> str:
+def generate_image(character_id: str, scenario: str, supporting_characters: str = "") -> str:
     """
     Generate an image for the given character and scenario using fal.ai FLUX + LoRA.
     Returns the image URL from fal.ai (caller is responsible for uploading to S3).
@@ -47,7 +53,7 @@ def generate_image(character_id: str, scenario: str) -> str:
     os.environ.setdefault("FAL_KEY", os.environ.get("FAL_KEY", ""))
 
     character = get_character(character_id)
-    prompt = build_prompt(character, scenario)
+    prompt = build_prompt(character, scenario, supporting_characters)
 
     last_error = None
     for attempt in range(MAX_ATTEMPTS):
