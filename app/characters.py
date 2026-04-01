@@ -4,6 +4,9 @@
 
 PLACEHOLDER_LORA = "https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors"
 
+# Trained LoRAs
+SOUTH_ASIAN_GIRL_CHILD_LORA = "https://v3b.fal.media/files/b/0a9470ed/z9INFa1vqIBc3o1zZ4bmN_pytorch_lora_weights.safetensors"
+
 CHARACTERS: dict[str, dict] = {
     # --- Child characters ---
     "asian_boy_child": {
@@ -52,9 +55,9 @@ CHARACTERS: dict[str, dict] = {
         "description": "young South Asian boy, straight black hair, blue striped shirt, gray pants, blue sneakers",
     },
     "south_asian_girl_child": {
-        "lora_url": PLACEHOLDER_LORA,
+        "lora_url": SOUTH_ASIAN_GIRL_CHILD_LORA,
         "trigger_word": "BIPCHAR_south_asian_girl",
-        "description": "young South Asian girl, long black hair, yellow kurta top, navy leggings, gold sandals",
+        "description": "young South Asian girl, long black hair, peach t-shirt, khaki shorts, white sneakers",
     },
     "middle_eastern_boy_child": {
         "lora_url": PLACEHOLDER_LORA,
