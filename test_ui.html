@@ -444,8 +444,8 @@
     { id:"middle_eastern_girl_teen",   gender:"girl", age:"teen",  label:"Middle Eastern",  emoji:"🧑🏻", trigger:"BIPCHAR_middle_eastern_teen_girl", desc:"teenage Middle Eastern girl, dark hair with navy blue hijab, teal jacket, dark jeans, white sneakers",          lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
   ];
 
-  const STYLE = "flat illustration style, clean lines, minimal shading, solid flat colors, educational illustration, child-friendly, friendly cartoon, detailed scene background, no text, no words";
-  const NEG   = "realistic, photographic, 3D render, complex shading, dark, scary, violent, sexual, text, watermark, holding hands, hand holding, touching hands, vignette, oval mask, circular crop, blob background, faded edges";
+  const STYLE = "flat illustration style, clean lines, minimal shading, solid flat colors, educational illustration, child-friendly, friendly cartoon, full rectangular scene, edge to edge background, bedroom walls and floor visible, no text, no words";
+  const NEG   = "realistic, photographic, 3D render, complex shading, dark, scary, violent, sexual, text, watermark, holding hands, hand holding, touching hands, vignette, oval mask, circular crop, blob background, faded edges, plain background, white background, gradient background, no background";
 
   let activeGender = "boy";
   let activeAge    = "child";
@@ -531,7 +531,7 @@
       ? `, with a fully grown adult ${supportingRaw} nearby, adult body proportions, clearly taller than the child, mature facial features`
       : "";
     const soloClause = hasAdult ? "" : ", only one child in the scene, no other people";
-    const prompt = `${char.trigger}, ${char.desc}, actively ${verb} ${location}${objectsClause}${supportingClause}${soloClause}, full body, dynamic action pose, detailed background. ${STYLE}.`;
+    const prompt = `${location}, ${char.trigger}, ${char.desc}, actively ${verb}${objectsClause}${supportingClause}${soloClause}, full body, dynamic action pose, full scene with walls floor and furniture visible. ${STYLE}.`;
 
     setLoading(true);
     clearError();
