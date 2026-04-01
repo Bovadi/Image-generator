@@ -465,9 +465,11 @@
       card.className = "char-card" + (char.id === selectedId ? " selected" : "");
       card.dataset.id = char.id;
       card.onclick = () => selectChar(char.id);
+      const isTrained = !char.lora.includes("huggingface.co") && char.lora !== "PASTE_LORA_URL_HERE";
       card.innerHTML = `
         <div class="char-avatar">${char.emoji}</div>
         <div class="char-name">${char.label}</div>
+        ${isTrained ? '<div style="font-size:9px;color:#38a169;font-weight:700;margin-top:3px">✓ TRAINED</div>' : ''}
         <div class="check-badge">✓</div>
       `;
       scroll.appendChild(card);
@@ -506,6 +508,7 @@
       return;
     }
 
+    const isTrained = !char.lora.includes("huggingface.co") && char.lora !== "PASTE_LORA_URL_HERE";
     const prompt = `${char.trigger}, ${char.desc}. Scene: ${scenario}. ${STYLE}.`;
 
     setLoading(true);
@@ -513,22 +516,24 @@
     hideResult();
 
     try {
+      const body = {
+        prompt,
+        negative_prompt: NEG,
+        image_size: "square_hd",
+        num_inference_steps: 28,
+        guidance_scale: 3.5,
+        num_images: 1,
+        enable_safety_checker: true,
+      };
+      if (isTrained) body.loras = [{ path: char.lora, scale: 1.0 }];
+
       const res = await fetch("https://fal.run/fal-ai/flux-lora", {
         method: "POST",
         headers: {
           "Authorization": `Key ${falKey}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          prompt,
-          negative_prompt: NEG,
-          loras: [{ path: char.lora, scale: 1.0 }],
-          image_size: "square_hd",
-          num_inference_steps: 28,
-          guidance_scale: 3.5,
-          num_images: 1,
-          enable_safety_checker: true,
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) throw new Error(`fal.ai error ${res.status}: ${await res.text()}`);
