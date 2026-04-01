@@ -370,26 +370,26 @@
   <!-- Character row -->
   <div class="char-scroll" id="charScroll"></div>
 
-  <!-- Scenario input -->
-  <div class="bottom-bar">
-    <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
-      <div class="scenario-input">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-        </svg>
-        <input type="text" id="scenario" placeholder="Scenario... e.g. doing homework at school" />
-      </div>
-      <div class="scenario-input">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-        </svg>
-        <input type="text" id="supporting" placeholder="Adults in scene (optional)... e.g. a female teacher with gray hair" />
-      </div>
+  <!-- Inputs -->
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+    <div class="scenario-input">
+      <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">ACTION</span>
+      <input type="text" id="verb" placeholder="e.g. doing homework, crying, asking for a break" />
     </div>
+    <div class="scenario-input">
+      <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">LOCATION</span>
+      <input type="text" id="location" placeholder="e.g. in a classroom, at the kitchen table, on the playground" />
+    </div>
+    <div class="scenario-input">
+      <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">ADULTS</span>
+      <input type="text" id="supporting" placeholder="optional — e.g. a female teacher with short gray hair" />
+    </div>
+  </div>
+  <div style="display:flex;justify-content:flex-end;">
     <button class="btn-generate" id="generateBtn" onclick="generate()">Generate</button>
   </div>
 
-  <p class="hint" id="hintText">Select a character and enter a scenario to generate an image.</p>
+  <p class="hint" id="hintText">Select a character, fill in the action and location, then hit Generate.</p>
 
   <!-- Loading -->
   <div class="loading" id="loading">
@@ -503,25 +503,27 @@
   // ── Generate ──────────────────────────────────────────────────────────────
   async function generate() {
     const falKey   = document.getElementById("falKey").value.trim();
-    const scenario = document.getElementById("scenario").value.trim();
+    const verb     = document.getElementById("verb").value.trim();
+    const location = document.getElementById("location").value.trim();
+    const supportingRaw = document.getElementById("supporting").value.trim();
 
     if (!falKey)    { showError("Enter your fal.ai key at the top."); return; }
     if (!selectedId){ showError("Select a character first."); return; }
-    if (!scenario)  { showError("Type a scenario first."); return; }
+    if (!verb)      { showError("Enter an action first."); return; }
+    if (!location)  { showError("Enter a location first."); return; }
 
     const char = CHARACTERS.find(c => c.id === selectedId);
 
     if (char.lora === "PASTE_LORA_URL_HERE") {
-      showError("This character's LoRA isn't trained yet. Paste the LoRA URL into the HTML file.");
+      showError("This character's LoRA isn't trained yet.");
       return;
     }
 
     const isTrained = !char.lora.includes("huggingface.co") && char.lora !== "PASTE_LORA_URL_HERE";
-    const supportingRaw = document.getElementById("supporting").value.trim();
     const supportingClause = supportingRaw
       ? `, with a fully grown adult ${supportingRaw} nearby, adult body proportions, clearly taller than the child, mature facial features`
       : "";
-    const prompt = `${char.trigger}, ${char.desc}, actively ${scenario}${supportingClause}, full body, dynamic action pose, detailed background with relevant objects and furniture. ${STYLE}.`;
+    const prompt = `${char.trigger}, ${char.desc}, actively ${verb} ${location}${supportingClause}, full body, dynamic action pose, detailed background with relevant objects and furniture. ${STYLE}.`;
 
     setLoading(true);
     clearError();
