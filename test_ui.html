@@ -284,6 +284,22 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── PII warning ── */
+    .pii-warning {
+      display: none;
+      background: #fffbeb;
+      border: 1px solid #f6e05e;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #744210;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+    .pii-warning.visible { display: block; }
+    .pii-warning strong { display: block; margin-bottom: 4px; }
+    .pii-replaced { font-family: monospace; background: #fef3c7; padding: 1px 5px; border-radius: 4px; }
+
     /* ── Error ── */
     .error-msg {
       display: none;
@@ -402,6 +418,7 @@
   </div>
 
   <!-- Error -->
+  <div class="pii-warning" id="piiWarning"></div>
   <div class="error-msg" id="errorMsg"></div>
 
   <!-- Result -->
@@ -506,6 +523,7 @@
 
   // ── Generate ──────────────────────────────────────────────────────────────
   async function generate() {
+    scrubAllInputs();
     const falKey   = document.getElementById("falKey").value.trim();
     const verb     = document.getElementById("verb").value.trim();
     const location = document.getElementById("location").value.trim();
@@ -600,6 +618,76 @@
     a.download = `bip-${selectedId}-${Date.now()}.png`;
     a.click();
   }
+
+  // ── PII Detection & Replacement ───────────────────────────────────────────
+
+  const FAKE_NAMES    = ["the student", "the child", "a young girl", "a young boy", "the kid"];
+  const FAKE_ADULTS   = ["the teacher", "a caregiver", "the adult", "a parent", "a guardian"];
+  const FAKE_PLACES   = ["the school", "the facility", "the center", "the building"];
+
+  const PII_PATTERNS = [
+    // Phone numbers
+    { label: "phone number",    regex: /(\+?1?\s?)?(\(?\d{3}\)?[\s.\-]?\d{3}[\s.\-]?\d{4})/g,      replacement: () => "555-000-0000" },
+    // Email addresses
+    { label: "email address",   regex: /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g,        replacement: () => "student@example.com" },
+    // SSN
+    { label: "SSN",             regex: /\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b/g,                          replacement: () => "XXX-XX-XXXX" },
+    // Dates of birth / dates (MM/DD/YYYY or similar)
+    { label: "date",            regex: /\b(0?[1-9]|1[0-2])[\/\-](0?[1-9]|[12]\d|3[01])[\/\-](\d{2}|\d{4})\b/g, replacement: () => "a date of birth" },
+    // Medical record / ID numbers (6+ digit standalone numbers)
+    { label: "ID number",       regex: /\b\d{6,}\b/g,                                                replacement: () => "XXXXXXXX" },
+    // Full names — two or more capitalized words not at sentence start
+    { label: "name",            regex: /(?<![.!?]\s)(?<!\n)\b([A-Z][a-z]{1,15})(\s[A-Z][a-z]{1,15}){1,2}\b/g,
+      replacement: (match) => {
+        const lower = match.toLowerCase();
+        if (["monday","tuesday","wednesday","thursday","friday","saturday","sunday",
+             "january","february","march","april","june","july","august","september",
+             "october","november","december","south","north","east","west","united",
+             "states","new york","living room","bedroom","classroom"].some(w => lower.includes(w))) return match;
+        return FAKE_NAMES[Math.floor(Math.random() * FAKE_NAMES.length)];
+      }
+    },
+  ];
+
+  function scrubPII(text) {
+    let scrubbed = text;
+    const found = [];
+    PII_PATTERNS.forEach(({ label, regex, replacement }) => {
+      scrubbed = scrubbed.replace(regex, (match) => {
+        found.push({ label, original: match });
+        return typeof replacement === "function" ? replacement(match) : replacement;
+      });
+    });
+    return { scrubbed, found };
+  }
+
+  function scrubAllInputs() {
+    const fields = ["verb", "location", "objects", "supporting"];
+    const allFound = [];
+    fields.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el || !el.value.trim()) return;
+      const { scrubbed, found } = scrubPII(el.value);
+      if (found.length) {
+        el.value = scrubbed;
+        allFound.push(...found);
+      }
+    });
+    if (allFound.length) {
+      const types = [...new Set(allFound.map(f => f.label))].join(", ");
+      const originals = allFound.map(f => `<span class="pii-replaced">${f.original}</span>`).join(", ");
+      const el = document.getElementById("piiWarning");
+      el.innerHTML = `<strong>⚠️ We noticed personal information in your prompt.</strong>
+        We detected and removed: ${originals} (${types}). Your inputs have been updated to keep this session HIPAA compliant.`;
+      el.classList.add("visible");
+    }
+  }
+
+  // Scrub on blur of each input field
+  ["verb", "location", "objects", "supporting"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("blur", scrubAllInputs);
+  });
 
   // ── Init ──────────────────────────────────────────────────────────────────
   renderChars();

@@ -5,7 +5,7 @@ import threading
 import requests
 
 from app.auth import validate_inbound_token, callback_auth_header
-from app.moderation import check_scenario, ModerationError
+from app.moderation import check_scenario, scrub_pii, ModerationError
 from app.generator import generate_image, GenerationError
 from app.storage import upload_from_url
 from app.characters import get_character
@@ -97,6 +97,12 @@ def handler(event: dict, context) -> dict:
         get_character(character_id)
     except ValueError as exc:
         return _json_response(400, {"error": str(exc)})
+
+    # Scrub PII before moderation or generation
+    scenario, pii_found = scrub_pii(scenario)
+    supporting_characters, _ = scrub_pii(supporting_characters)
+    if pii_found:
+        logger.warning("PII detected and scrubbed from request: %s", pii_found)
 
     # Moderation check — reject early before incurring generation cost
     try:
