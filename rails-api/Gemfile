@@ -1,0 +1,22 @@
+source "https://rubygems.org"
+ruby "3.3.0"
+
+gem "rails", "~> 7.1"
+gem "puma", "~> 6.0"
+
+# HTTP client for fal.ai and callbacks
+gem "faraday", "~> 2.9"
+gem "faraday-retry", "~> 2.2"
+
+# AWS S3
+gem "aws-sdk-s3", "~> 1.150"
+
+# OpenAI moderation
+gem "ruby-openai", "~> 7.0"
+
+# Environment variables
+gem "dotenv-rails", groups: [:development, :test]
+
+group :development, :test do
+  gem "rspec-rails", "~> 6.1"
+end
