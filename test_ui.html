@@ -353,10 +353,14 @@
 <div class="modal">
   <button class="modal-close" onclick="this.parentElement.style.opacity=0.5">✕</button>
 
-  <!-- API key -->
+  <!-- API keys -->
   <div class="key-row">
     <label>FAL KEY</label>
     <input type="password" id="falKey" placeholder="paste your fal.ai key" />
+  </div>
+  <div class="key-row" style="margin-top:8px;">
+    <label>OPENAI KEY</label>
+    <input type="password" id="openaiKey" placeholder="paste your OpenAI key (for PII detection)" />
   </div>
 
   <h1>Select a Character</h1>
@@ -523,17 +527,38 @@
 
   // ── Generate ──────────────────────────────────────────────────────────────
   async function generate() {
-    scrubAllInputs();
+    scrubAllInputs(); // regex pass first
+    hidePIIWarning();
+
     const falKey   = document.getElementById("falKey").value.trim();
+
+    if (!falKey)    { showError("Enter your fal.ai key at the top."); return; }
+    if (!selectedId){ showError("Select a character first."); return; }
+    if (!document.getElementById("verb").value.trim())     { showError("Enter an action first."); return; }
+    if (!document.getElementById("location").value.trim()) { showError("Enter a location first."); return; }
+
+    // AI PII check — runs before reading field values into prompt
+    const aiResult = await checkPIIWithAI({
+      verb:       document.getElementById("verb").value.trim(),
+      location:   document.getElementById("location").value.trim(),
+      objects:    document.getElementById("objects").value.trim(),
+      supporting: document.getElementById("supporting").value.trim(),
+    });
+
+    if (aiResult) {
+      // Apply scrubbed values back to fields
+      ["verb", "location", "objects", "supporting"].forEach(id => {
+        if (aiResult.scrubbed?.[id] !== undefined) {
+          document.getElementById(id).value = aiResult.scrubbed[id];
+        }
+      });
+      if (aiResult.found?.length) showPIIWarning(aiResult.found);
+    }
+
     const verb     = document.getElementById("verb").value.trim();
     const location = document.getElementById("location").value.trim();
     const supportingRaw = document.getElementById("supporting").value.trim().toLowerCase();
     const hasAdult = supportingRaw && supportingRaw !== "none" && supportingRaw !== "no" && supportingRaw !== "n/a";
-
-    if (!falKey)    { showError("Enter your fal.ai key at the top."); return; }
-    if (!selectedId){ showError("Select a character first."); return; }
-    if (!verb)      { showError("Enter an action first."); return; }
-    if (!location)  { showError("Enter a location first."); return; }
 
     const char = CHARACTERS.find(c => c.id === selectedId);
 
@@ -619,7 +644,71 @@
     a.click();
   }
 
-  // ── PII Detection & Replacement ───────────────────────────────────────────
+  // ── AI-powered PII Detection (OpenAI) ────────────────────────────────────
+  async function checkPIIWithAI(fields) {
+    const openaiKey = document.getElementById("openaiKey").value.trim();
+    if (!openaiKey) return null; // skip if no key provided
+
+    const payload = {
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: `You are a HIPAA compliance tool for a special education app.
+Detect and replace any personally identifiable information (PII) in the user's input fields.
+PII includes: real people's names (first, last, or full), phone numbers, email addresses,
+SSNs, dates of birth, home or school addresses, school names, or any other identifying details.
+Replace names with generic role terms like "the student", "the teacher", "the parent", "the caregiver".
+Return ONLY valid JSON in this exact format:
+{
+  "scrubbed": { "verb": "...", "location": "...", "objects": "...", "supporting": "..." },
+  "found": ["name", "phone number"]
+}
+If no PII is found, return the original text unchanged and an empty found array.`
+        },
+        {
+          role: "user",
+          content: JSON.stringify(fields)
+        }
+      ],
+      temperature: 0,
+      max_tokens: 300,
+    };
+
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${openaiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      console.warn("OpenAI PII check failed:", res.status);
+      return null;
+    }
+
+    const data = await res.json();
+    const text = data?.choices?.[0]?.message?.content?.trim();
+    try {
+      return JSON.parse(text);
+    } catch {
+      console.warn("OpenAI PII response could not be parsed:", text);
+      return null;
+    }
+  }
+
+  function showPIIWarning(found) {
+    const types = [...new Set(found)].join(", ");
+    const el = document.getElementById("piiWarning");
+    el.innerHTML = `<strong>⚠️ Personal information detected and removed.</strong> We found and replaced: ${types}. Your inputs have been updated to keep this session HIPAA compliant.`;
+    el.classList.add("visible");
+  }
+
+  function hidePIIWarning() { document.getElementById("piiWarning").classList.remove("visible"); }
+
+  // ── PII Detection & Replacement (regex fallback) ──────────────────────────
 
   const FAKE_NAMES    = ["the student", "the child", "a young girl", "a young boy", "the kid"];
   const FAKE_ADULTS   = ["the teacher", "a caregiver", "the adult", "a parent", "a guardian"];
