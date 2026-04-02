@@ -542,12 +542,12 @@
         prompt,
         negative_prompt: NEG,
         image_size: { width: 1024, height: 512 },
-        num_inference_steps: 28,
-        guidance_scale: 3.5,
+        num_inference_steps: 35,
+        guidance_scale: 7.0,
         num_images: 1,
         enable_safety_checker: true,
       };
-      if (isTrained) body.loras = [{ path: char.lora, scale: 1.0 }];
+      if (isTrained) body.loras = [{ path: char.lora, scale: 0.75 }];
 
       const res = await fetch("https://fal.run/fal-ai/flux-lora", {
         method: "POST",
