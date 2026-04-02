@@ -5,7 +5,7 @@ class GenerationJob < ApplicationJob
   # When callback_url is present, POSTs result there instead of returning.
   def perform(character_id, scenario, supporting, callback_url)
     fal_url   = FalService.generate(character_id, scenario, supporting)
-    image_url = S3Service.upload_from_url(fal_url)
+    image_url = ENV["AWS_BUCKET_NAME"].present? ? S3Service.upload_from_url(fal_url) : fal_url
     result    = { status: "success", image_url: image_url }
 
     if callback_url.present?
