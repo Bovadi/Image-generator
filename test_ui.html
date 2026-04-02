@@ -527,11 +527,11 @@
     const isTrained = !char.lora.includes("huggingface.co") && char.lora !== "PASTE_LORA_URL_HERE";
     const objectsRaw = document.getElementById("objects").value.trim();
     const objectsClause = objectsRaw ? `, ${objectsRaw} clearly visible` : "";
-    const supportingClause = hasAdult
-      ? `, with a fully grown adult ${supportingRaw} nearby, adult body proportions, clearly taller than the child, mature facial features`
+    const adultPrefix = hasAdult
+      ? `scene includes a fully grown adult ${supportingRaw}, adult body proportions, clearly taller than the child, mature facial features. `
       : "";
     const soloClause = hasAdult ? "" : ", only one child in the scene, no other people";
-    const prompt = `${location}, ${char.trigger}, ${char.desc}, actively ${verb}${objectsClause}${supportingClause}${soloClause}, full body, dynamic action pose, full scene with walls floor and furniture visible. ${STYLE}.`;
+    const prompt = `${adultPrefix}${location}, ${char.trigger}, ${char.desc}, actively ${verb}${objectsClause}${soloClause}, full body, dynamic action pose, full scene with walls floor and furniture visible. ${STYLE}.`;
 
     setLoading(true);
     clearError();
