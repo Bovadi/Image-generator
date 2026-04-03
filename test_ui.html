@@ -1026,7 +1026,8 @@ If no PII is found, return the original text unchanged and an empty found array.
     const objectsClause = objects ? `, ${objects} clearly visible` : "";
     const soloClause   = hasAdult ? "" : ", only one child in the scene, no other people";
     const detailsStr   = details ? `${details}. ` : "";
-    const prompt = `${detailsStr}Full body visible from head to toe, no cropping. Keep the character's appearance, clothing, and art style exactly the same as in the reference image. Wide shot showing full bodies. ${location}. The character is actively ${verb}${objectsClause}${hasAdult ? `, with a fully grown adult ${supporting} nearby, clearly taller` : ""}${soloClause}. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, full scene background visible, no text.${details ? ` Important: ${details}.` : ""}`;
+    const adultDesc = hasAdult ? `a fully grown adult ${supporting}, wearing completely different clothes than the child, much taller, adult face and proportions` : "";
+    const prompt = `${detailsStr}Zoomed out wide shot, both figures shown fully from head to toe, no bodies or heads cut off. Keep the child character's appearance exactly as in the reference image. ${location}. The child is actively ${verb}${objectsClause}${hasAdult ? `. ${adultDesc} stands nearby` : ""}${soloClause}. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, full scene background visible, no text.${details ? ` Important: ${details}.` : ""}`;
 
     kSetLoading(true);
     kClearError();
@@ -1051,7 +1052,7 @@ If no PII is found, return the original text unchanged and an empty found array.
         body: JSON.stringify({
           prompt,
           image_url: refUrl,
-          image_size: { width: 1024, height: 576 },
+          image_size: { width: 1024, height: 512 },
           num_inference_steps: 28,
           guidance_scale: 3.5,
           num_images: 1,
