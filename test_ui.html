@@ -467,6 +467,7 @@
 
   const STYLE = "flat illustration style, clean lines, minimal shading, solid flat colors, educational illustration, child-friendly, friendly cartoon, full rectangular scene, edge to edge background, bedroom walls and floor visible, no text, no words";
   const NEG   = "realistic, photographic, 3D render, complex shading, dark, scary, violent, sexual, text, watermark, holding hands, hand holding, touching hands, vignette, oval mask, circular crop, blob background, faded edges, plain background, white background, gradient background, no background";
+  const ADULT_LORA_URL = "https://v3b.fal.media/files/b/0a94ce97/KUvipoYCO6K1g50HpMnak_pytorch_lora_weights.safetensors";
 
   let activeGender = "boy";
   let activeAge    = "child";
@@ -590,7 +591,10 @@
         num_images: 1,
         enable_safety_checker: true,
       };
-      if (isTrained) body.loras = [{ path: char.lora, scale: 0.75 }];
+      const loras = [];
+      if (isTrained) loras.push({ path: char.lora, scale: 0.75 });
+      if (hasAdult)  loras.push({ path: ADULT_LORA_URL, scale: 0.75 });
+      if (loras.length) body.loras = loras;
 
       const res = await fetch("https://fal.run/fal-ai/flux-lora", {
         method: "POST",
