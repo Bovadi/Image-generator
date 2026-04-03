@@ -1128,23 +1128,17 @@ If no PII is found, return the original text unchanged and an empty found array.
   }
 
   function clampCrop() {
-    const frame = document.getElementById("k-crop-frame");
-    const fw = frame.clientWidth, fh = frame.clientHeight;
-    const iw = cs.natW * cs.scale, ih = cs.natH * cs.scale;
-    cs.ox = Math.min(0, Math.max(fw - iw, cs.ox));
-    cs.oy = Math.min(0, Math.max(fh - ih, cs.oy));
+    // no clamping — allow free pan and zoom out
   }
 
   function zoomCrop(delta) {
     const frame = document.getElementById("k-crop-frame");
     const fw = frame.clientWidth, fh = frame.clientHeight;
-    const minScale = Math.max(fw / cs.natW, fh / cs.natH);
-    const newScale = Math.max(minScale, cs.scale + delta);
+    const newScale = Math.max(0.05, cs.scale + delta);
     const ratio = newScale / cs.scale;
     cs.ox = fw / 2 - (fw / 2 - cs.ox) * ratio;
     cs.oy = fh / 2 - (fh / 2 - cs.oy) * ratio;
     cs.scale = newScale;
-    clampCrop();
     applyCropTransform();
   }
 
