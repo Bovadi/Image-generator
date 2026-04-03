@@ -1102,6 +1102,7 @@ If no PII is found, return the original text unchanged and an empty found array.
   // ── Crop tool (pan + zoom) ────────────────────────────────────────────────
   let cs = { scale: 1, ox: 0, oy: 0, natW: 0, natH: 0 }; // crop state
 
+  let _cropDragSetup = false;
   function initCropTool(imgSrc) {
     const tool  = document.getElementById("k-crop-tool");
     const frame = document.getElementById("k-crop-frame");
@@ -1110,14 +1111,16 @@ If no PII is found, return the original text unchanged and an empty found array.
     img.onload = () => {
       cs.natW = img.naturalWidth;
       cs.natH = img.naturalHeight;
-      const fw = frame.clientWidth;
-      const fh = frame.clientHeight;
-      cs.scale = Math.max(fw / cs.natW, fh / cs.natH);
-      cs.ox = (fw - cs.natW * cs.scale) / 2;
-      cs.oy = (fh - cs.natH * cs.scale) / 2;
-      applyCropTransform();
-      tool.style.display = "block";
-      setupCropDrag(frame);
+      tool.style.display = "block"; // show first so frame has layout dimensions
+      requestAnimationFrame(() => {
+        const fw = frame.clientWidth;
+        const fh = frame.clientHeight;
+        cs.scale = Math.max(fw / cs.natW, fh / cs.natH);
+        cs.ox = (fw - cs.natW * cs.scale) / 2;
+        cs.oy = (fh - cs.natH * cs.scale) / 2;
+        applyCropTransform();
+        if (!_cropDragSetup) { setupCropDrag(frame); _cropDragSetup = true; }
+      });
     };
     if (img.complete && img.naturalWidth) img.onload();
   }
