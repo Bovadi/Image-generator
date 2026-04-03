@@ -632,7 +632,7 @@
     const objectsClauseFull = objectsRaw ? `, ${objectsRaw} clearly visible and prominent in the scene` : "";
     const prompt = `${detailsPrefix}${location}. ${adultPrefix}${char.trigger}, ${char.desc}, actively ${verb}${objectsClauseFull}${soloClause}, full body, dynamic action pose, full scene background visible. ${STYLE}.${detailsSuffix}`;
 
-    setLoading(true);
+    setLoading(true, details ? "Step 1/2 — Generating character (~30s)…" : "Generating image — ~15–30 seconds");
     clearError();
     hideResult();
 
@@ -665,19 +665,67 @@
       const data = await res.json();
       const url  = data?.images?.[0]?.url;
       if (!url) throw new Error("No image returned.");
-      showResult(url);
+
+      // Step 2 — refine with gpt-image-1 if DETAILS + OpenAI key present
+      const finalUrl = details ? await refineWithGPT(url, details) : url;
+      showResult(finalUrl);
     } catch(e) {
       showError(e.message);
     } finally {
-      setLoading(false);
+      setLoading(false, "");
+    }
+  }
+
+  // ── GPT-image-1 refinement pass ───────────────────────────────────────────
+  async function refineWithGPT(imageUrl, details) {
+    const openaiKey = document.getElementById("openaiKey").value.trim();
+    if (!openaiKey) return imageUrl;
+
+    setLoading(true, "Step 2/2 — Refining details with AI (~15s)…");
+
+    try {
+      // Fetch FLUX image as blob
+      const imgRes = await fetch(imageUrl);
+      if (!imgRes.ok) throw new Error("Could not fetch generated image for refinement.");
+      const imgBlob = await imgRes.blob();
+      const imgFile = new File([imgBlob], "image.png", { type: "image/png" });
+
+      const form = new FormData();
+      form.append("model", "gpt-image-1");
+      form.append("image[]", imgFile);
+      form.append("prompt", `This is a flat illustration style educational cartoon image. Apply ONLY this change: ${details}. Keep the art style, characters, colors, background, and overall composition completely identical. Do not redraw or redesign anything else.`);
+      form.append("n", "1");
+      form.append("size", "1536x1024");
+
+      const editRes = await fetch("https://api.openai.com/v1/images/edits", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${openaiKey}` },
+        body: form,
+      });
+
+      if (!editRes.ok) {
+        console.warn("GPT refinement failed:", editRes.status, await editRes.text());
+        return imageUrl; // fall back to FLUX image
+      }
+
+      const editData = await editRes.json();
+      // gpt-image-1 returns base64 by default
+      const b64 = editData?.data?.[0]?.b64_json;
+      if (!b64) return imageUrl;
+      return `data:image/png;base64,${b64}`;
+    } catch(e) {
+      console.warn("GPT refinement error:", e.message);
+      return imageUrl; // fall back gracefully
     }
   }
 
   // ── UI helpers ────────────────────────────────────────────────────────────
-  function setLoading(on) {
+  function setLoading(on, msg = "") {
     document.getElementById("loading").classList.toggle("visible", on);
     document.getElementById("generateBtn").disabled = on;
     document.getElementById("generateBtn").textContent = on ? "Generating…" : "Generate";
+    const p = document.querySelector("#loading p");
+    if (p) p.textContent = msg || "Generating image — ~15–30 seconds";
   }
 
   function showResult(url) {
