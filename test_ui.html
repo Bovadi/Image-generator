@@ -408,6 +408,10 @@
       <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">ADULTS</span>
       <input type="text" id="supporting" placeholder="optional — e.g. a female teacher with short gray hair" />
     </div>
+    <div class="scenario-input">
+      <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">DETAILS</span>
+      <input type="text" id="details" placeholder="optional — e.g. no other people, teacher has gray hair, she is sitting" />
+    </div>
   </div>
   <div style="display:flex;justify-content:flex-end;">
     <button class="btn-generate" id="generateBtn" onclick="generate()">Generate</button>
@@ -622,7 +626,9 @@
       ? `two figures fully visible from head to toe, scene includes a fully grown adult ${adultDesc}, adult is at least twice the height of the child, large adult body proportions, very tall compared to child, mature facial features and adult face, both characters centered in frame. `
       : "";
     const soloClause = hasAdult ? "" : ", only one child in the scene, no other people";
-    const prompt = `${location}. ${adultPrefix}${char.trigger}, ${char.desc}, actively ${verb}${objectsClause}${soloClause}, full body, dynamic action pose, full scene background visible. ${STYLE}.`;
+    const details    = document.getElementById("details").value.trim();
+    const detailsPrefix = details ? `${details}. ` : "";
+    const prompt = `${detailsPrefix}${location}. ${adultPrefix}${char.trigger}, ${char.desc}, actively ${verb}${objectsClause}${soloClause}, full body, dynamic action pose, full scene background visible. ${STYLE}.`;
 
     setLoading(true);
     clearError();
@@ -802,7 +808,7 @@ If no PII is found, return the original text unchanged and an empty found array.
   }
 
   function scrubAllInputs() {
-    const fields = ["verb", "location", "objects", "supporting"];
+    const fields = ["verb", "location", "objects", "supporting", "details"];
     const allFound = [];
     fields.forEach(id => {
       const el = document.getElementById(id);
