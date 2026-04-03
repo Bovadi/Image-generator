@@ -466,7 +466,7 @@
   ];
 
   const STYLE = "flat illustration style, clean lines, minimal shading, solid flat colors, educational illustration, child-friendly, friendly cartoon, full rectangular scene, edge to edge background, no text, no words";
-  const NEG   = "realistic, photographic, 3D render, complex shading, dark, scary, violent, sexual, text, watermark, holding hands, hand holding, touching hands, vignette, oval mask, circular crop, blob background, faded edges, plain background, white background, gradient background, no background";
+  const NEG   = "realistic, photographic, 3D render, complex shading, dark, scary, violent, sexual, text, watermark, holding hands, hand holding, touching hands, vignette, oval mask, circular crop, blob background, faded edges, plain background, white background, gradient background, no background, duplicate characters, matching outfits, identical clothing, two identical people, clones";
   const ADULT_LORA_URL = "https://v3b.fal.media/files/b/0a94ce97/KUvipoYCO6K1g50HpMnak_pytorch_lora_weights.safetensors";
 
   const SKIN_TONE = {
@@ -593,7 +593,7 @@
     const objectsClause = objectsRaw ? `, ${objectsRaw} clearly visible` : "";
     const adultDesc   = hasAdult ? adultWithSkinTone(supportingRaw, selectedId) : "";
     const adultPrefix = hasAdult
-      ? `two figures fully visible from head to toe, scene includes a fully grown adult ${adultDesc}, adult body proportions, clearly taller than the child, mature facial features, both characters centered in frame. `
+      ? `two figures fully visible from head to toe, scene includes a fully grown adult ${adultDesc}, adult body proportions, clearly taller than the child, mature facial features, adult wearing completely different outfit than the child, both characters centered in frame. `
       : "";
     const soloClause = hasAdult ? "" : ", only one child in the scene, no other people";
     const prompt = `${location}. ${adultPrefix}${char.trigger}, ${char.desc}, actively ${verb}${objectsClause}${soloClause}, full body, dynamic action pose, full scene background visible. ${STYLE}.`;
@@ -613,8 +613,8 @@
         enable_safety_checker: true,
       };
       const loras = [];
-      if (isTrained) loras.push({ path: char.lora, scale: 1.0 });
-      if (hasAdult)  loras.push({ path: ADULT_LORA_URL, scale: 0.7 });
+      if (isTrained) loras.push({ path: char.lora, scale: hasAdult ? 0.85 : 1.0 });
+      if (hasAdult)  loras.push({ path: ADULT_LORA_URL, scale: 0.8 });
       if (loras.length) body.loras = loras;
 
       const res = await fetch("https://fal.run/fal-ai/flux-lora", {
