@@ -1027,7 +1027,7 @@ If no PII is found, return the original text unchanged and an empty found array.
     const soloClause   = hasAdult ? "" : ", only one child in the scene, no other people";
     const detailsStr   = details ? `${details}. ` : "";
     const adultDesc = hasAdult ? `a fully grown adult ${supporting}, wearing completely different clothes than the child, much taller, adult face and proportions` : "";
-    const prompt = `${detailsStr}Scene: ${location}. Full detailed background scene visible. Characters are small within the wide scene, shown fully from head to toe with empty space above their heads. Keep the child character's appearance, clothing and art style exactly as in the reference image. The child is actively ${verb}${objectsClause}${hasAdult ? `. ${adultDesc} stands nearby, full body visible` : ""}${soloClause}. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, no text, no white background.${details ? ` Important: ${details}.` : ""}`;
+    const prompt = `${detailsStr}Extreme long shot. ${location}. The figures are tiny in the frame, occupying only the bottom third of the image, full bodies visible from head to toe, lots of background scene visible above and around them. Keep the child character's appearance, clothing and art style exactly as in the reference image. The child is actively ${verb}${objectsClause}${hasAdult ? `. ${adultDesc} stands nearby, full body visible including head` : ""}${soloClause}. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, no text, no white background.${details ? ` Important: ${details}.` : ""}`;
 
     kSetLoading(true);
     kClearError();
@@ -1053,8 +1053,8 @@ If no PII is found, return the original text unchanged and an empty found array.
           prompt,
           image_url: refUrl,
           image_size: { width: 1024, height: 512 },
-          num_inference_steps: 28,
-          guidance_scale: 3.5,
+          num_inference_steps: 35,
+          guidance_scale: 7.0,
           num_images: 1,
         }),
       });
