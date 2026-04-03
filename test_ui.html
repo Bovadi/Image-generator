@@ -465,7 +465,7 @@
     { id:"middle_eastern_girl_teen",   gender:"girl", age:"teen",  label:"Middle Eastern",  emoji:"🧑🏻", trigger:"BIPCHAR_middle_eastern_teen_girl", desc:"teenage Middle Eastern girl, dark hair with navy blue hijab, teal jacket, dark jeans, white sneakers",          lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
   ];
 
-  const STYLE = "flat illustration style, clean lines, minimal shading, solid flat colors, educational illustration, child-friendly, friendly cartoon, full rectangular scene, edge to edge background, bedroom walls and floor visible, no text, no words";
+  const STYLE = "flat illustration style, clean lines, minimal shading, solid flat colors, educational illustration, child-friendly, friendly cartoon, full rectangular scene, edge to edge background, no text, no words";
   const NEG   = "realistic, photographic, 3D render, complex shading, dark, scary, violent, sexual, text, watermark, holding hands, hand holding, touching hands, vignette, oval mask, circular crop, blob background, faded edges, plain background, white background, gradient background, no background";
   const ADULT_LORA_URL = "https://v3b.fal.media/files/b/0a94ce97/KUvipoYCO6K1g50HpMnak_pytorch_lora_weights.safetensors";
 
@@ -592,8 +592,8 @@
         enable_safety_checker: true,
       };
       const loras = [];
-      if (isTrained) loras.push({ path: char.lora, scale: 0.75 });
-      if (hasAdult)  loras.push({ path: ADULT_LORA_URL, scale: 0.75 });
+      if (isTrained) loras.push({ path: char.lora, scale: 0.9 });
+      if (hasAdult)  loras.push({ path: ADULT_LORA_URL, scale: 0.7 });
       if (loras.length) body.loras = loras;
 
       const res = await fetch("https://fal.run/fal-ai/flux-lora", {
