@@ -714,13 +714,22 @@
         {
           role: "system",
           content: `You are a HIPAA compliance tool for a special education app.
-Detect and replace any personally identifiable information (PII) in the user's input fields.
-PII includes: real people's names (first, last, or full), phone numbers, email addresses,
-SSNs, dates of birth, home or school addresses, school names, or any other identifying details.
-Replace names with generic role terms like "the student", "the teacher", "the parent", "the caregiver".
+Detect and replace ONLY the following personally identifiable information (PII):
+- Real personal names (e.g. "John", "Maria Lopez", "Mrs. Johnson") — replace with a generic role like "the student" or "the teacher"
+- Phone numbers — replace with "555-000-0000"
+- Email addresses — replace with "example@example.com"
+- Specific street addresses (e.g. "123 Main St") — replace with "the address"
+- Specific school names (e.g. "Lincoln Elementary") — replace with "the school"
+
+Do NOT replace or change:
+- Gender words: girl, boy, she, he, her, his
+- Family roles: mother, father, mom, dad, parent, caregiver, guardian, grandmother, grandfather
+- Job titles: teacher, counselor, therapist, librarian, doctor
+- General descriptive words or actions
+
 Return ONLY valid JSON in this exact format:
 {
-  "scrubbed": { "verb": "...", "location": "...", "objects": "...", "supporting": "..." },
+  "scrubbed": { "verb": "...", "location": "...", "objects": "...", "supporting": "...", "details": "..." },
   "found": ["name", "phone number"]
 }
 If no PII is found, return the original text unchanged and an empty found array.`
