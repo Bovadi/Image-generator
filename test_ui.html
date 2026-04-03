@@ -346,6 +346,21 @@
     }
 
     .btn-secondary:hover { background: #f0f8ff; border-color: #4B9EF4; color: #4B9EF4; }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 0; margin: 16px 0 20px; border-bottom: 2px solid #e2e8f0; }
+    .tab-btn { padding: 8px 20px; border: none; background: none; font-size: 13px; font-weight: 700; color: #a0aec0; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.15s; }
+    .tab-btn.active { color: #4B9EF4; border-bottom-color: #4B9EF4; }
+    .tab-btn:hover:not(.active) { color: #4a5568; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ── Kontext reference upload ── */
+    .ref-drop { border: 2px dashed #e2e8f0; border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.15s; margin-bottom: 12px; }
+    .ref-drop:hover, .ref-drop.drag-over { border-color: #4B9EF4; background: #f0f8ff; }
+    .ref-drop p { font-size: 13px; color: #a0aec0; margin: 0; }
+    .ref-drop strong { display: block; font-size: 14px; color: #4a5568; margin-bottom: 4px; }
+    .ref-preview { width: 100%; max-height: 140px; object-fit: contain; border-radius: 8px; margin-top: 10px; display: none; }
   </style>
 </head>
 <body>
@@ -362,6 +377,15 @@
     <label>OPENAI KEY</label>
     <input type="password" id="openaiKey" placeholder="paste your OpenAI key (for PII detection)" />
   </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('lora', this)">LoRA Generator</button>
+    <button class="tab-btn" onclick="switchTab('kontext', this)">Kontext Generator</button>
+  </div>
+
+  <!-- ── TAB 1: LoRA ── -->
+  <div class="tab-content active" id="tab-lora">
 
   <h1>Select a Character</h1>
 
@@ -434,9 +458,71 @@
     <img id="resultImg" src="" alt="Generated image" />
     <div class="result-actions">
       <button class="btn-secondary" onclick="generate()">↺ Regenerate</button>
-      <button class="btn-secondary" onclick="downloadImg()">↓ Download</button>
+      <button class="btn-secondary" onclick="downloadImg('result')">↓ Download</button>
     </div>
   </div>
+
+  </div><!-- end tab-lora -->
+
+  <!-- ── TAB 2: Kontext ── -->
+  <div class="tab-content" id="tab-kontext">
+
+    <h1>Kontext Generator</h1>
+    <p style="font-size:13px;color:#718096;margin-bottom:16px;">Upload a reference image of the character — FLUX Kontext maintains their appearance without LoRA training.</p>
+
+    <!-- Reference image upload -->
+    <div class="ref-drop" id="refDrop" onclick="document.getElementById('refInput').click()"
+         ondragover="event.preventDefault();this.classList.add('drag-over')"
+         ondragleave="this.classList.remove('drag-over')"
+         ondrop="handleRefDrop(event)">
+      <strong>Drop character reference image here</strong>
+      <p>or click to browse — PNG, JPG, WEBP</p>
+      <img id="refPreview" class="ref-preview" alt="Reference preview" />
+    </div>
+    <input type="file" id="refInput" accept="image/*" style="display:none" onchange="handleRefFile(this.files[0])">
+
+    <!-- Inputs -->
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+      <div class="scenario-input">
+        <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">ACTION</span>
+        <input type="text" id="k-verb" placeholder="e.g. crying, hitting the table, asking for a break" />
+      </div>
+      <div class="scenario-input">
+        <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">LOCATION</span>
+        <input type="text" id="k-location" placeholder="e.g. in a classroom, on the playground" />
+      </div>
+      <div class="scenario-input">
+        <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">OBJECTS</span>
+        <input type="text" id="k-objects" placeholder="optional — e.g. books on the desk" />
+      </div>
+      <div class="scenario-input">
+        <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">ADULTS</span>
+        <input type="text" id="k-supporting" placeholder="optional — e.g. a female teacher nearby" />
+      </div>
+      <div class="scenario-input">
+        <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">DETAILS</span>
+        <input type="text" id="k-details" placeholder="optional — e.g. she is crying with tears, teacher has glasses" />
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;">
+      <button class="btn-generate" id="kontextBtn" onclick="generateKontext()">Generate</button>
+    </div>
+
+    <div class="loading" id="k-loading">
+      <div class="spinner"></div>
+      <p style="font-size:14px;color:#718096;font-weight:600">Generating — ~15–30 seconds</p>
+    </div>
+    <div class="error-msg" id="k-errorMsg"></div>
+    <div class="result" id="k-result">
+      <img id="k-resultImg" src="" alt="Generated image" />
+      <div class="result-actions">
+        <button class="btn-secondary" onclick="generateKontext()">↺ Regenerate</button>
+        <button class="btn-secondary" onclick="downloadImg('k-result')">↓ Download</button>
+      </div>
+    </div>
+
+  </div><!-- end tab-kontext -->
+
 </div>
 
 <script>
@@ -744,10 +830,10 @@
 
   function clearError() { document.getElementById("errorMsg").classList.remove("visible"); }
 
-  function downloadImg() {
+  function downloadImg(resultId = "result") {
     const a = document.createElement("a");
-    a.href = document.getElementById("resultImg").src;
-    a.download = `bip-${selectedId}-${Date.now()}.png`;
+    a.href = document.getElementById(resultId === "result" ? "resultImg" : "k-resultImg").src;
+    a.download = `bip-${Date.now()}.png`;
     a.click();
   }
 
@@ -893,6 +979,115 @@ If no PII is found, return the original text unchanged and an empty found array.
     const el = document.getElementById(id);
     if (el) el.addEventListener("blur", scrubAllInputs);
   });
+
+  // ── Tab switching ─────────────────────────────────────────────────────────
+  function switchTab(tab, btn) {
+    document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+    document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
+    document.getElementById(`tab-${tab}`).classList.add("active");
+    btn.classList.add("active");
+  }
+
+  // ── Kontext: reference image ──────────────────────────────────────────────
+  let refImageBlob = null;
+
+  function handleRefFile(file) {
+    if (!file) return;
+    refImageBlob = file;
+    const url = URL.createObjectURL(file);
+    const preview = document.getElementById("refPreview");
+    preview.src = url;
+    preview.style.display = "block";
+    document.querySelector("#refDrop strong").textContent = file.name;
+  }
+
+  function handleRefDrop(e) {
+    e.preventDefault();
+    document.getElementById("refDrop").classList.remove("drag-over");
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith("image/")) handleRefFile(file);
+  }
+
+  // ── Kontext: generate ─────────────────────────────────────────────────────
+  async function generateKontext() {
+    const falKey = document.getElementById("falKey").value.trim();
+    const verb       = document.getElementById("k-verb").value.trim();
+    const location   = document.getElementById("k-location").value.trim();
+    const objects    = document.getElementById("k-objects").value.trim();
+    const supporting = document.getElementById("k-supporting").value.trim();
+    const details    = document.getElementById("k-details").value.trim();
+
+    if (!falKey)       { kShowError("Enter your fal.ai key at the top."); return; }
+    if (!refImageBlob) { kShowError("Upload a reference image of the character first."); return; }
+    if (!verb)         { kShowError("Enter an action."); return; }
+    if (!location)     { kShowError("Enter a location."); return; }
+
+    const hasAdult     = supporting && !["none","no","n/a"].includes(supporting.toLowerCase().trim());
+    const objectsClause = objects ? `, ${objects} clearly visible` : "";
+    const soloClause   = hasAdult ? "" : ", only one child in the scene, no other people";
+    const detailsStr   = details ? `${details}. ` : "";
+    const prompt = `${detailsStr}Keep the character's appearance, clothing, and art style exactly the same as in the reference image. ${location}. The character is actively ${verb}${objectsClause}${hasAdult ? `, with a fully grown adult ${supporting} nearby, clearly taller` : ""}${soloClause}. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, full scene background visible, no text.${details ? ` Important: ${details}.` : ""}`;
+
+    kSetLoading(true);
+    kClearError();
+    document.getElementById("k-result").classList.remove("visible");
+
+    try {
+      // Upload reference image to fal.ai storage
+      const uploadForm = new FormData();
+      uploadForm.append("file", refImageBlob);
+      const uploadRes = await fetch("https://fal.run/storage/upload", {
+        method: "POST",
+        headers: { "Authorization": `Key ${falKey}` },
+        body: uploadForm,
+      });
+      if (!uploadRes.ok) throw new Error(`Upload failed: ${uploadRes.status}`);
+      const uploadData = await uploadRes.json();
+      const refUrl = uploadData.url;
+      if (!refUrl) throw new Error("No upload URL returned.");
+
+      // Call FLUX Kontext
+      const res = await fetch("https://fal.run/fal-ai/flux-kontext/dev", {
+        method: "POST",
+        headers: {
+          "Authorization": `Key ${falKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt,
+          image_url: refUrl,
+          image_size: { width: 1024, height: 512 },
+          num_inference_steps: 28,
+          guidance_scale: 3.5,
+          num_images: 1,
+        }),
+      });
+
+      if (!res.ok) throw new Error(`fal.ai error ${res.status}: ${await res.text()}`);
+      const data = await res.json();
+      const url  = data?.images?.[0]?.url;
+      if (!url) throw new Error("No image returned.");
+
+      document.getElementById("k-resultImg").src = url;
+      document.getElementById("k-result").classList.add("visible");
+    } catch(e) {
+      kShowError(e.message);
+    } finally {
+      kSetLoading(false);
+    }
+  }
+
+  function kSetLoading(on) {
+    document.getElementById("k-loading").classList.toggle("visible", on);
+    document.getElementById("kontextBtn").disabled = on;
+    document.getElementById("kontextBtn").textContent = on ? "Generating…" : "Generate";
+  }
+  function kShowError(msg) {
+    const el = document.getElementById("k-errorMsg");
+    el.textContent = msg;
+    el.classList.add("visible");
+  }
+  function kClearError() { document.getElementById("k-errorMsg").classList.remove("visible"); }
 
   // ── Init ──────────────────────────────────────────────────────────────────
   renderChars();
