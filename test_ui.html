@@ -512,7 +512,6 @@
       <div class="spinner"></div>
       <p style="font-size:14px;color:#718096;font-weight:600">Generating — ~15–30 seconds</p>
     </div>
-    <div class="pii-warning" id="k-piiWarning"></div>
     <div class="error-msg" id="k-errorMsg"></div>
     <div class="result" id="k-result">
       <img id="k-resultImg" src="" alt="Generated image" style="width:100%;height:auto;object-fit:contain;border-radius:14px;border:1px solid #e2e8f0;display:block;" />
@@ -1042,24 +1041,6 @@ If no PII found, return original text and empty found array.`
     if (!refImageBlob) { kShowError("Upload a reference image of the character first."); return; }
     if (!document.getElementById("k-verb").value.trim())     { kShowError("Enter an action."); return; }
     if (!document.getElementById("k-location").value.trim()) { kShowError("Enter a location."); return; }
-
-    kHidePIIWarning();
-
-    // AI PII check — runs before reading values into prompt
-    const aiResult = await checkPIIWithAI({
-      verb:       document.getElementById("k-verb").value.trim(),
-      location:   document.getElementById("k-location").value.trim(),
-      objects:    document.getElementById("k-objects").value.trim(),
-      supporting: document.getElementById("k-supporting").value.trim(),
-      details:    document.getElementById("k-details").value.trim(),
-    });
-    if (aiResult) {
-      ["verb","location","objects","supporting","details"].forEach(key => {
-        if (aiResult.scrubbed?.[key] !== undefined)
-          document.getElementById("k-" + key).value = aiResult.scrubbed[key];
-      });
-      if (aiResult.found?.length) kShowPIIWarning(aiResult.found);
-    }
 
     const verb       = document.getElementById("k-verb").value.trim();
     const location   = document.getElementById("k-location").value.trim();
