@@ -1040,7 +1040,7 @@ If no PII is found, return the original text unchanged and an empty found array.
     const soloClause   = hasAdult ? "" : ", only one child in the scene, no other people";
     const detailsStr   = details ? `${details}. ` : "";
     const adultDesc = hasAdult ? `a fully grown adult ${supporting}, wearing completely different clothes than the child, much taller, adult face and proportions` : "";
-    const prompt = `${detailsStr}Extreme long shot. ${location}. The figures are tiny in the frame, occupying only the bottom third of the image, full bodies visible from head to toe, lots of background scene visible above and around them. Keep the child character's appearance, clothing and art style exactly as in the reference image. The child is actively ${verb}${objectsClause}${hasAdult ? `. ${adultDesc} stands nearby, full body visible including head` : ""}${soloClause}. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, no text, no white background.${details ? ` Important: ${details}.` : ""}`;
+    const prompt = `${detailsStr}${location}. The child from the reference image is actively ${verb}${objectsClause}${hasAdult ? `. ${adultDesc} stands nearby, full body visible from head to toe` : ""}${soloClause}. Full bodies visible, wide background scene. Keep the child's face, hair, skin tone, and clothing identical to the reference. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.${details ? ` Important: ${details}.` : ""}`;
 
     kSetLoading(true);
     kClearError();
@@ -1067,7 +1067,7 @@ If no PII is found, return the original text unchanged and an empty found array.
           image_url: refUrl,
           image_size: { width: 1024, height: 768 },
           num_inference_steps: 35,
-          guidance_scale: 7.0,
+          guidance_scale: 12.0,
           num_images: 1,
         }),
       });
