@@ -469,6 +469,26 @@
   const NEG   = "realistic, photographic, 3D render, complex shading, dark, scary, violent, sexual, text, watermark, holding hands, hand holding, touching hands, vignette, oval mask, circular crop, blob background, faded edges, plain background, white background, gradient background, no background";
   const ADULT_LORA_URL = "https://v3b.fal.media/files/b/0a94ce97/KUvipoYCO6K1g50HpMnak_pytorch_lora_weights.safetensors";
 
+  const SKIN_TONE = {
+    asian:           "light skin tone",
+    black:           "dark brown skin tone",
+    hispanic:        "medium brown skin tone",
+    white:           "fair skin tone",
+    south_asian:     "tan brown skin tone",
+    middle_eastern:  "olive skin tone",
+  };
+
+  const FAMILY_WORDS = ["parent", "mother", "father", "mom", "dad", "caregiver", "guardian", "mama", "papa"];
+
+  function adultWithSkinTone(adultText, characterId) {
+    const lower = adultText.toLowerCase();
+    const isFamily = FAMILY_WORDS.some(w => lower.includes(w));
+    if (!isFamily) return adultText;
+    const ethnicity = Object.keys(SKIN_TONE).find(e => characterId.includes(e));
+    if (!ethnicity) return adultText;
+    return `${adultText}, ${SKIN_TONE[ethnicity]}`;
+  }
+
   let activeGender = "boy";
   let activeAge    = "child";
   let selectedId   = null;
@@ -571,8 +591,9 @@
     const isTrained = !char.lora.includes("huggingface.co") && char.lora !== "PASTE_LORA_URL_HERE";
     const objectsRaw = document.getElementById("objects").value.trim();
     const objectsClause = objectsRaw ? `, ${objectsRaw} clearly visible` : "";
+    const adultDesc   = hasAdult ? adultWithSkinTone(supportingRaw, selectedId) : "";
     const adultPrefix = hasAdult
-      ? `scene includes a fully grown adult ${supportingRaw}, adult body proportions, clearly taller than the child, mature facial features. `
+      ? `scene includes a fully grown adult ${adultDesc}, adult body proportions, clearly taller than the child, mature facial features. `
       : "";
     const soloClause = hasAdult ? "" : ", only one child in the scene, no other people";
     const prompt = `${adultPrefix}${location}, ${char.trigger}, ${char.desc}, actively ${verb}${objectsClause}${soloClause}, full body, dynamic action pose, full scene with walls floor and furniture visible. ${STYLE}.`;
@@ -592,7 +613,7 @@
         enable_safety_checker: true,
       };
       const loras = [];
-      if (isTrained) loras.push({ path: char.lora, scale: 0.9 });
+      if (isTrained) loras.push({ path: char.lora, scale: 1.0 });
       if (hasAdult)  loras.push({ path: ADULT_LORA_URL, scale: 0.7 });
       if (loras.length) body.loras = loras;
 
