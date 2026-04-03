@@ -522,24 +522,15 @@
 
     <!-- Crop tool -->
     <div id="k-crop-tool" style="display:none;margin-top:16px;">
-      <p style="font-size:13px;color:#718096;margin-bottom:8px;">Move the crop window to frame the scene, then download.</p>
-      <div id="k-crop-container" style="position:relative;width:100%;user-select:none;">
-        <img id="k-crop-source" style="width:100%;display:block;border-radius:8px;" />
-        <!-- top mask -->
-        <div id="k-mask-top" style="position:absolute;left:0;right:0;top:0;background:rgba(0,0,0,0.55);pointer-events:none;"></div>
-        <!-- crop window -->
-        <div id="k-crop-window" style="position:absolute;left:0;right:0;border:3px solid #4B9EF4;box-sizing:border-box;pointer-events:none;"></div>
-        <!-- bottom mask -->
-        <div id="k-mask-bottom" style="position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);pointer-events:none;"></div>
-        <!-- drag handle -->
-        <div id="k-drag-handle" style="position:absolute;left:0;right:0;cursor:ns-resize;z-index:10;"
-             onmousedown="startCropDrag(event)" ontouchstart="startCropDrag(event)">
-        </div>
+      <p style="font-size:13px;color:#718096;margin-bottom:8px;">Drag to pan &middot; scroll or use buttons to zoom &middot; then Crop &amp; Download</p>
+      <div id="k-crop-frame" style="position:relative;width:100%;overflow:hidden;border-radius:12px;border:3px solid #4B9EF4;cursor:grab;touch-action:none;background:#e2e8f0;">
+        <div style="padding-top:48.46%;"></div><!-- 315/650 aspect ratio spacer -->
+        <img id="k-crop-img" style="position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform;user-select:none;pointer-events:none;" />
       </div>
       <div style="display:flex;gap:8px;margin-top:10px;">
-        <button class="btn-secondary" onclick="moveCropBy(-10)">↑ Up</button>
-        <button class="btn-secondary" onclick="moveCropBy(10)">↓ Down</button>
-        <button class="btn-generate" style="flex:1;" onclick="applyCrop()">✂ Crop & Download</button>
+        <button class="btn-secondary" onclick="zoomCrop(-0.1)">− Zoom Out</button>
+        <button class="btn-secondary" onclick="zoomCrop(0.1)">+ Zoom In</button>
+        <button class="btn-generate" style="flex:1;" onclick="applyCrop()">✂ Crop &amp; Download</button>
       </div>
     </div>
 
@@ -1108,96 +1099,97 @@ If no PII is found, return the original text unchanged and an empty found array.
   }
   function kClearError() { document.getElementById("k-errorMsg").classList.remove("visible"); }
 
-  // ── Crop tool ─────────────────────────────────────────────────────────────
-  const CROP_RATIO = 650 / 315; // target aspect ratio
-  let cropTopPx = 0;            // crop window top in display pixels
-  let cropHeightPx = 0;         // crop window height in display pixels
-  let cropImgNaturalW = 0;
-  let cropImgNaturalH = 0;
+  // ── Crop tool (pan + zoom) ────────────────────────────────────────────────
+  let cs = { scale: 1, ox: 0, oy: 0, natW: 0, natH: 0 }; // crop state
 
   function initCropTool(imgSrc) {
-    const tool = document.getElementById("k-crop-tool");
-    const src  = document.getElementById("k-crop-source");
-    src.src = imgSrc;
-    src.onload = () => {
-      cropImgNaturalW = src.naturalWidth;
-      cropImgNaturalH = src.naturalHeight;
-      const dispW = src.clientWidth;
-      const dispH = src.clientHeight;
-      cropHeightPx = dispW / CROP_RATIO;
-      cropTopPx    = Math.max(0, (dispH - cropHeightPx) / 2);
-      updateCropUI();
+    const tool  = document.getElementById("k-crop-tool");
+    const frame = document.getElementById("k-crop-frame");
+    const img   = document.getElementById("k-crop-img");
+    img.src = imgSrc;
+    img.onload = () => {
+      cs.natW = img.naturalWidth;
+      cs.natH = img.naturalHeight;
+      const fw = frame.clientWidth;
+      const fh = frame.clientHeight;
+      cs.scale = Math.max(fw / cs.natW, fh / cs.natH);
+      cs.ox = (fw - cs.natW * cs.scale) / 2;
+      cs.oy = (fh - cs.natH * cs.scale) / 2;
+      applyCropTransform();
       tool.style.display = "block";
+      setupCropDrag(frame);
     };
-    if (src.complete) src.onload();
+    if (img.complete && img.naturalWidth) img.onload();
   }
 
-  function updateCropUI() {
-    const src    = document.getElementById("k-crop-source");
-    const dispH  = src.clientHeight;
-    const top    = document.getElementById("k-mask-top");
-    const win    = document.getElementById("k-crop-window");
-    const bot    = document.getElementById("k-mask-bottom");
-    const handle = document.getElementById("k-drag-handle");
-    const bottom = cropTopPx + cropHeightPx;
-
-    top.style.height    = cropTopPx + "px";
-    win.style.top       = cropTopPx + "px";
-    win.style.height    = cropHeightPx + "px";
-    bot.style.top       = bottom + "px";
-    bot.style.height    = Math.max(0, dispH - bottom) + "px";
-    handle.style.top    = cropTopPx + "px";
-    handle.style.height = cropHeightPx + "px";
+  function applyCropTransform() {
+    document.getElementById("k-crop-img").style.transform =
+      `translate(${cs.ox}px,${cs.oy}px) scale(${cs.scale})`;
   }
 
-  function moveCropBy(px) {
-    const src   = document.getElementById("k-crop-source");
-    const dispH = src.clientHeight;
-    cropTopPx   = Math.max(0, Math.min(dispH - cropHeightPx, cropTopPx + px));
-    updateCropUI();
+  function clampCrop() {
+    const frame = document.getElementById("k-crop-frame");
+    const fw = frame.clientWidth, fh = frame.clientHeight;
+    const iw = cs.natW * cs.scale, ih = cs.natH * cs.scale;
+    cs.ox = Math.min(0, Math.max(fw - iw, cs.ox));
+    cs.oy = Math.min(0, Math.max(fh - ih, cs.oy));
   }
 
-  let dragStartY = 0, dragStartTop = 0;
-  function startCropDrag(e) {
-    dragStartY   = e.touches ? e.touches[0].clientY : e.clientY;
-    dragStartTop = cropTopPx;
-    const onMove = ev => {
-      const y = ev.touches ? ev.touches[0].clientY : ev.clientY;
-      moveCropBy(0); // reset then set
-      const src   = document.getElementById("k-crop-source");
-      const dispH = src.clientHeight;
-      cropTopPx   = Math.max(0, Math.min(dispH - cropHeightPx, dragStartTop + (y - dragStartY)));
-      updateCropUI();
-    };
-    const onUp = () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-      window.removeEventListener("touchmove", onMove);
-      window.removeEventListener("touchend", onUp);
-    };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-    window.addEventListener("touchmove", onMove);
-    window.addEventListener("touchend", onUp);
+  function zoomCrop(delta) {
+    const frame = document.getElementById("k-crop-frame");
+    const fw = frame.clientWidth, fh = frame.clientHeight;
+    const minScale = Math.max(fw / cs.natW, fh / cs.natH);
+    const newScale = Math.max(minScale, cs.scale + delta);
+    const ratio = newScale / cs.scale;
+    cs.ox = fw / 2 - (fw / 2 - cs.ox) * ratio;
+    cs.oy = fh / 2 - (fh / 2 - cs.oy) * ratio;
+    cs.scale = newScale;
+    clampCrop();
+    applyCropTransform();
+  }
+
+  function setupCropDrag(frame) {
+    let drag = false, sx, sy, sox, soy;
+    frame.addEventListener("mousedown", e => {
+      drag = true; sx = e.clientX; sy = e.clientY; sox = cs.ox; soy = cs.oy;
+      frame.style.cursor = "grabbing";
+    });
+    window.addEventListener("mousemove", e => {
+      if (!drag) return;
+      cs.ox = sox + (e.clientX - sx);
+      cs.oy = soy + (e.clientY - sy);
+      clampCrop(); applyCropTransform();
+    });
+    window.addEventListener("mouseup", () => { drag = false; frame.style.cursor = "grab"; });
+    frame.addEventListener("touchstart", e => {
+      if (e.touches.length !== 1) return;
+      drag = true; sx = e.touches[0].clientX; sy = e.touches[0].clientY; sox = cs.ox; soy = cs.oy;
+    });
+    frame.addEventListener("touchmove", e => {
+      e.preventDefault();
+      if (!drag || e.touches.length !== 1) return;
+      cs.ox = sox + (e.touches[0].clientX - sx);
+      cs.oy = soy + (e.touches[0].clientY - sy);
+      clampCrop(); applyCropTransform();
+    }, { passive: false });
+    frame.addEventListener("touchend", () => { drag = false; });
+    frame.addEventListener("wheel", e => {
+      e.preventDefault();
+      zoomCrop(e.deltaY > 0 ? -0.05 : 0.05);
+    }, { passive: false });
   }
 
   function applyCrop() {
-    const src    = document.getElementById("k-crop-source");
-    const dispW  = src.clientWidth;
-    const dispH  = src.clientHeight;
-    const scaleX = cropImgNaturalW / dispW;
-    const scaleY = cropImgNaturalH / dispH;
-    const sx     = 0;
-    const sy     = Math.round(cropTopPx * scaleY);
-    const sw     = cropImgNaturalW;
-    const sh     = Math.round(cropHeightPx * scaleY);
-
+    const img = document.getElementById("k-crop-img");
+    const frame = document.getElementById("k-crop-frame");
+    const fw = frame.clientWidth, fh = frame.clientHeight;
+    const srcX = -cs.ox / cs.scale;
+    const srcY = -cs.oy / cs.scale;
+    const srcW =  fw   / cs.scale;
+    const srcH =  fh   / cs.scale;
     const canvas = document.createElement("canvas");
-    canvas.width  = 650;
-    canvas.height = 315;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(src, sx, sy, sw, sh, 0, 0, 650, 315);
-
+    canvas.width = 650; canvas.height = 315;
+    canvas.getContext("2d").drawImage(img, srcX, srcY, srcW, srcH, 0, 0, 650, 315);
     const a = document.createElement("a");
     a.download = `bip-kontext-${Date.now()}.png`;
     a.href = canvas.toDataURL("image/png");
