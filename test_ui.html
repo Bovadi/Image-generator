@@ -1033,18 +1033,13 @@ If no PII is found, return the original text unchanged and an empty found array.
     document.getElementById("k-result").classList.remove("visible");
 
     try {
-      // Upload reference image to fal.ai storage
-      const uploadForm = new FormData();
-      uploadForm.append("file", refImageBlob);
-      const uploadRes = await fetch("https://fal.run/storage/upload", {
-        method: "POST",
-        headers: { "Authorization": `Key ${falKey}` },
-        body: uploadForm,
+      // Convert reference image to base64 data URL
+      const refUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(refImageBlob);
       });
-      if (!uploadRes.ok) throw new Error(`Upload failed: ${uploadRes.status}`);
-      const uploadData = await uploadRes.json();
-      const refUrl = uploadData.url;
-      if (!refUrl) throw new Error("No upload URL returned.");
 
       // Call FLUX Kontext
       const res = await fetch("https://fal.run/fal-ai/flux-kontext/dev", {
