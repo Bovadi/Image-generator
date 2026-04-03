@@ -514,7 +514,7 @@
     </div>
     <div class="error-msg" id="k-errorMsg"></div>
     <div class="result" id="k-result">
-      <img id="k-resultImg" src="" alt="Generated image" />
+      <img id="k-resultImg" src="" alt="Generated image" style="width:100%;height:auto;object-fit:contain;border-radius:14px;border:1px solid #e2e8f0;display:block;" />
       <div class="result-actions">
         <button class="btn-secondary" onclick="generateKontext()">↺ Regenerate</button>
         <button class="btn-secondary" onclick="downloadImg('k-result')">↓ Download</button>
@@ -1052,7 +1052,7 @@ If no PII is found, return the original text unchanged and an empty found array.
         body: JSON.stringify({
           prompt,
           image_url: refUrl,
-          image_size: { width: 1024, height: 512 },
+          image_size: { width: 1024, height: 768 },
           num_inference_steps: 35,
           guidance_scale: 7.0,
           num_images: 1,
