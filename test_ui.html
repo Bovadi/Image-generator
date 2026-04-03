@@ -512,6 +512,7 @@
       <div class="spinner"></div>
       <p style="font-size:14px;color:#718096;font-weight:600">Generating — ~15–30 seconds</p>
     </div>
+    <div class="pii-warning" id="k-piiWarning"></div>
     <div class="error-msg" id="k-errorMsg"></div>
     <div class="result" id="k-result">
       <img id="k-resultImg" src="" alt="Generated image" style="width:100%;height:auto;object-fit:contain;border-radius:14px;border:1px solid #e2e8f0;display:block;" />
@@ -861,23 +862,23 @@
         {
           role: "system",
           content: `You are a HIPAA compliance tool for a special education app.
-Detect and replace ONLY the following personally identifiable information (PII):
-- Real personal names (e.g. "John", "Maria Lopez", "Mrs. Johnson") — replace with a generic role like "the student" or "the teacher"
-- Phone numbers — replace with "555-000-0000"
-- Email addresses — replace with "example@example.com"
-- Specific street addresses (e.g. "123 Main St") — replace with "the address"
-- Specific school names (e.g. "Lincoln Elementary") — replace with "the school"
+Detect and replace ONLY these three types of personally identifiable information (PII):
+1. Real personal names (first names, last names, full names — e.g. "John", "Maria Lopez", "Mrs. Johnson") — replace with a generic role like "the student", "the teacher", or "the adult"
+2. Email addresses — replace with "example@example.com"
+3. Specific street addresses with a number (e.g. "123 Main St", "45 Oak Avenue") — replace with "the address"
 
-Do NOT replace or change:
+Do NOT replace or flag:
+- Phone numbers (leave as-is)
+- School names (leave as-is)
 - Gender words: girl, boy, she, he, her, his
-- Family roles: mother, father, mom, dad, parent, caregiver, guardian, grandmother, grandfather
-- Job titles: teacher, counselor, therapist, librarian, doctor
-- General descriptive words or actions
+- Family roles: mother, father, mom, dad, parent, caregiver, guardian, grandmother, grandfather, grandma, grandpa
+- Job titles: teacher, counselor, therapist, librarian, doctor, aide, principal
+- General descriptive words, locations, emotions, or actions
 
 Return ONLY valid JSON in this exact format:
 {
   "scrubbed": { "verb": "...", "location": "...", "objects": "...", "supporting": "...", "details": "..." },
-  "found": ["name", "phone number"]
+  "found": ["personal name", "email address"]
 }
 If no PII is found, return the original text unchanged and an empty found array.`
         },
@@ -1021,26 +1022,68 @@ If no PII is found, return the original text unchanged and an empty found array.
     if (file && file.type.startsWith("image/")) handleRefFile(file);
   }
 
+  const SKIN_TONE_WORDS = ["dark","light","pale","brown","black","white","tan","olive","fair","asian","latino","latina","hispanic","south asian","east asian","african","caucasian","mixed","biracial","medium","deep","rich","warm","cool"];
+
+  function adultHasSkinTone(text) {
+    const lower = text.toLowerCase();
+    return SKIN_TONE_WORDS.some(w => lower.includes(w));
+  }
+
+  function kShowPIIWarning(found) {
+    const types = [...new Set(found)].join(", ");
+    const el = document.getElementById("k-piiWarning");
+    el.innerHTML = `<strong>⚠️ Personal information detected and removed.</strong> We found and replaced: ${types}. Your inputs have been updated to keep this session HIPAA compliant.`;
+    el.classList.add("visible");
+  }
+  function kHidePIIWarning() { document.getElementById("k-piiWarning").classList.remove("visible"); }
+
   // ── Kontext: generate ─────────────────────────────────────────────────────
   async function generateKontext() {
     const falKey = document.getElementById("falKey").value.trim();
+
+    if (!falKey)       { kShowError("Enter your fal.ai key at the top."); return; }
+    if (!refImageBlob) { kShowError("Upload a reference image of the character first."); return; }
+    if (!document.getElementById("k-verb").value.trim())     { kShowError("Enter an action."); return; }
+    if (!document.getElementById("k-location").value.trim()) { kShowError("Enter a location."); return; }
+
+    kHidePIIWarning();
+
+    // AI PII check
+    const aiResult = await checkPIIWithAI({
+      verb:       document.getElementById("k-verb").value.trim(),
+      location:   document.getElementById("k-location").value.trim(),
+      objects:    document.getElementById("k-objects").value.trim(),
+      supporting: document.getElementById("k-supporting").value.trim(),
+      details:    document.getElementById("k-details").value.trim(),
+    });
+    if (aiResult) {
+      ["k-verb","k-location","k-objects","k-supporting","k-details"].forEach(id => {
+        const key = id.replace("k-","");
+        if (aiResult.scrubbed?.[key] !== undefined) document.getElementById(id).value = aiResult.scrubbed[key];
+      });
+      if (aiResult.found?.length) kShowPIIWarning(aiResult.found);
+    }
+
     const verb       = document.getElementById("k-verb").value.trim();
     const location   = document.getElementById("k-location").value.trim();
     const objects    = document.getElementById("k-objects").value.trim();
     const supporting = document.getElementById("k-supporting").value.trim();
     const details    = document.getElementById("k-details").value.trim();
 
-    if (!falKey)       { kShowError("Enter your fal.ai key at the top."); return; }
-    if (!refImageBlob) { kShowError("Upload a reference image of the character first."); return; }
-    if (!verb)         { kShowError("Enter an action."); return; }
-    if (!location)     { kShowError("Enter a location."); return; }
-
-    const hasAdult     = supporting && !["none","no","n/a"].includes(supporting.toLowerCase().trim());
+    const hasAdult      = supporting && !["none","no","n/a"].includes(supporting.toLowerCase().trim());
     const objectsClause = objects ? `, ${objects} clearly visible` : "";
-    const soloClause   = hasAdult ? "" : ", only one child in the scene, no other people";
-    const detailsStr   = details ? `${details}. ` : "";
-    const adultDesc = hasAdult ? `a fully grown adult ${supporting}, wearing completely different clothes than the child, much taller, adult face and proportions` : "";
-    const prompt = `${detailsStr}${location}. The child from the reference image is actively ${verb}${objectsClause}${hasAdult ? `. ${adultDesc} stands nearby, full body visible from head to toe` : ""}${soloClause}. Full bodies visible, wide background scene. Keep the child's face, hair, skin tone, and clothing identical to the reference. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.${details ? ` Important: ${details}.` : ""}`;
+    const soloClause    = hasAdult ? "" : ", only one child in the scene, no other people";
+    const detailsStr    = details ? `${details}. ` : "";
+
+    // Adult skin tone: default to matching the reference child unless user specified one
+    const skinToneClause = hasAdult && !adultHasSkinTone(supporting)
+      ? ", same skin tone as the child in the reference image"
+      : "";
+    const adultDesc = hasAdult
+      ? `a fully grown adult ${supporting}${skinToneClause}, wearing completely different clothes than the child, much taller, adult face and proportions`
+      : "";
+
+    const prompt = `${detailsStr}${location}. The child from the reference image is actively ${verb}${objectsClause}${hasAdult ? `. ${adultDesc} stands nearby, full body visible from head to toe` : ""}${soloClause}. Full bodies visible from head to toe, wide background scene. Keep the child's face, hair, skin tone, and clothing identical to the reference. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.${details ? ` Important: ${details}.` : ""}`;
 
     kSetLoading(true);
     kClearError();
@@ -1065,7 +1108,7 @@ If no PII is found, return the original text unchanged and an empty found array.
         body: JSON.stringify({
           prompt,
           image_url: refUrl,
-          image_size: { width: 1024, height: 768 },
+          image_size: { width: 1024, height: 1024 },
           num_inference_steps: 35,
           guidance_scale: 12.0,
           num_images: 1,
