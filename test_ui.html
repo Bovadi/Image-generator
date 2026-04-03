@@ -1027,7 +1027,7 @@ If no PII is found, return the original text unchanged and an empty found array.
     const soloClause   = hasAdult ? "" : ", only one child in the scene, no other people";
     const detailsStr   = details ? `${details}. ` : "";
     const adultDesc = hasAdult ? `a fully grown adult ${supporting}, wearing completely different clothes than the child, much taller, adult face and proportions` : "";
-    const prompt = `${detailsStr}Zoomed out wide shot, both figures shown fully from head to toe, no bodies or heads cut off. Keep the child character's appearance exactly as in the reference image. ${location}. The child is actively ${verb}${objectsClause}${hasAdult ? `. ${adultDesc} stands nearby` : ""}${soloClause}. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, full scene background visible, no text.${details ? ` Important: ${details}.` : ""}`;
+    const prompt = `${detailsStr}Scene: ${location}. Full detailed background scene visible. Characters are small within the wide scene, shown fully from head to toe with empty space above their heads. Keep the child character's appearance, clothing and art style exactly as in the reference image. The child is actively ${verb}${objectsClause}${hasAdult ? `. ${adultDesc} stands nearby, full body visible` : ""}${soloClause}. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, no text, no white background.${details ? ` Important: ${details}.` : ""}`;
 
     kSetLoading(true);
     kClearError();
