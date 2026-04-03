@@ -470,12 +470,12 @@
   const ADULT_LORA_URL = "https://v3b.fal.media/files/b/0a94ce97/KUvipoYCO6K1g50HpMnak_pytorch_lora_weights.safetensors";
 
   const SKIN_TONE = {
-    asian:           "light skin tone",
-    black:           "dark brown skin tone",
-    hispanic:        "medium brown skin tone",
-    white:           "fair skin tone",
-    south_asian:     "tan brown skin tone",
-    middle_eastern:  "olive skin tone",
+    asian:           "light skin, East Asian features",
+    black:           "dark brown skin, Black features",
+    hispanic:        "medium brown skin, Hispanic features",
+    white:           "fair light skin, white features",
+    south_asian:     "tan brown skin, South Asian features",
+    middle_eastern:  "olive tan skin, Middle Eastern features",
   };
 
   const FAMILY_WORDS = ["parent", "mother", "father", "mom", "dad", "caregiver", "guardian", "mama", "papa"];
@@ -593,7 +593,7 @@
     const objectsClause = objectsRaw ? `, ${objectsRaw} clearly visible` : "";
     const adultDesc   = hasAdult ? adultWithSkinTone(supportingRaw, selectedId) : "";
     const adultPrefix = hasAdult
-      ? `scene includes a fully grown adult ${adultDesc}, adult body proportions, clearly taller than the child, mature facial features. `
+      ? `two figures fully visible from head to toe, scene includes a fully grown adult ${adultDesc}, adult body proportions, clearly taller than the child, mature facial features, both characters centered in frame. `
       : "";
     const soloClause = hasAdult ? "" : ", only one child in the scene, no other people";
     const prompt = `${adultPrefix}${location}, ${char.trigger}, ${char.desc}, actively ${verb}${objectsClause}${soloClause}, full body, dynamic action pose, full scene with walls floor and furniture visible. ${STYLE}.`;
