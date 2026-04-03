@@ -1,7 +1,7 @@
 module Characters
   PLACEHOLDER_LORA = nil # set to real URL during development if needed
 
-  SOUTH_ASIAN_GIRL_CHILD_LORA = "https://v3b.fal.media/files/b/0a9470ed/z9INFa1vqIBc3o1zZ4bmN_pytorch_lora_weights.safetensors"
+  SOUTH_ASIAN_GIRL_CHILD_LORA = "https://v3b.fal.media/files/b/0a94ce41/4o-h-nA8AJA25YJcqjVTx_pytorch_lora_weights.safetensors"
 
   REGISTRY = {
     # ── Child characters ────────────────────────────────────────────────────
