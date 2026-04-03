@@ -625,7 +625,7 @@
     const adultPrefix = hasAdult
       ? `two figures fully visible from head to toe, scene includes a fully grown adult ${adultDesc}, adult is at least twice the height of the child, large adult body proportions, very tall compared to child, mature facial features and adult face, both characters centered in frame. `
       : "";
-    const soloClause = hasAdult ? "" : ", only one child in the scene, no other people";
+    const soloClause = hasAdult ? ", no other people in the background, only these two characters" : ", only one child in the scene, no other people";
     const details    = document.getElementById("details").value.trim();
     const detailsPrefix = details ? `${details}. ` : "";
     const prompt = `${detailsPrefix}${location}. ${adultPrefix}${char.trigger}, ${char.desc}, actively ${verb}${objectsClause}${soloClause}, full body, dynamic action pose, full scene background visible. ${STYLE}.`;
