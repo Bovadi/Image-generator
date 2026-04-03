@@ -489,6 +489,32 @@
     return `${adultText}, ${SKIN_TONE[ethnicity]}`;
   }
 
+  const FEMALE_WORDS = ["female", "woman", "mother", "mom", "mama", "teacher", "counselor", "therapist", "caregiver", "guardian", "grandmother", "grandma", "aunt", "sister"];
+  const MALE_WORDS   = ["male", "man", "father", "dad", "papa", "grandfather", "grandpa", "uncle", "brother"];
+
+  const ADULT_FEMALE_OUTFITS = [
+    "wearing a teal blouse and dark navy trousers",
+    "wearing a burgundy cardigan and dark gray pants",
+    "wearing a navy blue top and olive green pants",
+    "wearing a forest green blazer and black trousers",
+    "wearing a coral red blouse and charcoal gray pants",
+  ];
+  const ADULT_MALE_OUTFITS = [
+    "wearing a navy blue shirt and dark gray trousers",
+    "wearing a forest green polo shirt and khaki trousers",
+    "wearing a burgundy sweater and dark jeans",
+    "wearing a gray button-up shirt and dark blue trousers",
+  ];
+
+  function adultWithOutfit(adultText) {
+    const lower = adultText.toLowerCase();
+    const isFemale = FEMALE_WORDS.some(w => lower.includes(w));
+    const isMale   = MALE_WORDS.some(w => lower.includes(w));
+    const outfits  = isFemale ? ADULT_FEMALE_OUTFITS : isMale ? ADULT_MALE_OUTFITS : ADULT_FEMALE_OUTFITS;
+    const outfit   = outfits[Math.floor(Math.random() * outfits.length)];
+    return `${adultText}, ${outfit}, short hair`;
+  }
+
   let activeGender = "boy";
   let activeAge    = "child";
   let selectedId   = null;
@@ -591,9 +617,9 @@
     const isTrained = !char.lora.includes("huggingface.co") && char.lora !== "PASTE_LORA_URL_HERE";
     const objectsRaw = document.getElementById("objects").value.trim();
     const objectsClause = objectsRaw ? `, ${objectsRaw} clearly visible` : "";
-    const adultDesc   = hasAdult ? adultWithSkinTone(supportingRaw, selectedId) : "";
+    const adultDesc   = hasAdult ? adultWithOutfit(adultWithSkinTone(supportingRaw, selectedId)) : "";
     const adultPrefix = hasAdult
-      ? `two figures fully visible from head to toe, scene includes a fully grown adult ${adultDesc}, adult body proportions, clearly taller than the child, mature facial features, adult wearing completely different outfit than the child, both characters centered in frame. `
+      ? `two figures fully visible from head to toe, scene includes a fully grown adult ${adultDesc}, adult body proportions, clearly taller than the child, mature facial features, both characters centered in frame. `
       : "";
     const soloClause = hasAdult ? "" : ", only one child in the scene, no other people";
     const prompt = `${location}. ${adultPrefix}${char.trigger}, ${char.desc}, actively ${verb}${objectsClause}${soloClause}, full body, dynamic action pose, full scene background visible. ${STYLE}.`;
@@ -613,8 +639,8 @@
         enable_safety_checker: true,
       };
       const loras = [];
-      if (isTrained) loras.push({ path: char.lora, scale: hasAdult ? 0.85 : 1.0 });
-      if (hasAdult)  loras.push({ path: ADULT_LORA_URL, scale: 0.8 });
+      if (isTrained) loras.push({ path: char.lora, scale: hasAdult ? 0.75 : 1.0 });
+      if (hasAdult)  loras.push({ path: ADULT_LORA_URL, scale: 0.85 });
       if (loras.length) body.loras = loras;
 
       const res = await fetch("https://fal.run/fal-ai/flux-lora", {
