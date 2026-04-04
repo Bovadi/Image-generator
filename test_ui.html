@@ -332,6 +332,20 @@
       margin-top: 12px;
     }
 
+    .skin-btn {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: 700;
+      color: #4a5568;
+      padding: 0;
+      transition: border-color 0.15s;
+    }
+    .skin-btn[data-label="none"] { width: auto; padding: 2px 8px; border-radius: 20px; font-size: 11px; }
+    .skin-btn.active { border-color: #4B9EF4; box-shadow: 0 0 0 2px #bfdbfe; }
+
     .btn-secondary {
       flex: 1;
       padding: 10px;
@@ -498,6 +512,15 @@
       <div class="scenario-input">
         <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">ADULTS</span>
         <input type="text" id="k-supporting" placeholder="optional — e.g. a female teacher nearby" />
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;padding-left:68px;margin-top:-4px;margin-bottom:4px;">
+        <span style="font-size:11px;color:#a0aec0;">Skin tone:</span>
+        <button class="skin-btn" data-tone="" data-label="none" onclick="selectSkinTone(this)" style="background:#e2e8f0;">None</button>
+        <button class="skin-btn" data-tone="light warm beige skin tone" data-label="Light" onclick="selectSkinTone(this)" style="background:#f5cba7;"></button>
+        <button class="skin-btn" data-tone="medium warm tan skin tone" data-label="Medium" onclick="selectSkinTone(this)" style="background:#c68642;"></button>
+        <button class="skin-btn" data-tone="warm golden brown skin tone" data-label="Tan" onclick="selectSkinTone(this)" style="background:#8d5524;"></button>
+        <button class="skin-btn" data-tone="deep dark brown skin tone" data-label="Dark" onclick="selectSkinTone(this)" style="background:#4a2912;"></button>
+        <span id="k-skinToneLabel" style="font-size:11px;color:#718096;margin-left:2px;"></span>
       </div>
       <div class="scenario-input">
         <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">DETAILS</span>
@@ -1024,6 +1047,16 @@ If no PII found, return original text and empty found array.`
     if (file && file.type.startsWith("image/")) handleRefFile(file);
   }
 
+  let selectedSkinTone = ""; // tone phrase, empty = none selected
+
+  function selectSkinTone(btn) {
+    document.querySelectorAll(".skin-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    selectedSkinTone = btn.dataset.tone;
+    const label = btn.dataset.label;
+    document.getElementById("k-skinToneLabel").textContent = label !== "none" ? label : "";
+  }
+
   const SKIN_TONE_WORDS = ["dark","light","pale","brown","black","white","tan","olive","fair","asian","latino","latina","hispanic","south asian","east asian","african","caucasian","mixed","biracial","medium","deep","rich","warm","cool"];
   function adultHasSkinTone(text) { return SKIN_TONE_WORDS.some(w => text.toLowerCase().includes(w)); }
   function kShowPIIWarning(found) {
@@ -1053,15 +1086,13 @@ If no PII found, return original text and empty found array.`
     const soloClause    = hasAdult ? "" : ", only one child in the scene, no other people";
     const detailsStr    = details ? `${details}. ` : "";
 
-    // Default adult skin tone to match the reference child unless user already specified one
-    const skinToneClause = hasAdult && !adultHasSkinTone(supporting)
-      ? ", same skin tone as the child in the reference image"
-      : "";
+    // Skin tone: use button selection if set, otherwise no skin tone instruction
+    const skinToneClause = hasAdult && selectedSkinTone ? `, ${selectedSkinTone}` : "";
     const adultDesc = hasAdult
       ? `a fully grown adult ${supporting}${skinToneClause}, wearing completely different clothes than the child, much taller, adult face and proportions`
       : "";
 
-    const prompt = `${detailsStr}${location}. The child from the reference image is actively ${verb}${objectsClause}${hasAdult ? `. ${adultDesc} stands nearby, full body visible from head to toe` : ""}${soloClause}. All characters fully visible from head to toe, no cropping, square canvas with room for everyone. Keep the child's face, hair, skin tone, and clothing identical to the reference. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.${details ? ` Important: ${details}.` : ""}`;
+    const prompt = `${detailsStr}${location}. The child from the reference image is actively ${verb}${objectsClause}${hasAdult ? `. ${adultDesc} stands nearby, full body visible from head to toe` : ""}${soloClause}. All characters fully visible from head to toe, no cropping of heads or feet. Keep the child's face, hair, skin tone, and clothing identical to the reference. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.${details ? ` Important: ${details}.` : ""}`;
 
     kSetLoading(true);
     kClearError();
