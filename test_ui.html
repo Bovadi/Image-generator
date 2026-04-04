@@ -484,18 +484,35 @@
   <div class="tab-content" id="tab-kontext">
 
     <h1>Kontext Generator</h1>
-    <p style="font-size:13px;color:#718096;margin-bottom:16px;">Upload a reference image of the character — FLUX Kontext maintains their appearance without LoRA training.</p>
+    <p style="font-size:13px;color:#718096;margin-bottom:16px;">Upload reference images — FLUX Kontext maintains their appearance without LoRA training.</p>
 
-    <!-- Reference image upload -->
-    <div class="ref-drop" id="refDrop" onclick="document.getElementById('refInput').click()"
-         ondragover="event.preventDefault();this.classList.add('drag-over')"
-         ondragleave="this.classList.remove('drag-over')"
-         ondrop="handleRefDrop(event)">
-      <strong>Drop character reference image here</strong>
-      <p>or click to browse — PNG, JPG, WEBP</p>
-      <img id="refPreview" class="ref-preview" alt="Reference preview" />
+    <!-- Reference image uploads -->
+    <div style="display:flex;gap:10px;margin-bottom:12px;">
+      <div style="flex:1;">
+        <div style="font-size:11px;font-weight:700;color:#a0aec0;margin-bottom:5px;">CHILD</div>
+        <div class="ref-drop" id="refDrop" onclick="document.getElementById('refInput').click()"
+             ondragover="event.preventDefault();this.classList.add('drag-over')"
+             ondragleave="this.classList.remove('drag-over')"
+             ondrop="handleRefDrop(event)">
+          <strong>Drop image here</strong>
+          <p>or click to browse</p>
+          <img id="refPreview" class="ref-preview" alt="Child reference" />
+        </div>
+        <input type="file" id="refInput" accept="image/*" style="display:none" onchange="handleRefFile(this.files[0])">
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:11px;font-weight:700;color:#a0aec0;margin-bottom:5px;">ADULT <span style="font-weight:400;color:#cbd5e0;">(optional)</span></div>
+        <div class="ref-drop" id="refAdultDrop" onclick="document.getElementById('refAdultInput').click()"
+             ondragover="event.preventDefault();this.classList.add('drag-over')"
+             ondragleave="this.classList.remove('drag-over')"
+             ondrop="handleRefAdultDrop(event)">
+          <strong>Drop image here</strong>
+          <p>or click to browse</p>
+          <img id="refAdultPreview" class="ref-preview" alt="Adult reference" />
+        </div>
+        <input type="file" id="refAdultInput" accept="image/*" style="display:none" onchange="handleRefAdultFile(this.files[0])">
+      </div>
     </div>
-    <input type="file" id="refInput" accept="image/*" style="display:none" onchange="handleRefFile(this.files[0])">
 
     <!-- Inputs -->
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
@@ -1027,24 +1044,66 @@ If no PII found, return original text and empty found array.`
     btn.classList.add("active");
   }
 
-  // ── Kontext: reference image ──────────────────────────────────────────────
-  let refImageBlob = null;
+  // ── Kontext: reference images ─────────────────────────────────────────────
+  let refImageBlob      = null;
+  let refAdultImageBlob = null;
 
   function handleRefFile(file) {
     if (!file) return;
     refImageBlob = file;
-    const url = URL.createObjectURL(file);
     const preview = document.getElementById("refPreview");
-    preview.src = url;
+    preview.src = URL.createObjectURL(file);
     preview.style.display = "block";
-    document.querySelector("#refDrop strong").textContent = file.name;
+    document.querySelector("#refDrop strong").textContent = "✓ " + file.name;
   }
-
   function handleRefDrop(e) {
     e.preventDefault();
     document.getElementById("refDrop").classList.remove("drag-over");
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith("image/")) handleRefFile(file);
+  }
+
+  function handleRefAdultFile(file) {
+    if (!file) return;
+    refAdultImageBlob = file;
+    const preview = document.getElementById("refAdultPreview");
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = "block";
+    document.querySelector("#refAdultDrop strong").textContent = "✓ " + file.name;
+  }
+  function handleRefAdultDrop(e) {
+    e.preventDefault();
+    document.getElementById("refAdultDrop").classList.remove("drag-over");
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith("image/")) handleRefAdultFile(file);
+  }
+
+  // Stitch child (left) + adult (right) into one image for Kontext
+  function stitchImages(childBlob, adultBlob) {
+    return new Promise((resolve) => {
+      const childImg = new Image();
+      const adultImg = new Image();
+      const childUrl = URL.createObjectURL(childBlob);
+      const adultUrl = URL.createObjectURL(adultBlob);
+      childImg.onload = () => {
+        adultImg.onload = () => {
+          const h  = Math.max(childImg.naturalHeight, adultImg.naturalHeight);
+          const cw = Math.round(childImg.naturalWidth  * (h / childImg.naturalHeight));
+          const aw = Math.round(adultImg.naturalWidth  * (h / adultImg.naturalHeight));
+          const canvas = document.createElement("canvas");
+          canvas.width  = cw + aw;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(childImg, 0, 0, cw, h);
+          ctx.drawImage(adultImg, cw, 0, aw, h);
+          URL.revokeObjectURL(childUrl);
+          URL.revokeObjectURL(adultUrl);
+          resolve(canvas.toDataURL("image/png"));
+        };
+        adultImg.src = adultUrl;
+      };
+      childImg.src = childUrl;
+    });
   }
 
   let selectedSkinTone = "";
@@ -1104,24 +1163,32 @@ If no PII found, return original text and empty found array.`
     const soloClause    = hasAdult ? "" : ", only one child in the scene, no other people";
     const detailsStr    = details ? `${details}. ` : "";
 
-    const adultDesc = hasAdult
-      ? `${supporting}, wearing completely different clothes than the child, much taller, adult proportions`
-      : "";
+    const hasAdultRef = !!refAdultImageBlob;
 
-    const prompt = `${detailsStr}${location}. The child from the reference image is actively ${verb}${objectsClause}${hasAdult ? `. ${adultDesc} stands nearby, full body visible from head to toe` : ""}${soloClause}. All characters fully visible from head to toe, no cropping of heads or feet. Keep the child's face, hair, skin tone, and clothing identical to the reference. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.${details ? ` Important: ${details}.` : ""}`;
+    let adultDesc, prompt;
+    if (hasAdultRef && hasAdult) {
+      // Adult reference image provided — describe by position in stitched image
+      adultDesc = `${supporting} (right figure in reference image), much taller than the child, adult proportions`;
+      prompt = `${detailsStr}${location}. The reference image shows two characters side by side: the child on the left and the adult on the right. Keep both characters' faces, hair, skin tones, and clothing identical to their respective figures in the reference. The child is actively ${verb}${objectsClause}. ${adultDesc} stands nearby, full body visible from head to toe${soloClause}. All characters fully visible from head to toe, no cropping. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.${details ? ` Important: ${details}.` : ""}`;
+    } else {
+      adultDesc = hasAdult ? `${supporting}, wearing completely different clothes than the child, much taller, adult proportions` : "";
+      prompt = `${detailsStr}${location}. The child from the reference image is actively ${verb}${objectsClause}${hasAdult ? `. ${adultDesc} stands nearby, full body visible from head to toe` : ""}${soloClause}. All characters fully visible from head to toe, no cropping of heads or feet. Keep the child's face, hair, skin tone, and clothing identical to the reference. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.${details ? ` Important: ${details}.` : ""}`;
+    }
 
     kSetLoading(true);
     kClearError();
     document.getElementById("k-result").classList.remove("visible");
 
     try {
-      // Convert reference image to base64 data URL
-      const refUrl = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(refImageBlob);
-      });
+      // Build reference: stitch child+adult if adult ref provided, else just child
+      const refUrl = hasAdultRef
+        ? await stitchImages(refImageBlob, refAdultImageBlob)
+        : await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(refImageBlob);
+          });
 
       // Call FLUX Kontext
       const res = await fetch("https://fal.run/fal-ai/flux-kontext/dev", {
