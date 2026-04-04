@@ -1089,13 +1089,13 @@ If no PII found, return original text and empty found array.`
     const soloClause    = hasAdult ? "" : ", only one child in the scene, no other people";
     const detailsStr    = details ? `${details}. ` : "";
 
-    // Skin tone: use button selection if set, otherwise no skin tone instruction
-    const skinToneClause = hasAdult && selectedSkinTone ? `, ${selectedSkinTone}` : "";
+    const skinTonePhrase = selectedSkinTone ? ` with ${selectedSkinTone}` : "";
     const adultDesc = hasAdult
-      ? `a fully grown adult ${supporting}${skinToneClause}, wearing completely different clothes than the child, much taller, adult face and proportions`
+      ? `a fully grown adult ${supporting}${skinTonePhrase}, wearing completely different clothes than the child, much taller, adult face and proportions`
       : "";
+    const skinToneNote = hasAdult && selectedSkinTone ? ` The adult has ${selectedSkinTone}.` : "";
 
-    const prompt = `${detailsStr}${location}. The child from the reference image is actively ${verb}${objectsClause}${hasAdult ? `. ${adultDesc} stands nearby, full body visible from head to toe` : ""}${soloClause}. All characters fully visible from head to toe, no cropping of heads or feet. Keep the child's face, hair, skin tone, and clothing identical to the reference. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.${details ? ` Important: ${details}.` : ""}`;
+    const prompt = `${detailsStr}${location}. The child from the reference image is actively ${verb}${objectsClause}${hasAdult ? `. ${adultDesc} stands nearby, full body visible from head to toe` : ""}${soloClause}. All characters fully visible from head to toe, no cropping of heads or feet. Keep the child's face, hair, skin tone, and clothing identical to the reference.${skinToneNote} Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.${details ? ` Important: ${details}.` : ""}`;
 
     kSetLoading(true);
     kClearError();
