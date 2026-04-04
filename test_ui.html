@@ -1318,74 +1318,31 @@ If no PII found, return original text and empty found array.`
     }, { passive: false });
   }
 
-  async function applyCrop() {
-    const falKey = document.getElementById("falKey").value.trim();
-    const img    = document.getElementById("k-crop-img");
-    const frame  = document.getElementById("k-crop-frame");
+  function applyCrop() {
+    const img   = document.getElementById("k-crop-img");
+    const frame = document.getElementById("k-crop-frame");
     const fw = frame.clientWidth, fh = frame.clientHeight;
 
     const OUTW = 650, OUTH = 315;
     const scaleX = OUTW / fw, scaleY = OUTH / fh;
+    const drawX = cs.ox * scaleX, drawY = cs.oy * scaleY;
+    const drawW = cs.natW * cs.scale * scaleX, drawH = cs.natH * cs.scale * scaleY;
 
-    // Render the crop to a 650x315 canvas
     const canvas = document.createElement("canvas");
     canvas.width = OUTW; canvas.height = OUTH;
     const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#e2e8f0";
-    ctx.fillRect(0, 0, OUTW, OUTH);
-    const drawX = cs.ox * scaleX, drawY = cs.oy * scaleY;
-    const drawW = cs.natW * cs.scale * scaleX, drawH = cs.natH * cs.scale * scaleY;
+
+    // Layer 1: blurred stretched version of full image fills any empty areas
+    ctx.filter = "blur(28px) saturate(1.1)";
+    ctx.drawImage(img, -30, -30, OUTW + 60, OUTH + 60); // oversized to avoid blur edge fringing
+    ctx.filter = "none";
+
+    // Layer 2: sharp positioned image on top
     ctx.drawImage(img, drawX, drawY, drawW, drawH);
 
-    const croppedDataUrl = canvas.toDataURL("image/png");
-
-    // Check if the image fully covers the frame (no empty space)
-    const iw = cs.natW * cs.scale, ih = cs.natH * cs.scale;
-    const hasEmptySpace = cs.ox > 1 || cs.oy > 1 || (cs.ox + iw) < fw - 1 || (cs.oy + ih) < fh - 1;
-
-    if (!hasEmptySpace) {
-      // Image fills frame — display in place, no API call needed
-      document.getElementById("k-resultImg").src = croppedDataUrl;
-      document.getElementById("k-result").classList.add("visible");
-      document.getElementById("k-crop-tool").style.display = "none";
-      return;
-    }
-
-    // Empty space — re-generate at landscape ratio using stored params
-    if (!falKey)             { kShowError("fal.ai key required to extend."); return; }
-    if (!_lastKontextBody)   { kShowError("Generate an image first before cropping."); return; }
-
-    kSetLoading(true);
-    kClearError();
+    document.getElementById("k-resultImg").src = canvas.toDataURL("image/png");
+    document.getElementById("k-result").classList.add("visible");
     document.getElementById("k-crop-tool").style.display = "none";
-
-    try {
-      const landscapePrompt = _lastKontextBody.prompt
-        .replace("edge to edge background", "wide landscape scene, edge to edge background, full scene visible from left to right");
-      const res = await fetch("https://fal.run/fal-ai/flux-kontext/dev", {
-        method: "POST",
-        headers: { "Authorization": `Key ${falKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ..._lastKontextBody,
-          prompt:     landscapePrompt,
-          image_size: { width: 1024, height: 512 },
-        }),
-      });
-      if (!res.ok) throw new Error(`Extend error ${res.status}: ${await res.text()}`);
-      const data = await res.json();
-      const url  = data?.images?.[0]?.url;
-      if (!url) throw new Error("No image returned.");
-      const imgBlob = await (await fetch(url)).blob();
-      const blobUrl = URL.createObjectURL(imgBlob);
-      document.getElementById("k-resultImg").src = blobUrl;
-      document.getElementById("k-result").classList.add("visible");
-      initCropTool(blobUrl); // show crop tool again with the new landscape image
-    } catch(e) {
-      kShowError(e.message);
-      document.getElementById("k-crop-tool").style.display = "block";
-    } finally {
-      kSetLoading(false);
-    }
   }
 
   // ── Init ──────────────────────────────────────────────────────────────────
