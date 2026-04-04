@@ -1212,9 +1212,12 @@ If no PII found, return original text and empty found array.`
       const url  = data?.images?.[0]?.url;
       if (!url) throw new Error("No image returned.");
 
-      document.getElementById("k-resultImg").src = url;
+      // Fetch as blob so canvas can read it without CORS taint
+      const imgBlob = await (await fetch(url)).blob();
+      const blobUrl = URL.createObjectURL(imgBlob);
+      document.getElementById("k-resultImg").src = blobUrl;
       document.getElementById("k-result").classList.add("visible");
-      initCropTool(url);
+      initCropTool(blobUrl);
     } catch(e) {
       kShowError(e.message);
     } finally {
