@@ -1047,16 +1047,31 @@ If no PII found, return original text and empty found array.`
     if (file && file.type.startsWith("image/")) handleRefFile(file);
   }
 
-  let selectedSkinTone = ""; // tone phrase, empty = none selected
+  let selectedSkinTone = "";
+  let skinToneAppended = ""; // tracks what we last appended to the field
 
   function selectSkinTone(btn) {
+    const input = document.getElementById("k-supporting");
+    const tone  = btn.dataset.tone;
+
+    // Remove previously appended skin tone from field
+    if (skinToneAppended && input.value.endsWith(skinToneAppended)) {
+      input.value = input.value.slice(0, -skinToneAppended.length).trimEnd();
+    }
+
     document.querySelectorAll(".skin-btn").forEach(b => b.classList.remove("active"));
-    if (selectedSkinTone === btn.dataset.tone && btn.dataset.tone !== "") {
-      // clicking the active button deselects it
-      selectedSkinTone = "";
-    } else {
+
+    if (tone && tone !== selectedSkinTone) {
+      // Append tone to the field so user sees it and it carries full prompt weight
+      const toAppend = ` with ${tone}`;
+      input.value   = (input.value.trim() + toAppend);
+      skinToneAppended  = toAppend;
+      selectedSkinTone  = tone;
       btn.classList.add("active");
-      selectedSkinTone = btn.dataset.tone;
+    } else {
+      // Same button clicked again — deselect
+      selectedSkinTone = "";
+      skinToneAppended = "";
     }
   }
 
@@ -1089,13 +1104,11 @@ If no PII found, return original text and empty found array.`
     const soloClause    = hasAdult ? "" : ", only one child in the scene, no other people";
     const detailsStr    = details ? `${details}. ` : "";
 
-    const skinTonePhrase = selectedSkinTone ? ` with ${selectedSkinTone}` : "";
     const adultDesc = hasAdult
-      ? `a fully grown adult ${supporting}${skinTonePhrase}, wearing completely different clothes than the child, much taller, adult face and proportions`
+      ? `${supporting}, wearing completely different clothes than the child, much taller, adult proportions`
       : "";
-    const skinToneNote = hasAdult && selectedSkinTone ? ` The adult has ${selectedSkinTone}.` : "";
 
-    const prompt = `${detailsStr}${location}. The child from the reference image is actively ${verb}${objectsClause}${hasAdult ? `. ${adultDesc} stands nearby, full body visible from head to toe` : ""}${soloClause}. All characters fully visible from head to toe, no cropping of heads or feet. Keep the child's face, hair, skin tone, and clothing identical to the reference.${skinToneNote} Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.${details ? ` Important: ${details}.` : ""}`;
+    const prompt = `${detailsStr}${location}. The child from the reference image is actively ${verb}${objectsClause}${hasAdult ? `. ${adultDesc} stands nearby, full body visible from head to toe` : ""}${soloClause}. All characters fully visible from head to toe, no cropping of heads or feet. Keep the child's face, hair, skin tone, and clothing identical to the reference. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.${details ? ` Important: ${details}.` : ""}`;
 
     kSetLoading(true);
     kClearError();
