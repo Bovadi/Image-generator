@@ -562,7 +562,7 @@
 
     <!-- Crop tool -->
     <div id="k-crop-tool" style="display:none;margin-top:16px;">
-      <p style="font-size:13px;color:#718096;margin-bottom:8px;">Drag to pan &middot; scroll or use buttons to zoom &middot; then Crop &amp; Download</p>
+      <p style="font-size:13px;color:#718096;margin-bottom:8px;">Drag to pan &middot; scroll or use buttons to zoom &middot; then Crop (extends background if needed)</p>
       <div id="k-crop-frame" style="position:relative;width:100%;overflow:hidden;border-radius:12px;border:3px solid #4B9EF4;cursor:grab;touch-action:none;background:#e2e8f0;">
         <div style="padding-top:48.46%;"></div><!-- 315/650 aspect ratio spacer -->
         <img id="k-crop-img" style="position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform;user-select:none;pointer-events:none;" />
@@ -570,7 +570,7 @@
       <div style="display:flex;gap:8px;margin-top:10px;">
         <button class="btn-secondary" onclick="zoomCrop(-0.1)">− Zoom Out</button>
         <button class="btn-secondary" onclick="zoomCrop(0.1)">+ Zoom In</button>
-        <button class="btn-generate" style="flex:1;" onclick="applyCrop()">✂ Crop &amp; Download</button>
+        <button class="btn-generate" style="flex:1;" onclick="applyCrop()">✂ Crop</button>
       </div>
     </div>
 
@@ -1311,21 +1311,84 @@ If no PII found, return original text and empty found array.`
     }, { passive: false });
   }
 
-  function applyCrop() {
-    const img = document.getElementById("k-crop-img");
-    const frame = document.getElementById("k-crop-frame");
+  async function applyCrop() {
+    const falKey = document.getElementById("falKey").value.trim();
+    const img    = document.getElementById("k-crop-img");
+    const frame  = document.getElementById("k-crop-frame");
     const fw = frame.clientWidth, fh = frame.clientHeight;
-    const srcX = -cs.ox / cs.scale;
-    const srcY = -cs.oy / cs.scale;
-    const srcW =  fw   / cs.scale;
-    const srcH =  fh   / cs.scale;
+
+    const OUTW = 650, OUTH = 315;
+    const scaleX = OUTW / fw, scaleY = OUTH / fh;
+
+    // Render the crop to a 650x315 canvas
     const canvas = document.createElement("canvas");
-    canvas.width = 650; canvas.height = 315;
-    canvas.getContext("2d").drawImage(img, srcX, srcY, srcW, srcH, 0, 0, 650, 315);
-    const a = document.createElement("a");
-    a.download = `bip-kontext-${Date.now()}.png`;
-    a.href = canvas.toDataURL("image/png");
-    a.click();
+    canvas.width = OUTW; canvas.height = OUTH;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#e2e8f0";
+    ctx.fillRect(0, 0, OUTW, OUTH);
+    const drawX = cs.ox * scaleX, drawY = cs.oy * scaleY;
+    const drawW = cs.natW * cs.scale * scaleX, drawH = cs.natH * cs.scale * scaleY;
+    ctx.drawImage(img, drawX, drawY, drawW, drawH);
+
+    const croppedDataUrl = canvas.toDataURL("image/png");
+
+    // Check if the image fully covers the frame (no empty space)
+    const iw = cs.natW * cs.scale, ih = cs.natH * cs.scale;
+    const hasEmptySpace = cs.ox > 1 || cs.oy > 1 || (cs.ox + iw) < fw - 1 || (cs.oy + ih) < fh - 1;
+
+    if (!hasEmptySpace) {
+      // Image fills frame — display in place, no API call needed
+      document.getElementById("k-resultImg").src = croppedDataUrl;
+      document.getElementById("k-result").classList.add("visible");
+      document.getElementById("k-crop-tool").style.display = "none";
+      return;
+    }
+
+    // Empty space exists — use FLUX Fill to extend the background
+    if (!falKey) { kShowError("fal.ai key required to extend."); return; }
+
+    // Build mask: white = extend here, black = keep existing image
+    const maskCanvas = document.createElement("canvas");
+    maskCanvas.width = OUTW; maskCanvas.height = OUTH;
+    const mCtx = maskCanvas.getContext("2d");
+    mCtx.fillStyle = "white";
+    mCtx.fillRect(0, 0, OUTW, OUTH);
+    mCtx.fillStyle = "black";
+    mCtx.fillRect(
+      Math.max(0, drawX), Math.max(0, drawY),
+      Math.min(OUTW, drawX + drawW) - Math.max(0, drawX),
+      Math.min(OUTH, drawY + drawH) - Math.max(0, drawY)
+    );
+    const maskDataUrl = maskCanvas.toDataURL("image/png");
+
+    kSetLoading(true);
+    kClearError();
+    document.getElementById("k-crop-tool").style.display = "none";
+
+    try {
+      const res = await fetch("https://fal.run/fal-ai/flux-fill/dev", {
+        method: "POST",
+        headers: { "Authorization": `Key ${falKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          image_url: croppedDataUrl,
+          mask_url:  maskDataUrl,
+          prompt: "extend the background scene to fill the frame, same flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text",
+          num_inference_steps: 28,
+          guidance_scale: 30,
+        }),
+      });
+      if (!res.ok) throw new Error(`Fill error ${res.status}: ${await res.text()}`);
+      const data = await res.json();
+      const url  = data?.images?.[0]?.url;
+      if (!url) throw new Error("No image returned from fill.");
+      document.getElementById("k-resultImg").src = url;
+      document.getElementById("k-result").classList.add("visible");
+    } catch(e) {
+      kShowError(e.message);
+      document.getElementById("k-crop-tool").style.display = "block";
+    } finally {
+      kSetLoading(false);
+    }
   }
 
   // ── Init ──────────────────────────────────────────────────────────────────
