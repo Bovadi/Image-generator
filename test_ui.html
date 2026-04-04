@@ -333,18 +333,20 @@
     }
 
     .skin-btn {
-      width: 24px; height: 24px;
-      border-radius: 50%;
-      border: 2px solid transparent;
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 2px solid #e2e8f0;
+      background: #fff;
       cursor: pointer;
-      font-size: 10px;
-      font-weight: 700;
+      font-size: 11px;
+      font-weight: 600;
       color: #4a5568;
-      padding: 0;
-      transition: border-color 0.15s;
+      transition: border-color 0.15s, background 0.15s;
     }
-    .skin-btn[data-label="none"] { width: auto; padding: 2px 8px; border-radius: 20px; font-size: 11px; }
-    .skin-btn.active { border-color: #4B9EF4; box-shadow: 0 0 0 2px #bfdbfe; }
+    .skin-btn:hover { border-color: #a0aec0; }
+    .skin-btn.active { border-color: #4B9EF4; background: #ebf4ff; color: #1a56db; }
+    .skin-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.15); }
 
     .btn-secondary {
       flex: 1;
@@ -513,14 +515,12 @@
         <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">ADULTS</span>
         <input type="text" id="k-supporting" placeholder="optional — e.g. a female teacher nearby" />
       </div>
-      <div style="display:flex;align-items:center;gap:6px;padding-left:68px;margin-top:-4px;margin-bottom:4px;">
-        <span style="font-size:11px;color:#a0aec0;">Skin tone:</span>
-        <button class="skin-btn" data-tone="" data-label="none" onclick="selectSkinTone(this)" style="background:#e2e8f0;">None</button>
-        <button class="skin-btn" data-tone="light warm beige skin tone" data-label="Light" onclick="selectSkinTone(this)" style="background:#f5cba7;"></button>
-        <button class="skin-btn" data-tone="medium warm tan skin tone" data-label="Medium" onclick="selectSkinTone(this)" style="background:#c68642;"></button>
-        <button class="skin-btn" data-tone="warm golden brown skin tone" data-label="Tan" onclick="selectSkinTone(this)" style="background:#8d5524;"></button>
-        <button class="skin-btn" data-tone="deep dark brown skin tone" data-label="Dark" onclick="selectSkinTone(this)" style="background:#4a2912;"></button>
-        <span id="k-skinToneLabel" style="font-size:11px;color:#718096;margin-left:2px;"></span>
+      <div style="display:flex;align-items:center;gap:5px;padding-left:68px;margin-top:-2px;margin-bottom:6px;flex-wrap:wrap;">
+        <span style="font-size:11px;color:#a0aec0;margin-right:2px;">Adult skin:</span>
+        <button class="skin-btn" data-tone="" onclick="selectSkinTone(this)"><span class="skin-dot" style="background:#f5cba7;"></span>Light</button>
+        <button class="skin-btn" data-tone="medium warm tan skin tone" onclick="selectSkinTone(this)"><span class="skin-dot" style="background:#c68642;"></span>Medium</button>
+        <button class="skin-btn" data-tone="warm golden brown skin tone" onclick="selectSkinTone(this)"><span class="skin-dot" style="background:#8d5524;"></span>Tan</button>
+        <button class="skin-btn" data-tone="deep dark brown skin tone" onclick="selectSkinTone(this)"><span class="skin-dot" style="background:#3b1f0e;"></span>Dark</button>
       </div>
       <div class="scenario-input">
         <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">DETAILS</span>
@@ -1051,10 +1051,13 @@ If no PII found, return original text and empty found array.`
 
   function selectSkinTone(btn) {
     document.querySelectorAll(".skin-btn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    selectedSkinTone = btn.dataset.tone;
-    const label = btn.dataset.label;
-    document.getElementById("k-skinToneLabel").textContent = label !== "none" ? label : "";
+    if (selectedSkinTone === btn.dataset.tone && btn.dataset.tone !== "") {
+      // clicking the active button deselects it
+      selectedSkinTone = "";
+    } else {
+      btn.classList.add("active");
+      selectedSkinTone = btn.dataset.tone;
+    }
   }
 
   const SKIN_TONE_WORDS = ["dark","light","pale","brown","black","white","tan","olive","fair","asian","latino","latina","hispanic","south asian","east asian","african","caucasian","mixed","biracial","medium","deep","rich","warm","cool"];
