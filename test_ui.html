@@ -1369,22 +1369,22 @@ If no PII found, return original text and empty found array.`
     document.getElementById("k-crop-tool").style.display = "none";
 
     try {
-      const res = await fetch("https://fal.run/fal-ai/flux-fill/dev", {
+      const res = await fetch("https://fal.run/fal-ai/flux-kontext/dev", {
         method: "POST",
         headers: { "Authorization": `Key ${falKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           image_url: croppedDataUrl,
-          mask_url:  maskDataUrl,
-          prompt: "extend the background scene to fill the frame, same flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text",
-          num_inference_steps: 28,
-          guidance_scale: 30,
+          prompt: "Extend the background scene to fill the entire frame. Do not change the characters or their appearance. Fill any gray or empty areas with background that matches the existing scene. Same flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.",
+          num_inference_steps: 35,
+          guidance_scale: 12.0,
         }),
       });
-      if (!res.ok) throw new Error(`Fill error ${res.status}: ${await res.text()}`);
+      if (!res.ok) throw new Error(`Extend error ${res.status}: ${await res.text()}`);
       const data = await res.json();
       const url  = data?.images?.[0]?.url;
-      if (!url) throw new Error("No image returned from fill.");
-      document.getElementById("k-resultImg").src = url;
+      if (!url) throw new Error("No image returned.");
+      const imgBlob = await (await fetch(url)).blob();
+      document.getElementById("k-resultImg").src = URL.createObjectURL(imgBlob);
       document.getElementById("k-result").classList.add("visible");
     } catch(e) {
       kShowError(e.message);
