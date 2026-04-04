@@ -1212,6 +1212,9 @@ If no PII found, return original text and empty found array.`
       const url  = data?.images?.[0]?.url;
       if (!url) throw new Error("No image returned.");
 
+      // Store params for landscape re-generation in crop tool
+      _lastKontextBody = { prompt, image_url: refUrl, num_inference_steps: 35, guidance_scale: 12.0, num_images: 1 };
+
       // Fetch as blob so canvas can read it without CORS taint
       const imgBlob = await (await fetch(url)).blob();
       const blobUrl = URL.createObjectURL(imgBlob);
@@ -1240,7 +1243,8 @@ If no PII found, return original text and empty found array.`
   // ── Crop tool (pan + zoom) ────────────────────────────────────────────────
   let cs = { scale: 1, ox: 0, oy: 0, natW: 0, natH: 0 }; // crop state
 
-  let _cropDragSetup = false;
+  let _cropDragSetup   = false;
+  let _lastKontextBody = null;
   function initCropTool(imgSrc) {
     const tool  = document.getElementById("k-crop-tool");
     const frame = document.getElementById("k-crop-frame");
@@ -1347,36 +1351,24 @@ If no PII found, return original text and empty found array.`
       return;
     }
 
-    // Empty space exists — use FLUX Fill to extend the background
-    if (!falKey) { kShowError("fal.ai key required to extend."); return; }
-
-    // Build mask: white = extend here, black = keep existing image
-    const maskCanvas = document.createElement("canvas");
-    maskCanvas.width = OUTW; maskCanvas.height = OUTH;
-    const mCtx = maskCanvas.getContext("2d");
-    mCtx.fillStyle = "white";
-    mCtx.fillRect(0, 0, OUTW, OUTH);
-    mCtx.fillStyle = "black";
-    mCtx.fillRect(
-      Math.max(0, drawX), Math.max(0, drawY),
-      Math.min(OUTW, drawX + drawW) - Math.max(0, drawX),
-      Math.min(OUTH, drawY + drawH) - Math.max(0, drawY)
-    );
-    const maskDataUrl = maskCanvas.toDataURL("image/png");
+    // Empty space — re-generate at landscape ratio using stored params
+    if (!falKey)             { kShowError("fal.ai key required to extend."); return; }
+    if (!_lastKontextBody)   { kShowError("Generate an image first before cropping."); return; }
 
     kSetLoading(true);
     kClearError();
     document.getElementById("k-crop-tool").style.display = "none";
 
     try {
+      const landscapePrompt = _lastKontextBody.prompt
+        .replace("edge to edge background", "wide landscape scene, edge to edge background, full scene visible from left to right");
       const res = await fetch("https://fal.run/fal-ai/flux-kontext/dev", {
         method: "POST",
         headers: { "Authorization": `Key ${falKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          image_url: croppedDataUrl,
-          prompt: "Extend the background scene to fill the entire frame. Do not change the characters or their appearance. Fill any gray or empty areas with background that matches the existing scene. Same flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.",
-          num_inference_steps: 35,
-          guidance_scale: 12.0,
+          ..._lastKontextBody,
+          prompt:     landscapePrompt,
+          image_size: { width: 1024, height: 512 },
         }),
       });
       if (!res.ok) throw new Error(`Extend error ${res.status}: ${await res.text()}`);
@@ -1384,8 +1376,10 @@ If no PII found, return original text and empty found array.`
       const url  = data?.images?.[0]?.url;
       if (!url) throw new Error("No image returned.");
       const imgBlob = await (await fetch(url)).blob();
-      document.getElementById("k-resultImg").src = URL.createObjectURL(imgBlob);
+      const blobUrl = URL.createObjectURL(imgBlob);
+      document.getElementById("k-resultImg").src = blobUrl;
       document.getElementById("k-result").classList.add("visible");
+      initCropTool(blobUrl); // show crop tool again with the new landscape image
     } catch(e) {
       kShowError(e.message);
       document.getElementById("k-crop-tool").style.display = "block";
