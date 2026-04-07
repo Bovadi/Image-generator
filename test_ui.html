@@ -498,6 +498,8 @@
 <div class="key-bar">
   <label>FAL KEY</label>
   <input type="password" id="falKey" placeholder="paste your fal.ai key" />
+  <label style="margin-left:16px;">GOOGLE KEY</label>
+  <input type="password" id="googleKey" placeholder="paste your Google AI Studio key" />
 </div>
 
 <!-- Main layout -->
@@ -820,6 +822,16 @@
     });
   }
 
+  // Returns raw base64 string (no data: prefix) — needed for Gemini API
+  function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload  = () => resolve(r.result.split(",")[1]);
+      r.onerror = reject;
+      r.readAsDataURL(blob);
+    });
+  }
+
   function stitchImages(b1, b2) {
     return new Promise(resolve => {
       const i1 = new Image(), i2 = new Image();
@@ -944,32 +956,41 @@
       prompt = userPrompt + ". Flat illustration style, clean lines, solid flat colors, child-friendly cartoon.";
     }
 
+    const googleKey = document.getElementById("googleKey").value.trim();
+    if (!googleKey) { showEditError("Enter your Google AI Studio key at the top."); return; }
+
     setEditLoading(true);
 
     try {
-      const refDataUrl = await blobToDataUrl(imageBlob);
+      // Convert blob to base64 for Gemini
+      const base64 = await blobToBase64(imageBlob);
+      const mimeType = imageBlob.type || "image/png";
 
-      const res = await fetch("https://fal.run/fal-ai/flux-kontext/dev", {
-        method: "POST",
-        headers: { "Authorization": `Key ${falKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt,
-          image_url: refDataUrl,
-          image_size: { width: 1024, height: 1024 },
-          num_inference_steps: 35,
-          guidance_scale: 12.0,
-          num_images: 1,
-        }),
-      });
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${googleKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [
+              { inlineData: { mimeType, data: base64 } },
+              { text: prompt }
+            ]}],
+            generationConfig: { responseModalities: ["image", "text"] }
+          })
+        }
+      );
 
-      if (!res.ok) throw new Error(`fal.ai error ${res.status}: ${await res.text()}`);
+      if (!res.ok) throw new Error(`Google API error ${res.status}: ${await res.text()}`);
       const data = await res.json();
-      const url = data?.images?.[0]?.url;
-      if (!url) throw new Error("No image returned.");
+      const imgPart = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+      if (!imgPart) throw new Error("No image returned from Google.");
 
-      // Fetch result as blob
-      const resultBlob = await (await fetch(url)).blob();
-      const resultUrl = URL.createObjectURL(resultBlob);
+      // Convert base64 result to blob URL
+      const resultBase64 = imgPart.inlineData.data;
+      const resultMime   = imgPart.inlineData.mimeType || "image/png";
+      const resultBlob   = await fetch(`data:${resultMime};base64,${resultBase64}`).then(r => r.blob());
+      const resultUrl    = URL.createObjectURL(resultBlob);
 
       if (type === 'character') {
         // Replace character reference blob + thumbnail
