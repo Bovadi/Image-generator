@@ -156,19 +156,21 @@
     .btn-char {
       width: 100%;
       padding: 9px 12px;
-      background: #161616;
-      color: #fff;
-      border: none;
+      background: #fff;
+      color: #161616;
+      border: 1.5px solid #161616;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: background 0.15s, color 0.15s, transform 80ms ease;
       text-align: center;
     }
 
-    .btn-char:hover:not(:disabled) { background: #2d2d2d; }
-    .btn-char:disabled { background: #d1d5db; cursor: not-allowed; }
+    .btn-char:hover:not(:disabled) { background: #161616; color: #fff; }
+    .btn-char:active:not(:disabled) { transform: scale(0.97); }
+    .btn-char:focus-visible { outline: 2.5px solid #161616; outline-offset: 2px; }
+    .btn-char:disabled { background: #f3f4f6; color: #9ca3af; border-color: #e5e7eb; cursor: not-allowed; }
 
     /* Right side of character slot */
     .char-right {
@@ -242,18 +244,20 @@
     .btn-generate {
       width: 100%;
       padding: 13px;
-      background: #161616;
-      color: #fff;
-      border: none;
+      background: #fff;
+      color: #161616;
+      border: 1.5px solid #161616;
       border-radius: 10px;
       font-size: 15px;
       font-weight: 700;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: background 0.15s, color 0.15s, transform 80ms ease;
     }
 
-    .btn-generate:hover:not(:disabled) { background: #2d2d2d; }
-    .btn-generate:disabled { background: #d1d5db; cursor: not-allowed; }
+    .btn-generate:hover:not(:disabled) { background: #161616; color: #fff; }
+    .btn-generate:active:not(:disabled) { transform: scale(0.97); }
+    .btn-generate:focus-visible { outline: 2.5px solid #161616; outline-offset: 2px; }
+    .btn-generate:disabled { background: #f3f4f6; color: #9ca3af; border-color: #e5e7eb; cursor: not-allowed; }
 
     /* Loading */
     .loading { display: none; align-items: center; gap: 10px; padding: 4px 0; }
@@ -299,18 +303,20 @@
     .btn-top-action {
       flex: 1;
       padding: 13px;
-      background: #161616;
-      color: #fff;
-      border: none;
+      background: #fff;
+      color: #161616;
+      border: 1.5px solid #161616;
       border-radius: 10px;
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: background 0.15s, color 0.15s, transform 80ms ease;
     }
 
-    .btn-top-action:hover:not(:disabled) { background: #2d2d2d; }
-    .btn-top-action:disabled { background: #d1d5db; cursor: not-allowed; }
+    .btn-top-action:hover:not(:disabled) { background: #161616; color: #fff; }
+    .btn-top-action:active:not(:disabled) { transform: scale(0.97); }
+    .btn-top-action:focus-visible { outline: 2.5px solid #161616; outline-offset: 2px; }
+    .btn-top-action:disabled { background: #f3f4f6; color: #9ca3af; border-color: #e5e7eb; cursor: not-allowed; }
 
     /* Result image */
     .result-area {
@@ -630,8 +636,8 @@
     <textarea id="edit-prompt-input" placeholder="Describe what you'd like to change…" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;resize:vertical;min-height:80px;outline:none;"></textarea>
     <div id="edit-error" style="display:none;background:#fff5f5;border:1px solid #fed7d7;border-radius:8px;padding:8px 12px;font-size:13px;color:#c53030;margin-top:10px;"></div>
     <div style="display:flex;gap:10px;margin-top:16px;align-items:center;">
-      <button id="edit-close-btn" onclick="closeEditModal()" style="flex:1;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;background:#fff;font-size:13px;font-weight:600;color:#4a5568;cursor:pointer;">Cancel</button>
-      <button id="edit-submit-btn" onclick="submitEdit()" style="flex:2;padding:10px;background:#161616;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">Apply Edit</button>
+      <button id="edit-close-btn" onclick="closeEditModal()" style="flex:1;padding:10px;border:1.5px solid #161616;border-radius:10px;background:#fff;font-size:13px;font-weight:600;color:#161616;cursor:pointer;transition:background 0.15s,color 0.15s;" onmouseover="this.style.background='#161616';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#161616'">Cancel</button>
+      <button id="edit-submit-btn" onclick="submitEdit()" style="flex:2;padding:10px;background:#fff;color:#161616;border:1.5px solid #161616;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:background 0.15s,color 0.15s;" onmouseover="this.style.background='#161616';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#161616'">Apply Edit</button>
     </div>
     <div id="edit-loading" style="display:none;align-items:center;gap:10px;margin-top:12px;">
       <div style="width:18px;height:18px;border:2.5px solid #e5e7eb;border-top-color:#161616;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;"></div>
