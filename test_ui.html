@@ -619,12 +619,14 @@
 
   // ── Base characters ───────────────────────────────────────────────────────
   const BASE_CHARACTERS = [
-    { id: "south_asian_girl", label: "South Asian Girl", emoji: "👧🏽", refPath: "images/south_asian_girl_ref.png" },
-    { id: "cs1", label: "Coming Soon", emoji: "👤", disabled: true },
-    { id: "cs2", label: "Coming Soon", emoji: "👤", disabled: true },
-    { id: "cs3", label: "Coming Soon", emoji: "👤", disabled: true },
-    { id: "cs4", label: "Coming Soon", emoji: "👤", disabled: true },
-    { id: "cs5", label: "Coming Soon", emoji: "👤", disabled: true },
+    { id: "boy_black",        label: "Boy — Dark",    color: "#f3f0ff", refPath: "images/Boy-Black.png" },
+    { id: "boy_light_black",  label: "Boy — Medium",  color: "#fef9ec", refPath: "images/Boy-Light-Black.png" },
+    { id: "boy_tan",          label: "Boy — Tan",     color: "#fff4e6", refPath: "images/Boy-Tan.png" },
+    { id: "boy_white",        label: "Boy — Light",   color: "#f0f8ff", refPath: "images/Boy-White.png" },
+    { id: "teen_black",       label: "Teen — Dark",   color: "#f3f0ff", refPath: "images/Teen-Black.png" },
+    { id: "teen_light_black", label: "Teen — Medium", color: "#fef9ec", refPath: "images/Teen-Light-Black.png" },
+    { id: "teen_tan",         label: "Teen — Tan",    color: "#fff4e6", refPath: "images/Teen-Tan.png" },
+    { id: "teen_white",       label: "Teen — Light",  color: "#f0f8ff", refPath: "images/Teen-White.png" },
   ];
 
   // ── State ─────────────────────────────────────────────────────────────────
@@ -659,7 +661,9 @@
       const card = document.createElement("div");
       card.className = "picker-card" + (ch.disabled ? " disabled" : "");
       card.innerHTML = `
-        <div class="picker-thumb"><span style="font-size:40px;">${ch.emoji}</span></div>
+        <div class="picker-thumb" style="background:${ch.color || '#f3f4f6'};">
+          ${ch.refPath ? `<img src="${ch.refPath}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.style.display='none'" />` : `<span style="font-size:40px;">👤</span>`}
+        </div>
         <div class="picker-label">${ch.label}</div>
       `;
       if (!ch.disabled) card.onclick = () => selectCharacter(pickerTargetSlot, ch);
