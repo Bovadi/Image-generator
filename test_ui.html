@@ -613,7 +613,7 @@
     <textarea id="edit-prompt-input" placeholder="Describe what you'd like to change…" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;resize:vertical;min-height:80px;outline:none;"></textarea>
     <div id="edit-error" style="display:none;background:#fff5f5;border:1px solid #fed7d7;border-radius:8px;padding:8px 12px;font-size:13px;color:#c53030;margin-top:10px;"></div>
     <div style="display:flex;gap:10px;margin-top:16px;align-items:center;">
-      <button onclick="closeEditModal()" style="flex:1;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;background:#fff;font-size:13px;font-weight:600;color:#4a5568;cursor:pointer;">Cancel</button>
+      <button id="edit-close-btn" onclick="closeEditModal()" style="flex:1;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;background:#fff;font-size:13px;font-weight:600;color:#4a5568;cursor:pointer;">Cancel</button>
       <button id="edit-submit-btn" onclick="submitEdit()" style="flex:2;padding:10px;background:#111;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">Apply Edit</button>
     </div>
     <div id="edit-loading" style="display:none;align-items:center;gap:10px;margin-top:12px;">
@@ -899,6 +899,7 @@
     document.getElementById("edit-error").style.display = "none";
     document.getElementById("edit-loading").style.display = "none";
     document.getElementById("edit-submit-btn").disabled = false;
+    document.getElementById("edit-close-btn").textContent = "Cancel";
     document.getElementById("edit-overlay").style.display = "flex";
     setTimeout(() => document.getElementById("edit-prompt-input").focus(), 50);
   }
@@ -978,12 +979,17 @@
         img.style.display = "block";
         document.getElementById(`slot-${slotIndex}-empty`).style.display = "none";
       } else {
-        // Replace generated image
+        // Replace generated image in background
         showResult(resultUrl);
         initCropTool(resultUrl);
       }
 
-      closeEditModal();
+      // Update modal preview to latest result, stay open for further edits
+      document.getElementById("edit-modal-preview").src = resultUrl;
+      document.getElementById("edit-prompt-input").value = "";
+      document.getElementById("edit-modal-sub").textContent = "Edit applied. Make another change or close.";
+      document.getElementById("edit-close-btn").textContent = "Close";
+      setTimeout(() => document.getElementById("edit-prompt-input").focus(), 50);
     } catch(e) {
       showEditError(e.message);
     } finally {
