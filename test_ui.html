@@ -605,10 +605,12 @@
 
 <!-- ── Edit Modal ── -->
 <div id="edit-overlay" onclick="editOverlayClick(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1001;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:20px;padding:28px;width:480px;max-width:95vw;box-shadow:0 24px 64px rgba(0,0,0,0.3);">
-    <div id="edit-modal-title" style="font-size:17px;font-weight:700;color:#111;margin-bottom:6px;"></div>
+  <div style="background:#fff;border-radius:20px;padding:28px;width:560px;max-width:95vw;box-shadow:0 24px 64px rgba(0,0,0,0.3);">
+    <div id="edit-modal-title" style="font-size:17px;font-weight:700;color:#111;margin-bottom:4px;"></div>
     <div id="edit-modal-sub" style="font-size:13px;color:#6b7280;margin-bottom:16px;"></div>
-    <textarea id="edit-prompt-input" placeholder="Describe what you'd like to change…" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;resize:vertical;min-height:90px;outline:none;"></textarea>
+    <img id="edit-modal-preview" src="" alt="" style="display:none;width:100%;max-height:320px;object-fit:contain;border-radius:12px;border:1px solid #e5e7eb;background:#f9fafb;margin-bottom:16px;" />
+    <label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:6px;">WHAT WOULD YOU LIKE TO EDIT?</label>
+    <textarea id="edit-prompt-input" placeholder="Describe what you'd like to change…" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;resize:vertical;min-height:80px;outline:none;"></textarea>
     <div id="edit-error" style="display:none;background:#fff5f5;border:1px solid #fed7d7;border-radius:8px;padding:8px 12px;font-size:13px;color:#c53030;margin-top:10px;"></div>
     <div style="display:flex;gap:10px;margin-top:16px;align-items:center;">
       <button onclick="closeEditModal()" style="flex:1;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;background:#fff;font-size:13px;font-weight:600;color:#4a5568;cursor:pointer;">Cancel</button>
@@ -870,26 +872,34 @@
   let _editContext = null; // { type: 'character'|'image', slotIndex? }
 
   function openEditModal(type, slotIndex) {
+    const preview = document.getElementById("edit-modal-preview");
+
     if (type === 'character') {
       const slot = chars[slotIndex];
       if (!slot.charId) { alert("Select a character first."); return; }
       document.getElementById("edit-modal-title").textContent = "Edit Character";
       document.getElementById("edit-modal-sub").textContent =
-        "Describe changes to this character only — clothing, hair, expression, accessories. The scene will not be affected.";
+        "Changes apply to this character only — clothing, hair, expression, accessories.";
+      // Show character image (full-res path)
+      const ch = BASE_CHARACTERS.find(c => c.id === slot.charId);
+      if (ch) { preview.src = ch.refPath; preview.style.display = "block"; }
+      else { preview.style.display = "none"; }
     } else {
       const img = document.getElementById("gen-result-img");
       if (!img.src || img.style.display === "none") { alert("Generate an image first."); return; }
       document.getElementById("edit-modal-title").textContent = "Edit Image";
       document.getElementById("edit-modal-sub").textContent =
         "Describe what you'd like to change in the generated image.";
+      preview.src = img.src;
+      preview.style.display = "block";
     }
+
     _editContext = { type, slotIndex };
     document.getElementById("edit-prompt-input").value = "";
     document.getElementById("edit-error").style.display = "none";
     document.getElementById("edit-loading").style.display = "none";
     document.getElementById("edit-submit-btn").disabled = false;
-    const overlay = document.getElementById("edit-overlay");
-    overlay.style.display = "flex";
+    document.getElementById("edit-overlay").style.display = "flex";
     setTimeout(() => document.getElementById("edit-prompt-input").focus(), 50);
   }
 
