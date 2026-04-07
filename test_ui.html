@@ -146,7 +146,7 @@
     .char-image-box img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
     }
 
     .btn-char {
@@ -662,7 +662,7 @@
       card.className = "picker-card" + (ch.disabled ? " disabled" : "");
       card.innerHTML = `
         <div class="picker-thumb" style="background:${ch.color || '#f3f4f6'};">
-          ${ch.refPath ? `<img src="${ch.refPath}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" onerror="this.style.display='none'" />` : `<span style="font-size:40px;">👤</span>`}
+          ${ch.refPath ? `<img src="${ch.refPath}" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none'" />` : `<span style="font-size:40px;">👤</span>`}
         </div>
         <div class="picker-label">${ch.label}</div>
       `;
@@ -686,10 +686,33 @@
     let refBlob = null;
     try {
       const res = await fetch(ch.refPath);
-      if (res.ok) refBlob = await res.blob();
+      if (res.ok) {
+        refBlob = await res.blob();
+        // Swap to small canvas thumbnail for display (full-res blob kept for generation)
+        img.src = await makeThumb(refBlob, 155, 170);
+      }
     } catch(e) {}
 
     chars[slotIndex] = { charId: ch.id, label: ch.label, refBlob };
+  }
+
+  function makeThumb(blob, w, h) {
+    return new Promise(resolve => {
+      const url = URL.createObjectURL(blob);
+      const i = new Image();
+      i.onload = () => {
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        const ctx = c.getContext("2d");
+        // scale to fit (contain) within w×h
+        const scale = Math.min(w / i.naturalWidth, h / i.naturalHeight);
+        const dw = i.naturalWidth * scale, dh = i.naturalHeight * scale;
+        ctx.drawImage(i, (w - dw) / 2, (h - dh) / 2, dw, dh);
+        URL.revokeObjectURL(url);
+        resolve(c.toDataURL("image/jpeg", 0.7));
+      };
+      i.src = url;
+    });
   }
 
   // ── Generate ──────────────────────────────────────────────────────────────
