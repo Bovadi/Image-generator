@@ -9,14 +9,30 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #d0e8f7 0%, #c5d8f0 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-wrapper {
       background: #fff;
-      color: #111;
+      border-radius: 20px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+      width: 100%;
+      max-width: 1200px;
+      overflow: hidden;
     }
 
     /* ── Page header ── */
     .page-header {
       padding: 20px 32px 16px;
       border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
     .page-header h1 {
@@ -24,6 +40,17 @@
       font-weight: 700;
       color: #111;
     }
+
+    .modal-close {
+      font-size: 20px;
+      color: #9ca3af;
+      background: none;
+      border: none;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-close:hover { color: #374151; }
 
     /* FAL key row — subtle, collapsible */
     .key-bar {
@@ -60,7 +87,6 @@
     /* ── Main layout ── */
     .layout {
       display: flex;
-      min-height: calc(100vh - 90px);
     }
 
     /* Left panel */
@@ -460,9 +486,12 @@
 </head>
 <body>
 
+<div class="modal-wrapper">
+
 <!-- Header -->
 <div class="page-header">
   <h1>Image Generator</h1>
+  <button class="modal-close" onclick="document.querySelector('.modal-wrapper').style.opacity=0.4">✕</button>
 </div>
 
 <!-- FAL key bar -->
@@ -571,6 +600,8 @@
   </div><!-- end right-panel -->
 
 </div><!-- end layout -->
+
+</div><!-- end modal-wrapper -->
 
 <!-- ── Character Picker Overlay ── -->
 <div id="picker-overlay" onclick="pickerBgClick(event)">
