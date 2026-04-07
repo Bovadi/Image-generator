@@ -722,7 +722,6 @@
 
     const char1 = chars[0];
     if (!char1.charId) { showError("Select a character for the first slot."); return; }
-    if (!char1.refBlob) { showError("Character image not loaded — please re-select the character."); return; }
 
     const char1Action = document.getElementById("slot-0-action").value.trim();
     if (!char1Action) { showError("Describe what the first character is doing."); return; }
@@ -733,9 +732,27 @@
     const objects = document.getElementById("gen-objects").value.trim();
     const details = document.getElementById("gen-details").value.trim();
 
+    // Fetch any blobs that haven't loaded yet
+    const ch1Data = BASE_CHARACTERS.find(c => c.id === char1.charId);
+    if (!char1.refBlob && ch1Data) {
+      setGenLoading(true, "Loading character image…");
+      try {
+        const r = await fetch(ch1Data.refPath);
+        if (r.ok) chars[0].refBlob = await r.blob();
+      } catch(e) {}
+    }
+    if (!chars[0].refBlob) { showError("Could not load character image."); setGenLoading(false); return; }
+
     const char2       = chars[1];
     const char2Action = document.getElementById("slot-1-action").value.trim();
-    const hasChar2    = !!(char2.charId && char2.refBlob && char2Action);
+    const ch2Data     = BASE_CHARACTERS.find(c => c.id === char2.charId);
+    if (char2.charId && !char2.refBlob && ch2Data) {
+      try {
+        const r = await fetch(ch2Data.refPath);
+        if (r.ok) chars[1].refBlob = await r.blob();
+      } catch(e) {}
+    }
+    const hasChar2 = !!(char2.charId && chars[1].refBlob && char2Action);
 
     const objectsClause = objects ? `, ${objects} clearly visible` : "";
     const detailsStr    = details ? `${details}. ` : "";
