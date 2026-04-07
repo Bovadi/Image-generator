@@ -673,26 +673,48 @@
 
   async function selectCharacter(slotIndex, ch) {
     closePicker();
+
+    // 1. Show image immediately in slot using file path (no wait)
+    const img   = document.getElementById(`slot-${slotIndex}-img`);
+    const empty = document.getElementById(`slot-${slotIndex}-empty`);
+    const name  = document.getElementById(`slot-${slotIndex}-name`);
+    const thumb = document.getElementById(`slot-${slotIndex}-thumb`);
+
+    name.textContent = ch.label;
+    thumb.classList.add("has-char");
+    img.src = ch.refPath;
+    img.style.display = "block";
+    empty.style.display = "none";
+
+    // 2. Fetch full-res blob for generation (background)
     let refBlob = null;
     try {
       const res = await fetch(ch.refPath);
-      if (res.ok) refBlob = await res.blob();
+      if (res.ok) {
+        refBlob = await res.blob();
+        // 3. Swap slot display to a small canvas thumbnail (keeps UI lightweight)
+        const thumbBlob = await makeThumbnail(refBlob, 144, 176);
+        img.src = URL.createObjectURL(thumbBlob);
+      }
     } catch(e) {}
 
     chars[slotIndex] = { charId: ch.id, label: ch.label, refBlob };
+  }
 
-    const box   = document.getElementById(`slot-${slotIndex}-box`);
-    const img   = document.getElementById(`slot-${slotIndex}-img`);
-    const empty = document.getElementById(`slot-${slotIndex}-empty`);
-
-    if (refBlob) {
-      img.src = URL.createObjectURL(refBlob);
-      img.style.display = "block";
-      empty.style.display = "none";
-    } else {
-      empty.textContent = ch.emoji;
-      empty.style.fontSize = "48px";
-    }
+  // Creates a downscaled canvas thumbnail for display only
+  function makeThumbnail(blob, w, h) {
+    return new Promise(resolve => {
+      const src = URL.createObjectURL(blob);
+      const i = new Image();
+      i.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(i, 0, 0, w, h);
+        URL.revokeObjectURL(src);
+        canvas.toBlob(b => resolve(b), "image/jpeg", 0.85);
+      };
+      i.src = src;
+    });
   }
 
   // ── Generate ──────────────────────────────────────────────────────────────
