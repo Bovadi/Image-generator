@@ -514,7 +514,7 @@
           <span id="slot-0-empty">Image with<br>character</span>
         </div>
         <button class="btn-char" onclick="openPicker(0)">Change Character</button>
-        <button class="btn-char" disabled>Edit Character</button>
+        <button class="btn-char" onclick="openEditModal('character', 0)">Edit Character</button>
       </div>
       <div class="char-right">
         <div class="char-title">First character</div>
@@ -531,7 +531,7 @@
           <span id="slot-1-empty">Image with<br>character</span>
         </div>
         <button class="btn-char" onclick="openPicker(1)">Change Character</button>
-        <button class="btn-char" disabled>Edit Character</button>
+        <button class="btn-char" onclick="openEditModal('character', 1)">Edit Character</button>
       </div>
       <div class="char-right">
         <div class="char-title">Second character</div>
@@ -572,7 +572,7 @@
 
     <div class="top-actions">
       <button class="btn-top-action" id="regen-btn" disabled onclick="generateImage()">Re-Generate</button>
-      <button class="btn-top-action" disabled>Edit Image</button>
+      <button class="btn-top-action" id="edit-image-btn" disabled onclick="openEditModal('image')">Edit Image</button>
     </div>
 
     <div class="result-area" id="result-area">
@@ -602,6 +602,24 @@
 </div><!-- end layout -->
 
 </div><!-- end modal-wrapper -->
+
+<!-- ── Edit Modal ── -->
+<div id="edit-overlay" onclick="editOverlayClick(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1001;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:20px;padding:28px;width:480px;max-width:95vw;box-shadow:0 24px 64px rgba(0,0,0,0.3);">
+    <div id="edit-modal-title" style="font-size:17px;font-weight:700;color:#111;margin-bottom:6px;"></div>
+    <div id="edit-modal-sub" style="font-size:13px;color:#6b7280;margin-bottom:16px;"></div>
+    <textarea id="edit-prompt-input" placeholder="Describe what you'd like to change…" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;resize:vertical;min-height:90px;outline:none;"></textarea>
+    <div id="edit-error" style="display:none;background:#fff5f5;border:1px solid #fed7d7;border-radius:8px;padding:8px 12px;font-size:13px;color:#c53030;margin-top:10px;"></div>
+    <div style="display:flex;gap:10px;margin-top:16px;align-items:center;">
+      <button onclick="closeEditModal()" style="flex:1;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;background:#fff;font-size:13px;font-weight:600;color:#4a5568;cursor:pointer;">Cancel</button>
+      <button id="edit-submit-btn" onclick="submitEdit()" style="flex:2;padding:10px;background:#111;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">Apply Edit</button>
+    </div>
+    <div id="edit-loading" style="display:none;align-items:center;gap:10px;margin-top:12px;">
+      <div style="width:18px;height:18px;border:2.5px solid #e5e7eb;border-top-color:#111;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;"></div>
+      <span style="font-size:13px;color:#6b7280;font-weight:600;">Applying edit — ~15 seconds</span>
+    </div>
+  </div>
+</div>
 
 <!-- ── Character Picker Overlay ── -->
 <div id="picker-overlay" onclick="pickerBgClick(event)">
@@ -781,6 +799,7 @@
       showResult(blobUrl);
       initCropTool(blobUrl);
       document.getElementById("regen-btn").disabled = false;
+      document.getElementById("edit-image-btn").disabled = false;
 
     } catch(e) {
       showError(e.message);
@@ -845,6 +864,153 @@
 
   function clearError() {
     document.getElementById("gen-error").classList.remove("visible");
+  }
+
+  // ── Edit modal ────────────────────────────────────────────────────────────
+  let _editContext = null; // { type: 'character'|'image', slotIndex? }
+
+  function openEditModal(type, slotIndex) {
+    if (type === 'character') {
+      const slot = chars[slotIndex];
+      if (!slot.charId) { alert("Select a character first."); return; }
+      document.getElementById("edit-modal-title").textContent = "Edit Character";
+      document.getElementById("edit-modal-sub").textContent =
+        "Describe changes to this character only — clothing, hair, expression, accessories. The scene will not be affected.";
+    } else {
+      const img = document.getElementById("gen-result-img");
+      if (!img.src || img.style.display === "none") { alert("Generate an image first."); return; }
+      document.getElementById("edit-modal-title").textContent = "Edit Image";
+      document.getElementById("edit-modal-sub").textContent =
+        "Describe what you'd like to change in the generated image.";
+    }
+    _editContext = { type, slotIndex };
+    document.getElementById("edit-prompt-input").value = "";
+    document.getElementById("edit-error").style.display = "none";
+    document.getElementById("edit-loading").style.display = "none";
+    document.getElementById("edit-submit-btn").disabled = false;
+    const overlay = document.getElementById("edit-overlay");
+    overlay.style.display = "flex";
+    setTimeout(() => document.getElementById("edit-prompt-input").focus(), 50);
+  }
+
+  function closeEditModal() {
+    document.getElementById("edit-overlay").style.display = "none";
+    _editContext = null;
+  }
+
+  function editOverlayClick(e) {
+    if (e.target === document.getElementById("edit-overlay")) closeEditModal();
+  }
+
+  async function submitEdit() {
+    const falKey = document.getElementById("falKey").value.trim();
+    if (!falKey) { showEditError("Enter your fal.ai key at the top."); return; }
+
+    const userPrompt = document.getElementById("edit-prompt-input").value.trim();
+    if (!userPrompt) { showEditError("Please describe what you'd like to change."); return; }
+
+    const { type, slotIndex } = _editContext;
+
+    let imageBlob, prompt;
+
+    if (type === 'character') {
+      const slot = chars[slotIndex];
+      if (!slot.refBlob) {
+        // Try to reload
+        const ch = BASE_CHARACTERS.find(c => c.id === slot.charId);
+        if (ch) try { slot.refBlob = await imgToBlob(ch.refPath); } catch(e) {}
+      }
+      if (!slot.refBlob) { showEditError("Character image not available."); return; }
+      imageBlob = slot.refBlob;
+      prompt = `Edit only this character's appearance: ${userPrompt}. Do not change the background, scene, or any other element. Keep everything else about the character identical — same pose, same proportions, same style. Flat illustration style, clean lines, solid flat colors.`;
+    } else {
+      // Get current generated image as blob
+      const imgEl = document.getElementById("gen-result-img");
+      if (!imgEl.src) { showEditError("No generated image found."); return; }
+      try {
+        imageBlob = await srcToBlob(imgEl.src);
+      } catch(e) { showEditError("Could not load the generated image."); return; }
+      prompt = userPrompt + ". Flat illustration style, clean lines, solid flat colors, child-friendly cartoon.";
+    }
+
+    setEditLoading(true);
+
+    try {
+      const refDataUrl = await blobToDataUrl(imageBlob);
+
+      const res = await fetch("https://fal.run/fal-ai/flux-kontext/dev", {
+        method: "POST",
+        headers: { "Authorization": `Key ${falKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt,
+          image_url: refDataUrl,
+          image_size: { width: 1024, height: 1024 },
+          num_inference_steps: 35,
+          guidance_scale: 12.0,
+          num_images: 1,
+        }),
+      });
+
+      if (!res.ok) throw new Error(`fal.ai error ${res.status}: ${await res.text()}`);
+      const data = await res.json();
+      const url = data?.images?.[0]?.url;
+      if (!url) throw new Error("No image returned.");
+
+      // Fetch result as blob
+      const resultBlob = await (await fetch(url)).blob();
+      const resultUrl = URL.createObjectURL(resultBlob);
+
+      if (type === 'character') {
+        // Replace character reference blob + thumbnail
+        chars[slotIndex].refBlob = resultBlob;
+        const img = document.getElementById(`slot-${slotIndex}-img`);
+        img.src = resultUrl;
+        img.style.display = "block";
+        document.getElementById(`slot-${slotIndex}-empty`).style.display = "none";
+      } else {
+        // Replace generated image
+        showResult(resultUrl);
+        initCropTool(resultUrl);
+      }
+
+      closeEditModal();
+    } catch(e) {
+      showEditError(e.message);
+    } finally {
+      setEditLoading(false);
+    }
+  }
+
+  function setEditLoading(on) {
+    document.getElementById("edit-loading").style.display = on ? "flex" : "none";
+    document.getElementById("edit-submit-btn").disabled = on;
+    document.getElementById("edit-submit-btn").textContent = on ? "Applying…" : "Apply Edit";
+  }
+
+  function showEditError(msg) {
+    const el = document.getElementById("edit-error");
+    el.textContent = msg;
+    el.style.display = "block";
+  }
+
+  // Convert an img src (blob URL or data URL) to a Blob
+  function srcToBlob(src) {
+    return new Promise((resolve, reject) => {
+      if (src.startsWith("blob:") || src.startsWith("data:")) {
+        // Already a blob/data URL — draw to canvas to get blob
+        const i = new Image();
+        i.onload = () => {
+          const c = document.createElement("canvas");
+          c.width = i.naturalWidth; c.height = i.naturalHeight;
+          c.getContext("2d").drawImage(i, 0, 0);
+          c.toBlob(b => b ? resolve(b) : reject(new Error("toBlob failed")), "image/png");
+        };
+        i.onerror = reject;
+        i.src = src;
+      } else {
+        fetch(src).then(r => r.blob()).then(resolve).catch(reject);
+      }
+    });
   }
 
   // ── Crop tool ─────────────────────────────────────────────────────────────
