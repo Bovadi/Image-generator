@@ -4,11 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BIP Visualized — Image Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    *, *::before, *::after { font-family: 'Inter', sans-serif; }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: linear-gradient(135deg, #d0e8f7 0%, #c5d8f0 100%);
       min-height: 100vh;
       display: flex;
@@ -38,7 +42,7 @@
     .page-header h1 {
       font-size: 20px;
       font-weight: 700;
-      color: #111;
+      color: #161616;
     }
 
     .modal-close {
@@ -50,7 +54,7 @@
       line-height: 1;
     }
 
-    .modal-close:hover { color: #374151; }
+    .modal-close:hover { color: #2d2d2d; }
 
     /* FAL key row — subtle, collapsible */
     .key-bar {
@@ -77,7 +81,7 @@
       padding: 5px 10px;
       font-size: 12px;
       font-family: monospace;
-      color: #374151;
+      color: #2d2d2d;
       outline: none;
       background: #fff;
     }
@@ -152,7 +156,7 @@
     .btn-char {
       width: 100%;
       padding: 9px 12px;
-      background: #111;
+      background: #161616;
       color: #fff;
       border: none;
       border-radius: 8px;
@@ -163,7 +167,7 @@
       text-align: center;
     }
 
-    .btn-char:hover:not(:disabled) { background: #374151; }
+    .btn-char:hover:not(:disabled) { background: #2d2d2d; }
     .btn-char:disabled { background: #d1d5db; cursor: not-allowed; }
 
     /* Right side of character slot */
@@ -177,7 +181,7 @@
     .char-title {
       font-size: 18px;
       font-weight: 700;
-      color: #111;
+      color: #161616;
     }
 
     .char-desc {
@@ -193,7 +197,7 @@
       padding: 10px 12px;
       font-size: 14px;
       font-family: inherit;
-      color: #111;
+      color: #161616;
       background: #fff;
       outline: none;
       resize: vertical;
@@ -214,7 +218,7 @@
     .scene-field label {
       display: block;
       font-size: 14px;
-      color: #111;
+      color: #161616;
       margin-bottom: 6px;
     }
 
@@ -225,7 +229,7 @@
       padding: 9px 12px;
       font-size: 14px;
       font-family: inherit;
-      color: #111;
+      color: #161616;
       outline: none;
       background: #fff;
       transition: border-color 0.15s;
@@ -238,7 +242,7 @@
     .btn-generate {
       width: 100%;
       padding: 13px;
-      background: #111;
+      background: #161616;
       color: #fff;
       border: none;
       border-radius: 10px;
@@ -248,7 +252,7 @@
       transition: background 0.15s;
     }
 
-    .btn-generate:hover:not(:disabled) { background: #374151; }
+    .btn-generate:hover:not(:disabled) { background: #2d2d2d; }
     .btn-generate:disabled { background: #d1d5db; cursor: not-allowed; }
 
     /* Loading */
@@ -257,12 +261,23 @@
     .spinner {
       width: 18px; height: 18px;
       border: 2px solid #e5e7eb;
-      border-top-color: #111;
+      border-top-color: #161616;
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
       flex-shrink: 0;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    @keyframes modal-backdrop-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes modal-panel-in {
+      from { opacity: 0; transform: scale(0.97) translateY(6px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .overlay-anim { animation: modal-backdrop-in 180ms ease forwards; }
+    .overlay-anim > div { animation: modal-panel-in 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
     .error-msg {
       display: none;
@@ -284,7 +299,7 @@
     .btn-top-action {
       flex: 1;
       padding: 13px;
-      background: #111;
+      background: #161616;
       color: #fff;
       border: none;
       border-radius: 10px;
@@ -294,7 +309,7 @@
       transition: background 0.15s;
     }
 
-    .btn-top-action:hover:not(:disabled) { background: #374151; }
+    .btn-top-action:hover:not(:disabled) { background: #2d2d2d; }
     .btn-top-action:disabled { background: #d1d5db; cursor: not-allowed; }
 
     /* Result image */
@@ -368,7 +383,7 @@
       background: #fff;
       font-size: 13px;
       font-weight: 600;
-      color: #374151;
+      color: #2d2d2d;
       cursor: pointer;
       transition: border-color 0.15s;
     }
@@ -441,7 +456,7 @@
       transition: all 0.15s;
     }
 
-    .picker-card:hover:not(.disabled) { border-color: #111; background: #f9fafb; }
+    .picker-card:hover:not(.disabled) { border-color: #161616; background: #f9fafb; }
     .picker-card.disabled { opacity: 0.4; cursor: not-allowed; }
 
     .picker-thumb {
@@ -462,7 +477,7 @@
     .picker-label {
       font-size: 12px;
       font-weight: 600;
-      color: #374151;
+      color: #2d2d2d;
     }
 
     .picker-footer {
@@ -477,7 +492,7 @@
       background: #fff;
       font-size: 13px;
       font-weight: 600;
-      color: #374151;
+      color: #2d2d2d;
       cursor: pointer;
     }
 
@@ -606,9 +621,9 @@
 </div><!-- end modal-wrapper -->
 
 <!-- ── Edit Modal ── -->
-<div id="edit-overlay" onclick="editOverlayClick(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1001;align-items:center;justify-content:center;">
+<div id="edit-overlay" onclick="editOverlayClick(event)" class="overlay-anim" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1001;align-items:center;justify-content:center;">
   <div style="background:#fff;border-radius:20px;padding:28px;width:560px;max-width:95vw;box-shadow:0 24px 64px rgba(0,0,0,0.3);">
-    <div id="edit-modal-title" style="font-size:17px;font-weight:700;color:#111;margin-bottom:4px;"></div>
+    <div id="edit-modal-title" style="font-size:17px;font-weight:700;color:#161616;margin-bottom:4px;"></div>
     <div id="edit-modal-sub" style="font-size:13px;color:#6b7280;margin-bottom:16px;"></div>
     <img id="edit-modal-preview" src="" alt="" style="display:none;width:100%;max-height:320px;object-fit:contain;border-radius:12px;border:1px solid #e5e7eb;background:#f9fafb;margin-bottom:16px;" />
     <label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:6px;">WHAT WOULD YOU LIKE TO EDIT?</label>
@@ -616,17 +631,17 @@
     <div id="edit-error" style="display:none;background:#fff5f5;border:1px solid #fed7d7;border-radius:8px;padding:8px 12px;font-size:13px;color:#c53030;margin-top:10px;"></div>
     <div style="display:flex;gap:10px;margin-top:16px;align-items:center;">
       <button id="edit-close-btn" onclick="closeEditModal()" style="flex:1;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;background:#fff;font-size:13px;font-weight:600;color:#4a5568;cursor:pointer;">Cancel</button>
-      <button id="edit-submit-btn" onclick="submitEdit()" style="flex:2;padding:10px;background:#111;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">Apply Edit</button>
+      <button id="edit-submit-btn" onclick="submitEdit()" style="flex:2;padding:10px;background:#161616;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">Apply Edit</button>
     </div>
     <div id="edit-loading" style="display:none;align-items:center;gap:10px;margin-top:12px;">
-      <div style="width:18px;height:18px;border:2.5px solid #e5e7eb;border-top-color:#111;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;"></div>
+      <div style="width:18px;height:18px;border:2.5px solid #e5e7eb;border-top-color:#161616;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;"></div>
       <span style="font-size:13px;color:#6b7280;font-weight:600;">Applying edit — ~15 seconds</span>
     </div>
   </div>
 </div>
 
 <!-- ── Character Picker Overlay ── -->
-<div id="picker-overlay" onclick="pickerBgClick(event)">
+<div id="picker-overlay" class="overlay-anim" onclick="pickerBgClick(event)">
   <div class="picker-modal">
     <h2>Select a Character</h2>
     <p>Choose a base character for this slot</p>
