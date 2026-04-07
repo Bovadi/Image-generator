@@ -764,7 +764,7 @@
       prompt = `${detailsStr}${location}. The child from the reference image is ${char1Action}${objectsClause}. Only one character in the scene. Full body visible from head to toe. Keep the child's face, hair, skin tone, and clothing identical to the reference. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.`;
     }
 
-    setLoading(true);
+    setGenLoading(true, "Generating — ~15–30 seconds");
     clearError();
 
     try {
@@ -803,7 +803,7 @@
     } catch(e) {
       showError(e.message);
     } finally {
-      setLoading(false);
+      setGenLoading(false);
     }
   }
 
