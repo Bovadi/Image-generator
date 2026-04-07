@@ -674,44 +674,33 @@
   async function selectCharacter(slotIndex, ch) {
     closePicker();
 
-    // 1. Show image immediately in slot using file path (no wait)
+    // Show image immediately in slot
     const img   = document.getElementById(`slot-${slotIndex}-img`);
     const empty = document.getElementById(`slot-${slotIndex}-empty`);
-
     img.src = ch.refPath;
     img.style.display = "block";
     empty.style.display = "none";
 
-    // 2. Fetch full-res blob in background for generation
-    let refBlob = null;
+    // Load as blob in background using canvas (works for file:// URLs)
+    chars[slotIndex] = { charId: ch.id, label: ch.label, refBlob: null };
     try {
-      const res = await fetch(ch.refPath);
-      if (res.ok) {
-        refBlob = await res.blob();
-        // Swap to small canvas thumbnail for display (full-res blob kept for generation)
-        img.src = await makeThumb(refBlob, 155, 170);
-      }
+      const blob = await imgToBlob(ch.refPath);
+      chars[slotIndex].refBlob = blob;
     } catch(e) {}
-
-    chars[slotIndex] = { charId: ch.id, label: ch.label, refBlob };
   }
 
-  function makeThumb(blob, w, h) {
-    return new Promise(resolve => {
-      const url = URL.createObjectURL(blob);
+  // Load a local image path into a Blob via canvas (avoids fetch() CORS on file://)
+  function imgToBlob(src) {
+    return new Promise((resolve, reject) => {
       const i = new Image();
       i.onload = () => {
         const c = document.createElement("canvas");
-        c.width = w; c.height = h;
-        const ctx = c.getContext("2d");
-        // scale to fit (contain) within w×h
-        const scale = Math.min(w / i.naturalWidth, h / i.naturalHeight);
-        const dw = i.naturalWidth * scale, dh = i.naturalHeight * scale;
-        ctx.drawImage(i, (w - dw) / 2, (h - dh) / 2, dw, dh);
-        URL.revokeObjectURL(url);
-        resolve(c.toDataURL("image/jpeg", 0.7));
+        c.width = i.naturalWidth; c.height = i.naturalHeight;
+        c.getContext("2d").drawImage(i, 0, 0);
+        c.toBlob(b => b ? resolve(b) : reject(new Error("toBlob failed")), "image/png");
       };
-      i.src = url;
+      i.onerror = () => reject(new Error("Image load failed"));
+      i.src = src;
     });
   }
 
@@ -732,25 +721,18 @@
     const objects = document.getElementById("gen-objects").value.trim();
     const details = document.getElementById("gen-details").value.trim();
 
-    // Fetch any blobs that haven't loaded yet
+    // Load blobs on-demand if background load hasn't finished
     const ch1Data = BASE_CHARACTERS.find(c => c.id === char1.charId);
-    if (!char1.refBlob && ch1Data) {
-      setGenLoading(true, "Loading character image…");
-      try {
-        const r = await fetch(ch1Data.refPath);
-        if (r.ok) chars[0].refBlob = await r.blob();
-      } catch(e) {}
+    if (!chars[0].refBlob && ch1Data) {
+      try { chars[0].refBlob = await imgToBlob(ch1Data.refPath); } catch(e) {}
     }
-    if (!chars[0].refBlob) { showError("Could not load character image."); setGenLoading(false); return; }
+    if (!chars[0].refBlob) { showError("Could not load character image."); return; }
 
     const char2       = chars[1];
     const char2Action = document.getElementById("slot-1-action").value.trim();
     const ch2Data     = BASE_CHARACTERS.find(c => c.id === char2.charId);
-    if (char2.charId && !char2.refBlob && ch2Data) {
-      try {
-        const r = await fetch(ch2Data.refPath);
-        if (r.ok) chars[1].refBlob = await r.blob();
-      } catch(e) {}
+    if (char2.charId && !chars[1].refBlob && ch2Data) {
+      try { chars[1].refBlob = await imgToBlob(ch2Data.refPath); } catch(e) {}
     }
     const hasChar2 = !!(char2.charId && chars[1].refBlob && char2Action);
 
@@ -764,7 +746,7 @@
       prompt = `${detailsStr}${location}. The child from the reference image is ${char1Action}${objectsClause}. Only one character in the scene. Full body visible from head to toe. Keep the child's face, hair, skin tone, and clothing identical to the reference. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.`;
     }
 
-    setGenLoading(true, "Generating — ~15–30 seconds");
+    setLoading(true);
     clearError();
 
     try {
@@ -803,7 +785,7 @@
     } catch(e) {
       showError(e.message);
     } finally {
-      setGenLoading(false);
+      setLoading(false);
     }
   }
 
