@@ -12,27 +12,36 @@
       background: linear-gradient(135deg, #d0e8f7 0%, #c5d8f0 100%);
       min-height: 100vh;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       padding: 24px;
     }
 
-    /* ── Modal card ── */
     .modal {
       background: rgba(255,255,255,0.96);
       backdrop-filter: blur(20px);
       border-radius: 24px;
       box-shadow: 0 24px 64px rgba(0,0,0,0.18);
       width: 100%;
-      max-width: 720px;
-      padding: 32px 32px 28px;
+      max-width: 1100px;
+      padding: 28px 32px;
       position: relative;
     }
 
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a202c;
+    }
+
     .modal-close {
-      position: absolute;
-      top: 16px;
-      right: 20px;
       font-size: 20px;
       color: #a0aec0;
       cursor: pointer;
@@ -41,18 +50,15 @@
       line-height: 1;
     }
 
-    .modal-close:hover { color: #4a5568; }
-
-    /* ── Config row (key) ── */
     .key-row {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 20px;
       background: #f7fafc;
       border: 1px solid #e2e8f0;
       border-radius: 10px;
       padding: 8px 14px;
+      margin-bottom: 20px;
     }
 
     .key-row label {
@@ -72,283 +78,206 @@
       outline: none;
     }
 
-    /* ── Title ── */
-    h1 {
-      text-align: center;
-      font-size: 20px;
-      font-weight: 700;
-      color: #1a202c;
-      margin-bottom: 16px;
+    /* Two-column layout */
+    .two-col {
+      display: flex;
+      gap: 24px;
     }
 
-    /* ── Filter toggles ── */
-    .filters {
+    .left-panel {
+      width: 380px;
+      flex-shrink: 0;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 20px;
+      gap: 10px;
     }
 
-    .toggle-group {
+    .right-panel {
+      flex: 1;
       display: flex;
-      gap: 8px;
+      flex-direction: column;
+      gap: 10px;
     }
 
-    .toggle-btn {
-      padding: 8px 28px;
-      border-radius: 99px;
-      border: 1.5px solid #d0d8e8;
-      background: #fff;
-      font-size: 14px;
-      font-weight: 600;
-      color: #718096;
-      cursor: pointer;
-      transition: all 0.15s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .toggle-btn:hover { border-color: #4B9EF4; color: #4B9EF4; }
-
-    .toggle-btn.active {
-      background: #4B9EF4;
-      border-color: #4B9EF4;
-      color: #fff;
-    }
-
-    /* ── Section label ── */
-    h2 {
-      text-align: center;
-      font-size: 16px;
-      font-weight: 700;
-      color: #1a202c;
-      margin-bottom: 14px;
-    }
-
-    /* ── Character scroll ── */
-    .char-scroll {
-      display: flex;
-      gap: 12px;
-      overflow-x: auto;
-      padding-bottom: 8px;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      margin-bottom: 20px;
-    }
-
-    .char-scroll::-webkit-scrollbar { height: 4px; }
-    .char-scroll::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 99px; }
-
-    .char-card {
-      flex: 0 0 130px;
-      scroll-snap-align: start;
-      border: 2.5px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 12px 8px 10px;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.15s;
-      background: #fff;
-      position: relative;
-    }
-
-    .char-card:hover { border-color: #4B9EF4; background: #f0f8ff; }
-
-    .char-card.selected {
-      border-color: #4B9EF4;
-      background: #f0f8ff;
-    }
-
-    .char-card.selected .check-badge {
-      display: flex;
-    }
-
-    .check-badge {
-      display: none;
-      position: absolute;
-      bottom: 8px;
-      right: 8px;
-      width: 22px;
-      height: 22px;
-      background: #4B9EF4;
-      border-radius: 50%;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
+    /* Section label */
+    .section-label {
       font-size: 11px;
       font-weight: 700;
+      color: #718096;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 5px;
     }
 
-    .char-avatar {
-      width: 90px;
-      height: 110px;
-      margin: 0 auto 8px;
+    /* Character slot */
+    .char-slot {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 12px;
+      background: #fafafa;
+    }
+
+    .char-slot-header {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .char-thumb {
+      width: 72px;
+      height: 88px;
       border-radius: 10px;
-      background: linear-gradient(160deg, #e8f4fd 0%, #d6ecf8 100%);
+      background: #e8f4fd;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 52px;
+      font-size: 32px;
+      flex-shrink: 0;
       overflow: hidden;
+      cursor: pointer;
+      border: 2px dashed #c8dff0;
+      transition: border-color 0.15s;
     }
 
-    .char-avatar img {
+    .char-thumb:hover { border-color: #4B9EF4; }
+    .char-thumb.has-char { border-style: solid; border-color: #e2e8f0; }
+
+    .char-thumb img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
 
-    .char-name {
-      font-size: 11.5px;
-      font-weight: 600;
-      color: #2d3748;
-      line-height: 1.3;
+    .slot-empty-text {
+      font-size: 10px;
+      color: #a0aec0;
+      text-align: center;
+      line-height: 1.4;
+      pointer-events: none;
     }
 
-    .char-card.hidden { display: none; }
-
-    /* ── Bottom bar ── */
-    .bottom-bar {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .scenario-input {
+    .char-slot-meta {
       flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .char-slot-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #2d3748;
+    }
+
+    .btn-slot {
+      padding: 5px 10px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      background: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      color: #4a5568;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+    }
+
+    .btn-slot:hover:not(:disabled) { border-color: #4B9EF4; color: #4B9EF4; background: #f0f8ff; }
+    .btn-slot:disabled { color: #cbd5e0; cursor: not-allowed; border-color: #f0f0f0; }
+    .btn-slot.danger { color: #e53e3e; border-color: #fed7d7; }
+    .btn-slot.danger:hover { background: #fff5f5; border-color: #fc8181; }
+
+    textarea.action-input {
+      width: 100%;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 13px;
+      font-family: inherit;
+      color: #2d3748;
+      background: #fff;
+      outline: none;
+      resize: vertical;
+      min-height: 58px;
+      transition: border-color 0.15s;
+    }
+
+    textarea.action-input:focus { border-color: #4B9EF4; box-shadow: 0 0 0 3px rgba(75,158,244,0.12); }
+    textarea.action-input::placeholder { color: #a0aec0; }
+
+    /* Add character button */
+    .btn-add-char {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border: 2px dashed #e2e8f0;
+      border-radius: 14px;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 600;
+      color: #a0aec0;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.15s;
+    }
+
+    .btn-add-char:hover { border-color: #4B9EF4; color: #4B9EF4; background: #f0f8ff; }
+
+    /* Field rows */
+    .field-row {
       display: flex;
       align-items: center;
       gap: 8px;
       border: 1.5px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 10px 14px;
+      border-radius: 10px;
+      padding: 8px 12px;
       background: #f9fbff;
       transition: border-color 0.15s;
     }
 
-    .scenario-input:focus-within {
-      border-color: #4B9EF4;
-      box-shadow: 0 0 0 3px rgba(75,158,244,0.12);
+    .field-row:focus-within { border-color: #4B9EF4; box-shadow: 0 0 0 3px rgba(75,158,244,0.12); }
+
+    .field-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #a0aec0;
+      white-space: nowrap;
+      min-width: 60px;
     }
 
-    .scenario-input svg { color: #a0aec0; flex-shrink: 0; }
-
-    .scenario-input input {
+    .field-row input {
       flex: 1;
       border: none;
       background: transparent;
-      font-size: 14px;
+      font-size: 13px;
       color: #2d3748;
       outline: none;
       font-family: inherit;
     }
 
-    .scenario-input input::placeholder { color: #a0aec0; }
+    .field-row input::placeholder { color: #a0aec0; }
 
+    /* Buttons */
     .btn-generate {
+      width: 100%;
+      padding: 13px;
       background: #4B9EF4;
       color: #fff;
       border: none;
       border-radius: 12px;
-      padding: 12px 24px;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 700;
       cursor: pointer;
-      white-space: nowrap;
       transition: background 0.15s, transform 0.1s;
-      flex-shrink: 0;
     }
 
     .btn-generate:hover:not(:disabled) { background: #2b7fd4; transform: translateY(-1px); }
-    .btn-generate:disabled { background: #a5c8f8; cursor: not-allowed; }
+    .btn-generate:disabled { background: #a5c8f8; cursor: not-allowed; transform: none; }
 
-    .hint {
-      text-align: center;
-      font-size: 12.5px;
-      color: #a0aec0;
-      margin-top: 10px;
-    }
-
-    /* ── Loading ── */
-    .loading { display: none; text-align: center; padding: 24px 0 8px; }
-    .loading.visible { display: block; }
-    .spinner {
-      width: 36px; height: 36px;
-      border: 3px solid #e2e8f0;
-      border-top-color: #4B9EF4;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      margin: 0 auto 10px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── PII warning ── */
-    .pii-warning {
-      display: none;
-      background: #fffbeb;
-      border: 1px solid #f6e05e;
-      border-radius: 10px;
-      padding: 12px 14px;
-      font-size: 13px;
-      color: #744210;
-      margin-top: 12px;
-      line-height: 1.5;
-    }
-    .pii-warning.visible { display: block; }
-    .pii-warning strong { display: block; margin-bottom: 4px; }
-    .pii-replaced { font-family: monospace; background: #fef3c7; padding: 1px 5px; border-radius: 4px; }
-
-    /* ── Error ── */
-    .error-msg {
-      display: none;
-      background: #fff5f5;
-      border: 1px solid #fed7d7;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 13px;
-      color: #c53030;
-      margin-top: 12px;
-    }
-    .error-msg.visible { display: block; }
-
-    /* ── Result ── */
-    .result { display: none; margin-top: 20px; }
-    .result.visible { display: block; }
-
-    .result img {
-      width: 615px;
-      height: 315px;
-      object-fit: cover;
-      border-radius: 14px;
-      border: 1px solid #e2e8f0;
-      display: block;
-    }
-
-    .result-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .skin-btn {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 3px 10px;
-      border-radius: 20px;
-      border: 2px solid #e2e8f0;
-      background: #fff;
-      cursor: pointer;
-      font-size: 11px;
-      font-weight: 600;
-      color: #4a5568;
-      transition: border-color 0.15s, background 0.15s;
-    }
-    .skin-btn:hover { border-color: #a0aec0; }
-    .skin-btn.active { border-color: #4B9EF4; background: #ebf4ff; color: #1a56db; }
-    .skin-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.15); }
-
-    .btn-secondary {
+    .btn-action {
       flex: 1;
       padding: 10px;
       border: 1.5px solid #e2e8f0;
@@ -361,836 +290,481 @@
       transition: all 0.15s;
     }
 
-    .btn-secondary:hover { background: #f0f8ff; border-color: #4B9EF4; color: #4B9EF4; }
+    .btn-action:hover:not(:disabled) { background: #f0f8ff; border-color: #4B9EF4; color: #4B9EF4; }
+    .btn-action:disabled { color: #cbd5e0; cursor: not-allowed; border-color: #f0f0f0; }
 
-    /* ── Tabs ── */
-    .tabs { display: flex; gap: 0; margin: 16px 0 20px; border-bottom: 2px solid #e2e8f0; }
-    .tab-btn { padding: 8px 20px; border: none; background: none; font-size: 13px; font-weight: 700; color: #a0aec0; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.15s; }
-    .tab-btn.active { color: #4B9EF4; border-bottom-color: #4B9EF4; }
-    .tab-btn:hover:not(.active) { color: #4a5568; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
+    /* Right panel top actions */
+    .right-actions {
+      display: flex;
+      gap: 8px;
+    }
 
-    /* ── Kontext reference upload ── */
-    .ref-drop { border: 2px dashed #e2e8f0; border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.15s; margin-bottom: 12px; }
-    .ref-drop:hover, .ref-drop.drag-over { border-color: #4B9EF4; background: #f0f8ff; }
-    .ref-drop p { font-size: 13px; color: #a0aec0; margin: 0; }
-    .ref-drop strong { display: block; font-size: 14px; color: #4a5568; margin-bottom: 4px; }
-    .ref-preview { width: 100%; max-height: 140px; object-fit: contain; border-radius: 8px; margin-top: 10px; display: none; }
+    /* Result area */
+    .result-area {
+      flex: 1;
+      min-height: 340px;
+      border-radius: 14px;
+      border: 2px dashed #e2e8f0;
+      background: #f9fbff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .result-area.has-image { border-style: solid; }
+
+    .result-placeholder {
+      text-align: center;
+      color: #a0aec0;
+      padding: 20px;
+    }
+
+    .result-placeholder p { font-size: 13px; margin-top: 8px; }
+
+    #gen-result-img {
+      width: 100%;
+      height: auto;
+      max-height: 500px;
+      object-fit: contain;
+      border-radius: 12px;
+      display: none;
+    }
+
+    /* Loading */
+    .loading { display: none; padding: 10px 0 4px; }
+    .loading.visible { display: flex; align-items: center; gap: 10px; }
+
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2.5px solid #e2e8f0;
+      border-top-color: #4B9EF4;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Error */
+    .error-msg {
+      display: none;
+      background: #fff5f5;
+      border: 1px solid #fed7d7;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #c53030;
+    }
+
+    .error-msg.visible { display: block; }
+
+    /* Crop tool */
+    #crop-tool { display: none; }
+    #crop-tool.visible { display: block; }
+
+    #crop-frame {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 3px solid #4B9EF4;
+      cursor: grab;
+      touch-action: none;
+      background: #e2e8f0;
+    }
+
+    #crop-img {
+      position: absolute;
+      top: 0; left: 0;
+      transform-origin: 0 0;
+      will-change: transform;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    /* Character picker overlay */
+    #picker-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #picker-overlay.visible { display: flex; }
+
+    .picker-modal {
+      background: #fff;
+      border-radius: 20px;
+      padding: 28px;
+      width: 520px;
+      max-width: 95vw;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .picker-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1a202c;
+      margin-bottom: 4px;
+    }
+
+    .picker-sub {
+      font-size: 13px;
+      color: #718096;
+      margin-bottom: 20px;
+    }
+
+    .picker-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .picker-card {
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px 10px 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+      background: #fff;
+    }
+
+    .picker-card:hover:not(.disabled) { border-color: #4B9EF4; background: #f0f8ff; }
+    .picker-card.disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .picker-thumb {
+      width: 72px;
+      height: 88px;
+      margin: 0 auto 10px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      overflow: hidden;
+    }
+
+    .picker-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+    .picker-card-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #2d3748;
+      line-height: 1.3;
+    }
+
+    .picker-close-row {
+      margin-top: 20px;
+      text-align: right;
+    }
+
+    .btn-picker-close {
+      padding: 8px 20px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      color: #4a5568;
+      cursor: pointer;
+    }
+
+    .btn-picker-close:hover { background: #f0f8ff; border-color: #4B9EF4; color: #4B9EF4; }
   </style>
 </head>
 <body>
 
 <div class="modal">
-  <button class="modal-close" onclick="this.parentElement.style.opacity=0.5">✕</button>
+  <div class="modal-header">
+    <div class="modal-title">BIP Visualized — Image Generator</div>
+    <button class="modal-close" onclick="this.closest('.modal').style.opacity=0.5">✕</button>
+  </div>
 
-  <!-- API keys -->
   <div class="key-row">
     <label>FAL KEY</label>
     <input type="password" id="falKey" placeholder="paste your fal.ai key" />
   </div>
-  <div class="key-row" style="margin-top:8px;">
-    <label>OPENAI KEY</label>
-    <input type="password" id="openaiKey" placeholder="paste your OpenAI key (for PII detection)" />
-  </div>
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('lora', this)">LoRA Generator</button>
-    <button class="tab-btn" onclick="switchTab('kontext', this)">Kontext Generator</button>
-  </div>
+  <div class="two-col">
 
-  <!-- ── TAB 1: LoRA ── -->
-  <div class="tab-content active" id="tab-lora">
+    <!-- ── LEFT PANEL ── -->
+    <div class="left-panel">
 
-  <h1>Select a Character</h1>
-
-  <!-- Filters -->
-  <div class="filters">
-    <div class="toggle-group" id="genderGroup">
-      <button class="toggle-btn active" data-gender="boy" onclick="setFilter('gender','boy',this)">
-        👦 Boy
-      </button>
-      <button class="toggle-btn" data-gender="girl" onclick="setFilter('gender','girl',this)">
-        👧 Girl
-      </button>
-    </div>
-    <div class="toggle-group" id="ageGroup">
-      <button class="toggle-btn active" data-age="child" onclick="setFilter('age','child',this)">
-        Child
-      </button>
-      <button class="toggle-btn" data-age="teen" onclick="setFilter('age','teen',this)">
-        Teen
-      </button>
-    </div>
-  </div>
-
-  <h2>Select a Character</h2>
-
-  <!-- Character row -->
-  <div class="char-scroll" id="charScroll"></div>
-
-  <!-- Inputs -->
-  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
-    <div class="scenario-input">
-      <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">ACTION</span>
-      <input type="text" id="verb" placeholder="e.g. doing homework, crying, asking for a break" />
-    </div>
-    <div class="scenario-input">
-      <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">LOCATION</span>
-      <input type="text" id="location" placeholder="e.g. in a classroom, at the kitchen table, on the playground" />
-    </div>
-    <div class="scenario-input">
-      <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">OBJECTS</span>
-      <input type="text" id="objects" placeholder="optional — e.g. coloring book open in her lap, crayons on the floor" />
-    </div>
-    <div class="scenario-input">
-      <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">ADULTS</span>
-      <input type="text" id="supporting" placeholder="optional — e.g. a female teacher with short gray hair" />
-    </div>
-    <div class="scenario-input">
-      <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">DETAILS</span>
-      <input type="text" id="details" placeholder="optional — e.g. no other people, teacher has gray hair, she is sitting" />
-    </div>
-  </div>
-  <div style="display:flex;justify-content:flex-end;">
-    <button class="btn-generate" id="generateBtn" onclick="generate()">Generate</button>
-  </div>
-
-  <p class="hint" id="hintText">Select a character, fill in the action and location, then hit Generate.</p>
-
-  <!-- Loading -->
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-    <p style="font-size:14px;color:#718096;font-weight:600">Generating image — ~15–30 seconds</p>
-  </div>
-
-  <!-- Error -->
-  <div class="pii-warning" id="piiWarning"></div>
-  <div class="error-msg" id="errorMsg"></div>
-
-  <!-- Result -->
-  <div class="result" id="result">
-    <img id="resultImg" src="" alt="Generated image" />
-    <div class="result-actions">
-      <button class="btn-secondary" onclick="generate()">↺ Regenerate</button>
-      <button class="btn-secondary" onclick="downloadImg('result')">↓ Download</button>
-    </div>
-  </div>
-
-  </div><!-- end tab-lora -->
-
-  <!-- ── TAB 2: Kontext ── -->
-  <div class="tab-content" id="tab-kontext">
-
-    <h1>Kontext Generator</h1>
-    <p style="font-size:13px;color:#718096;margin-bottom:16px;">Upload reference images — FLUX Kontext maintains their appearance without LoRA training.</p>
-
-    <!-- Reference image uploads -->
-    <div style="display:flex;gap:10px;margin-bottom:12px;">
-      <div style="flex:1;">
-        <div style="font-size:11px;font-weight:700;color:#a0aec0;margin-bottom:5px;">CHILD</div>
-        <div class="ref-drop" id="refDrop" onclick="document.getElementById('refInput').click()"
-             ondragover="event.preventDefault();this.classList.add('drag-over')"
-             ondragleave="this.classList.remove('drag-over')"
-             ondrop="handleRefDrop(event)">
-          <strong>Drop image here</strong>
-          <p>or click to browse</p>
-          <img id="refPreview" class="ref-preview" alt="Child reference" />
+      <!-- Character 1 -->
+      <div>
+        <div class="section-label">Character 1</div>
+        <div class="char-slot">
+          <div class="char-slot-header">
+            <div class="char-thumb" id="slot-0-thumb" onclick="openPicker(0)">
+              <img id="slot-0-img" style="display:none" alt="" />
+              <div id="slot-0-empty" class="slot-empty-text">+ Add<br>Character</div>
+            </div>
+            <div class="char-slot-meta">
+              <div class="char-slot-name" id="slot-0-name">No character selected</div>
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <button class="btn-slot" onclick="openPicker(0)">Change Character</button>
+                <button class="btn-slot" disabled title="Coming soon">Edit Character</button>
+              </div>
+            </div>
+          </div>
+          <textarea class="action-input" id="slot-0-action" placeholder="What is this character doing? e.g. crying at their desk, asking for a break…"></textarea>
         </div>
-        <input type="file" id="refInput" accept="image/*" style="display:none" onchange="handleRefFile(this.files[0])">
       </div>
-      <div style="flex:1;">
-        <div style="font-size:11px;font-weight:700;color:#a0aec0;margin-bottom:5px;">ADULT <span style="font-weight:400;color:#cbd5e0;">(optional)</span></div>
-        <div class="ref-drop" id="refAdultDrop" onclick="document.getElementById('refAdultInput').click()"
-             ondragover="event.preventDefault();this.classList.add('drag-over')"
-             ondragleave="this.classList.remove('drag-over')"
-             ondrop="handleRefAdultDrop(event)">
-          <strong>Drop image here</strong>
-          <p>or click to browse</p>
-          <img id="refAdultPreview" class="ref-preview" alt="Adult reference" />
+
+      <!-- Character 2 (optional) -->
+      <div>
+        <div class="section-label">Character 2 <span style="font-weight:400;color:#cbd5e0;">(optional)</span></div>
+        <div id="slot-1-add-btn">
+          <button class="btn-add-char" onclick="showSlot1()">+ Add Second Character</button>
         </div>
-        <input type="file" id="refAdultInput" accept="image/*" style="display:none" onchange="handleRefAdultFile(this.files[0])">
+        <div class="char-slot" id="slot-1" style="display:none;">
+          <div class="char-slot-header">
+            <div class="char-thumb" id="slot-1-thumb" onclick="openPicker(1)">
+              <img id="slot-1-img" style="display:none" alt="" />
+              <div id="slot-1-empty" class="slot-empty-text">+ Add<br>Character</div>
+            </div>
+            <div class="char-slot-meta">
+              <div class="char-slot-name" id="slot-1-name">No character selected</div>
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <button class="btn-slot" onclick="openPicker(1)">Change Character</button>
+                <button class="btn-slot" disabled title="Coming soon">Edit Character</button>
+                <button class="btn-slot danger" onclick="hideSlot1()">Remove</button>
+              </div>
+            </div>
+          </div>
+          <textarea class="action-input" id="slot-1-action" placeholder="What is this character doing?"></textarea>
+        </div>
       </div>
-    </div>
 
-    <!-- Inputs -->
-    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
-      <div class="scenario-input">
-        <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">ACTION</span>
-        <input type="text" id="k-verb" placeholder="e.g. crying, hitting the table, asking for a break" />
+      <!-- Location / Objects / Details -->
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="field-row">
+          <span class="field-label">LOCATION</span>
+          <input type="text" id="gen-location" placeholder="e.g. in a classroom, on the playground" />
+        </div>
+        <div class="field-row">
+          <span class="field-label">OBJECTS</span>
+          <input type="text" id="gen-objects" placeholder="optional — e.g. coloring book, backpack" />
+        </div>
+        <div class="field-row">
+          <span class="field-label">DETAILS</span>
+          <input type="text" id="gen-details" placeholder="optional — e.g. sunny day, tears on her face" />
+        </div>
       </div>
-      <div class="scenario-input">
-        <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">LOCATION</span>
-        <input type="text" id="k-location" placeholder="e.g. in a classroom, on the playground" />
-      </div>
-      <div class="scenario-input">
-        <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">OBJECTS</span>
-        <input type="text" id="k-objects" placeholder="optional — e.g. books on the desk" />
-      </div>
-      <div class="scenario-input">
-        <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">ADULTS</span>
-        <input type="text" id="k-supporting" placeholder="optional — e.g. a female teacher nearby" />
-      </div>
-      <div style="display:flex;align-items:center;gap:5px;padding-left:68px;margin-top:-2px;margin-bottom:6px;flex-wrap:wrap;">
-        <span style="font-size:11px;color:#a0aec0;margin-right:2px;">Adult skin:</span>
-        <button class="skin-btn" data-tone="" onclick="selectSkinTone(this)"><span class="skin-dot" style="background:#f5cba7;"></span>Light</button>
-        <button class="skin-btn" data-tone="medium warm tan skin tone" onclick="selectSkinTone(this)"><span class="skin-dot" style="background:#c68642;"></span>Medium</button>
-        <button class="skin-btn" data-tone="warm golden brown skin tone" onclick="selectSkinTone(this)"><span class="skin-dot" style="background:#8d5524;"></span>Tan</button>
-        <button class="skin-btn" data-tone="deep dark brown skin tone" onclick="selectSkinTone(this)"><span class="skin-dot" style="background:#3b1f0e;"></span>Dark</button>
-      </div>
-      <div class="scenario-input">
-        <span style="font-size:11px;font-weight:700;color:#a0aec0;white-space:nowrap;min-width:60px;">DETAILS</span>
-        <input type="text" id="k-details" placeholder="optional — e.g. she is crying with tears, teacher has glasses" />
-      </div>
-    </div>
-    <div style="display:flex;justify-content:flex-end;">
-      <button class="btn-generate" id="kontextBtn" onclick="generateKontext()">Generate</button>
-    </div>
 
-    <div class="loading" id="k-loading">
-      <div class="spinner"></div>
-      <p style="font-size:14px;color:#718096;font-weight:600">Generating — ~15–30 seconds</p>
-    </div>
-    <div class="error-msg" id="k-errorMsg"></div>
-    <div class="result" id="k-result">
-      <img id="k-resultImg" src="" alt="Generated image" style="width:100%;height:auto;object-fit:contain;border-radius:14px;border:1px solid #e2e8f0;display:block;" />
-      <div class="result-actions" style="margin-top:10px;">
-        <button class="btn-secondary" onclick="generateKontext()">↺ Regenerate</button>
-      </div>
-    </div>
+      <button class="btn-generate" id="gen-btn" onclick="generateImage()">Generate</button>
 
-    <!-- Crop tool -->
-    <div id="k-crop-tool" style="display:none;margin-top:16px;">
-      <p style="font-size:13px;color:#718096;margin-bottom:8px;">Drag to pan &middot; scroll or use buttons to zoom &middot; then Crop (extends background if needed)</p>
-      <div id="k-crop-frame" style="position:relative;width:100%;overflow:hidden;border-radius:12px;border:3px solid #4B9EF4;cursor:grab;touch-action:none;background:#e2e8f0;">
-        <div style="padding-top:48.46%;"></div><!-- 315/650 aspect ratio spacer -->
-        <img id="k-crop-img" style="position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform;user-select:none;pointer-events:none;" />
+      <div class="loading" id="gen-loading">
+        <div class="spinner"></div>
+        <span id="gen-loading-msg" style="font-size:13px;color:#718096;font-weight:600;">Generating — ~15–30 seconds</span>
       </div>
-      <div style="display:flex;gap:8px;margin-top:10px;">
-        <button class="btn-secondary" onclick="zoomCrop(-0.1)">− Zoom Out</button>
-        <button class="btn-secondary" onclick="zoomCrop(0.1)">+ Zoom In</button>
-        <button class="btn-generate" style="flex:1;" onclick="applyCrop()">✂ Crop</button>
+
+      <div class="error-msg" id="gen-error"></div>
+
+    </div><!-- end left-panel -->
+
+    <!-- ── RIGHT PANEL ── -->
+    <div class="right-panel">
+
+      <div class="right-actions">
+        <button class="btn-action" id="regen-btn" disabled onclick="generateImage()">↺ Re-Generate</button>
+        <button class="btn-action" disabled title="Coming soon">✏ Edit Image</button>
       </div>
+
+      <div class="result-area" id="result-area">
+        <div class="result-placeholder" id="result-placeholder">
+          <div style="font-size:52px;">🖼</div>
+          <p>Your generated image will appear here</p>
+        </div>
+        <img id="gen-result-img" src="" alt="Generated image" />
+      </div>
+
+      <!-- Crop tool -->
+      <div id="crop-tool">
+        <p style="font-size:12px;color:#718096;margin-bottom:6px;">Drag to pan · scroll to zoom · then click Implement</p>
+        <div id="crop-frame">
+          <div style="padding-top:48.46%;"></div>
+          <img id="crop-img" />
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn-action" onclick="zoomCrop(-0.1)">− Zoom Out</button>
+          <button class="btn-action" onclick="zoomCrop(0.1)">+ Zoom In</button>
+          <button class="btn-generate" style="width:auto;flex:1;padding:10px;" onclick="applyCrop()">✓ Implement</button>
+        </div>
+      </div>
+
+    </div><!-- end right-panel -->
+
+  </div><!-- end two-col -->
+</div><!-- end modal -->
+
+<!-- ── Character Picker Overlay ── -->
+<div id="picker-overlay" onclick="pickerOverlayClick(event)">
+  <div class="picker-modal">
+    <div class="picker-title">Select a Character</div>
+    <div class="picker-sub">Choose a base character for this slot</div>
+    <div class="picker-grid" id="picker-grid"></div>
+    <div class="picker-close-row">
+      <button class="btn-picker-close" onclick="closePicker()">Cancel</button>
     </div>
-
-  </div><!-- end tab-kontext -->
-
+  </div>
 </div>
 
 <script>
-  // ── Character data ────────────────────────────────────────────────────────
-  // After training completes, replace PASTE_LORA_URL_HERE with the real URL.
-  const CHARACTERS = [
-    { id:"asian_boy_child",            gender:"boy",  age:"child", label:"Asian",           emoji:"👦🏻", trigger:"BIPCHAR_asian_boy",                desc:"young Asian boy, short black hair, light blue hoodie, navy blue shorts, gray sneakers",                         lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"black_boy_child",            gender:"boy",  age:"child", label:"Black",           emoji:"👦🏾", trigger:"BIPCHAR_black_boy",                desc:"young Black boy, short curly black hair, yellow t-shirt, green shorts, white sneakers",                          lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"hispanic_boy_child",         gender:"boy",  age:"child", label:"Hispanic",        emoji:"👦🏽", trigger:"BIPCHAR_hispanic_boy",             desc:"young Hispanic boy, dark brown hair, teal shirt, khaki shorts, brown sneakers",                                  lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"white_boy_child",            gender:"boy",  age:"child", label:"White",           emoji:"👦🏼", trigger:"BIPCHAR_white_boy",                desc:"young white boy, blond hair, green t-shirt, blue jeans, green sneakers",                                         lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"south_asian_boy_child",      gender:"boy",  age:"child", label:"South Asian",     emoji:"👦🏽", trigger:"BIPCHAR_south_asian_boy",          desc:"young South Asian boy, straight black hair, blue striped shirt, gray pants, blue sneakers",                      lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"middle_eastern_boy_child",   gender:"boy",  age:"child", label:"Middle Eastern",  emoji:"👦🏻", trigger:"BIPCHAR_middle_eastern_boy",       desc:"young Middle Eastern boy, dark wavy hair, white shirt, olive pants, brown shoes",                               lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"asian_girl_child",           gender:"girl", age:"child", label:"Asian",           emoji:"👧🏻", trigger:"BIPCHAR_asian_girl",               desc:"young Asian girl, black hair in pigtails, pink t-shirt, purple leggings, white sneakers",                        lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"black_girl_child",           gender:"girl", age:"child", label:"Black",           emoji:"👧🏾", trigger:"BIPCHAR_black_girl",               desc:"young Black girl, natural curly black hair, orange dress, white sandals",                                        lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"hispanic_girl_child",        gender:"girl", age:"child", label:"Hispanic",        emoji:"👧🏽", trigger:"BIPCHAR_hispanic_girl",            desc:"young Hispanic girl, long dark brown hair, red top, blue jeans, red sneakers",                                   lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"white_girl_child",           gender:"girl", age:"child", label:"White",           emoji:"👧🏼", trigger:"BIPCHAR_white_girl",               desc:"young white girl, wavy red hair, lavender dress, purple sneakers",                                               lora:"https://huggingface.co/alvdanjan/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"south_asian_girl_child",     gender:"girl", age:"child", label:"South Asian",     emoji:"👧🏽", trigger:"BIPCHAR_south_asian_girl",         desc:"young South Asian girl, long black hair with pink hair tie, soft pink sweater top, light beige cream pants, cream white sneakers with orange laces",  lora:"https://v3b.fal.media/files/b/0a94ce41/4o-h-nA8AJA25YJcqjVTx_pytorch_lora_weights.safetensors" },
-    { id:"middle_eastern_girl_child",  gender:"girl", age:"child", label:"Middle Eastern",  emoji:"👧🏻", trigger:"BIPCHAR_middle_eastern_girl",      desc:"young Middle Eastern girl, dark hair with light blue hijab, teal top, dark pants, white sneakers",              lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"asian_boy_teen",             gender:"boy",  age:"teen",  label:"Asian",           emoji:"🧑🏻", trigger:"BIPCHAR_asian_teen_boy",           desc:"teenage Asian boy, short black hair, dark blue hoodie, black jeans, white sneakers",                             lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"black_boy_teen",             gender:"boy",  age:"teen",  label:"Black",           emoji:"🧑🏾", trigger:"BIPCHAR_black_teen_boy",           desc:"teenage Black boy, short fade haircut, gray hoodie, dark jeans, red sneakers",                                   lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"hispanic_boy_teen",          gender:"boy",  age:"teen",  label:"Hispanic",        emoji:"🧑🏽", trigger:"BIPCHAR_hispanic_teen_boy",        desc:"teenage Hispanic boy, medium-length dark hair, green bomber jacket, dark jeans, black shoes",                   lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"white_boy_teen",             gender:"boy",  age:"teen",  label:"White",           emoji:"🧑🏼", trigger:"BIPCHAR_white_teen_boy",           desc:"teenage white boy, light brown hair, navy t-shirt, khaki pants, gray sneakers",                                 lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"south_asian_boy_teen",       gender:"boy",  age:"teen",  label:"South Asian",     emoji:"🧑🏽", trigger:"BIPCHAR_south_asian_teen_boy",     desc:"teenage South Asian boy, dark hair, teal hoodie, black jeans, white sneakers",                                  lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"middle_eastern_boy_teen",    gender:"boy",  age:"teen",  label:"Middle Eastern",  emoji:"🧑🏻", trigger:"BIPCHAR_middle_eastern_teen_boy",  desc:"teenage Middle Eastern boy, short dark hair, olive jacket, dark pants, brown boots",                           lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"asian_girl_teen",            gender:"girl", age:"teen",  label:"Asian",           emoji:"🧑🏻", trigger:"BIPCHAR_asian_teen_girl",          desc:"teenage Asian girl, black hair in a ponytail, pink hoodie, light jeans, white sneakers",                        lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"black_girl_teen",            gender:"girl", age:"teen",  label:"Black",           emoji:"🧑🏾", trigger:"BIPCHAR_black_teen_girl",          desc:"teenage Black girl, natural afro, purple jacket, black leggings, white sneakers",                                lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"hispanic_girl_teen",         gender:"girl", age:"teen",  label:"Hispanic",        emoji:"🧑🏽", trigger:"BIPCHAR_hispanic_teen_girl",       desc:"teenage Hispanic girl, long dark wavy hair, orange sweater, blue jeans, white sneakers",                        lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"white_girl_teen",            gender:"girl", age:"teen",  label:"White",           emoji:"🧑🏼", trigger:"BIPCHAR_white_teen_girl",          desc:"teenage white girl, straight blond hair, light pink cardigan, white shirt, blue jeans, tan boots",               lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"south_asian_girl_teen",      gender:"girl", age:"teen",  label:"South Asian",     emoji:"🧑🏽", trigger:"BIPCHAR_south_asian_teen_girl",    desc:"teenage South Asian girl, long black hair, purple hoodie, dark jeans, purple sneakers",                         lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
-    { id:"middle_eastern_girl_teen",   gender:"girl", age:"teen",  label:"Middle Eastern",  emoji:"🧑🏻", trigger:"BIPCHAR_middle_eastern_teen_girl", desc:"teenage Middle Eastern girl, dark hair with navy blue hijab, teal jacket, dark jeans, white sneakers",          lora:"https://huggingface.co/alvdansen/frosting_lane_redux/resolve/main/fluxtest.safetensors" },
+
+  // ── Base characters ───────────────────────────────────────────────────────
+  const BASE_CHARACTERS = [
+    { id: "south_asian_girl", label: "South Asian Girl", emoji: "👧🏽", color: "#fce7f3", refPath: "images/south_asian_girl_ref.png" },
+    { id: "cs1",  label: "Coming Soon", emoji: "👤", color: "#f3f4f6", disabled: true },
+    { id: "cs2",  label: "Coming Soon", emoji: "👤", color: "#f3f4f6", disabled: true },
+    { id: "cs3",  label: "Coming Soon", emoji: "👤", color: "#f3f4f6", disabled: true },
+    { id: "cs4",  label: "Coming Soon", emoji: "👤", color: "#f3f4f6", disabled: true },
+    { id: "cs5",  label: "Coming Soon", emoji: "👤", color: "#f3f4f6", disabled: true },
   ];
 
-  const STYLE = "flat illustration style, clean lines, minimal shading, solid flat colors, educational illustration, child-friendly, friendly cartoon, full rectangular scene, edge to edge background, no text, no words";
-  const NEG   = "realistic, photographic, 3D render, complex shading, dark, scary, violent, sexual, text, watermark, holding hands, hand holding, touching hands, vignette, oval mask, circular crop, blob background, faded edges, plain background, white background, gradient background, no background, duplicate characters, matching outfits, identical clothing, two identical people, clones, overlapping furniture, objects clipping through each other, floating objects, impossible geometry, extra limbs, extra fingers, deformed hands, cropped head, cut off head, partial figure, head out of frame, figure cut off at top";
-  const ADULT_LORA_URL = "https://v3b.fal.media/files/b/0a94ce97/KUvipoYCO6K1g50HpMnak_pytorch_lora_weights.safetensors";
-
-  const SKIN_TONE = {
-    asian:           "light skin, East Asian features",
-    black:           "dark brown skin, Black features",
-    hispanic:        "medium brown skin, Hispanic features",
-    white:           "fair light skin, white features",
-    south_asian:     "tan brown skin, South Asian features",
-    middle_eastern:  "olive tan skin, Middle Eastern features",
-  };
-
-  const FAMILY_WORDS = ["parent", "mother", "father", "mom", "dad", "caregiver", "guardian", "mama", "papa"];
-
-  function adultWithSkinTone(adultText, characterId) {
-    const lower = adultText.toLowerCase();
-    const isFamily = FAMILY_WORDS.some(w => lower.includes(w));
-    if (!isFamily) return adultText;
-    const ethnicity = Object.keys(SKIN_TONE).find(e => characterId.includes(e));
-    if (!ethnicity) return adultText;
-    return `${adultText}, ${SKIN_TONE[ethnicity]}`;
-  }
-
-  const FEMALE_WORDS = ["female", "woman", "mother", "mom", "mama", "teacher", "counselor", "therapist", "caregiver", "guardian", "grandmother", "grandma", "aunt", "sister"];
-  const MALE_WORDS   = ["male", "man", "father", "dad", "papa", "grandfather", "grandpa", "uncle", "brother"];
-
-  const ADULT_FEMALE_OUTFITS = [
-    "wearing a teal blouse and dark navy trousers and brown leather flats",
-    "wearing a burgundy cardigan and dark gray pants and black ankle boots",
-    "wearing a navy blue top and olive green pants and dark brown loafers",
-    "wearing a forest green blazer and black trousers and black heeled shoes",
-    "wearing a coral red blouse and charcoal gray pants and dark gray flats",
-  ];
-  const ADULT_MALE_OUTFITS = [
-    "wearing a navy blue shirt and dark gray trousers and brown leather shoes",
-    "wearing a forest green polo shirt and khaki trousers and white sneakers",
-    "wearing a burgundy sweater and dark jeans and dark brown boots",
-    "wearing a gray button-up shirt and dark blue trousers and black shoes",
+  // ── State ─────────────────────────────────────────────────────────────────
+  const chars = [
+    { charId: null, label: "", refBlob: null },
+    { charId: null, label: "", refBlob: null },
   ];
 
-  function adultWithOutfit(adultText) {
-    const lower = adultText.toLowerCase();
-    const isFemale = FEMALE_WORDS.some(w => lower.includes(w));
-    const isMale   = MALE_WORDS.some(w => lower.includes(w));
-    const outfits  = isFemale ? ADULT_FEMALE_OUTFITS : isMale ? ADULT_MALE_OUTFITS : ADULT_FEMALE_OUTFITS;
-    const outfit   = outfits[Math.floor(Math.random() * outfits.length)];
-    return `${adultText}, ${outfit}, short hair`;
+  let pickerTargetSlot = 0;
+  let slot1Visible     = false;
+  let _cropDragSetup   = false;
+  let cs = { scale: 1, ox: 0, oy: 0, natW: 0, natH: 0 };
+
+  // ── Slot 2 toggle ─────────────────────────────────────────────────────────
+  function showSlot1() {
+    document.getElementById("slot-1-add-btn").style.display = "none";
+    document.getElementById("slot-1").style.display = "block";
+    slot1Visible = true;
   }
 
-  let activeGender = "boy";
-  let activeAge    = "child";
-  let selectedId   = null;
-
-  // ── Filters ──────────────────────────────────────────────────────────────
-  function setFilter(type, value, btn) {
-    if (type === "gender") {
-      activeGender = value;
-      document.querySelectorAll("#genderGroup .toggle-btn").forEach(b => b.classList.remove("active"));
-    } else {
-      activeAge = value;
-      document.querySelectorAll("#ageGroup .toggle-btn").forEach(b => b.classList.remove("active"));
-    }
-    btn.classList.add("active");
-    selectedId = null;
-    renderChars();
-    updateHint();
+  function hideSlot1() {
+    document.getElementById("slot-1-add-btn").style.display = "block";
+    document.getElementById("slot-1").style.display = "none";
+    slot1Visible = false;
+    chars[1] = { charId: null, label: "", refBlob: null };
   }
 
-  // ── Render character cards ────────────────────────────────────────────────
-  function renderChars() {
-    const scroll = document.getElementById("charScroll");
-    scroll.innerHTML = "";
-    const filtered = CHARACTERS.filter(c => c.gender === activeGender && c.age === activeAge);
+  // ── Picker ────────────────────────────────────────────────────────────────
+  function openPicker(slotIndex) {
+    pickerTargetSlot = slotIndex;
+    renderPickerGrid();
+    document.getElementById("picker-overlay").classList.add("visible");
+  }
 
-    filtered.forEach(char => {
+  function closePicker() {
+    document.getElementById("picker-overlay").classList.remove("visible");
+  }
+
+  function pickerOverlayClick(e) {
+    if (e.target === document.getElementById("picker-overlay")) closePicker();
+  }
+
+  function renderPickerGrid() {
+    const grid = document.getElementById("picker-grid");
+    grid.innerHTML = "";
+    BASE_CHARACTERS.forEach(ch => {
       const card = document.createElement("div");
-      card.className = "char-card" + (char.id === selectedId ? " selected" : "");
-      card.dataset.id = char.id;
-      card.onclick = () => selectChar(char.id);
-      const isTrained = !char.lora.includes("huggingface.co") && char.lora !== "PASTE_LORA_URL_HERE";
+      card.className = "picker-card" + (ch.disabled ? " disabled" : "");
       card.innerHTML = `
-        <div class="char-avatar">${char.emoji}</div>
-        <div class="char-name">${char.label}</div>
-        ${isTrained ? '<div style="font-size:9px;color:#38a169;font-weight:700;margin-top:3px">✓ TRAINED</div>' : ''}
-        <div class="check-badge">✓</div>
+        <div class="picker-thumb" style="background:${ch.color};">
+          <span style="font-size:42px;">${ch.emoji}</span>
+        </div>
+        <div class="picker-card-label">${ch.label}</div>
       `;
-      scroll.appendChild(card);
+      if (!ch.disabled) {
+        card.onclick = () => selectCharacter(pickerTargetSlot, ch);
+      }
+      grid.appendChild(card);
     });
   }
 
-  function selectChar(id) {
-    selectedId = id;
-    renderChars();
-    updateHint();
+  async function selectCharacter(slotIndex, ch) {
+    closePicker();
+    // Try to load ref image as blob
+    let refBlob = null;
+    try {
+      const res = await fetch(ch.refPath);
+      if (res.ok) refBlob = await res.blob();
+    } catch(e) { /* image not available yet */ }
+
+    chars[slotIndex] = { charId: ch.id, label: ch.label, refBlob };
+    updateSlotUI(slotIndex, ch, refBlob);
   }
 
-  function updateHint() {
-    const hint = document.getElementById("hintText");
-    if (!selectedId) {
-      hint.textContent = "Select a character and enter a scenario to generate an image.";
+  function updateSlotUI(slotIndex, ch, refBlob) {
+    const thumb = document.getElementById(`slot-${slotIndex}-thumb`);
+    const img   = document.getElementById(`slot-${slotIndex}-img`);
+    const empty = document.getElementById(`slot-${slotIndex}-empty`);
+    const name  = document.getElementById(`slot-${slotIndex}-name`);
+
+    name.textContent = ch.label;
+    thumb.classList.add("has-char");
+
+    if (refBlob) {
+      img.src = URL.createObjectURL(refBlob);
+      img.style.display = "block";
+      empty.style.display = "none";
     } else {
-      const c = CHARACTERS.find(x => x.id === selectedId);
-      hint.textContent = `Selected: ${c.label} ${activeAge} — type a scenario and hit Generate.`;
+      empty.textContent = ch.emoji;
+      empty.style.fontSize = "40px";
     }
   }
 
   // ── Generate ──────────────────────────────────────────────────────────────
-  async function generate() {
-    scrubAllInputs(); // regex pass first
-    hidePIIWarning();
-
-    const falKey   = document.getElementById("falKey").value.trim();
-
-    if (!falKey)    { showError("Enter your fal.ai key at the top."); return; }
-    if (!selectedId){ showError("Select a character first."); return; }
-    if (!document.getElementById("verb").value.trim())     { showError("Enter an action first."); return; }
-    if (!document.getElementById("location").value.trim()) { showError("Enter a location first."); return; }
-
-    // AI PII check — runs before reading field values into prompt
-    const aiResult = await checkPIIWithAI({
-      verb:       document.getElementById("verb").value.trim(),
-      location:   document.getElementById("location").value.trim(),
-      objects:    document.getElementById("objects").value.trim(),
-      supporting: document.getElementById("supporting").value.trim(),
-    });
-
-    if (aiResult) {
-      // Apply scrubbed values back to fields
-      ["verb", "location", "objects", "supporting"].forEach(id => {
-        if (aiResult.scrubbed?.[id] !== undefined) {
-          document.getElementById(id).value = aiResult.scrubbed[id];
-        }
-      });
-      if (aiResult.found?.length) showPIIWarning(aiResult.found);
-    }
-
-    const verb     = document.getElementById("verb").value.trim();
-    const location = document.getElementById("location").value.trim();
-    const supportingRaw = document.getElementById("supporting").value.trim().toLowerCase();
-    const hasAdult = supportingRaw && supportingRaw !== "none" && supportingRaw !== "no" && supportingRaw !== "n/a";
-
-    const char = CHARACTERS.find(c => c.id === selectedId);
-
-    if (char.lora === "PASTE_LORA_URL_HERE") {
-      showError("This character's LoRA isn't trained yet.");
-      return;
-    }
-
-    const isTrained = !char.lora.includes("huggingface.co") && char.lora !== "PASTE_LORA_URL_HERE";
-    const objectsRaw = document.getElementById("objects").value.trim();
-    const objectsClause = objectsRaw ? `, ${objectsRaw} clearly visible` : "";
-    const adultDesc   = hasAdult ? adultWithOutfit(adultWithSkinTone(supportingRaw, selectedId)) : "";
-    const adultPrefix = hasAdult
-      ? `two figures fully visible from head to toe, no cropping of heads or feet, scene includes a fully grown adult ${adultDesc}, adult is at least twice the height of the child, large adult body proportions, very tall compared to child, mature facial features and adult face, both characters centered in frame, wide shot showing full bodies. `
-      : "";
-    const soloClause = hasAdult ? "" : ", only one child in the scene, no other people";
-    const details       = document.getElementById("details").value.trim();
-    const detailsPrefix = details ? `${details}. ` : "";
-    const detailsSuffix = details ? ` Important: ${details}.` : "";
-    const objectsClauseFull = objectsRaw ? `, ${objectsRaw} clearly visible and prominent in the scene` : "";
-    const prompt = `${detailsPrefix}${location}. ${adultPrefix}${char.trigger}, ${char.desc}, actively ${verb}${objectsClauseFull}${soloClause}, full body, dynamic action pose, full scene background visible. ${STYLE}.${detailsSuffix}`;
-
-    setLoading(true, details ? "Step 1/2 — Generating character (~30s)…" : "Generating image — ~15–30 seconds");
-    clearError();
-    hideResult();
-
-    try {
-      const body = {
-        prompt,
-        negative_prompt: NEG,
-        image_size: { width: 1024, height: 512 },
-        num_inference_steps: 50,
-        guidance_scale: 7.0,
-        num_images: 1,
-        enable_safety_checker: true,
-      };
-      const loras = [];
-      if (isTrained) loras.push({ path: char.lora, scale: hasAdult ? 0.75 : 1.0 });
-      if (hasAdult)  loras.push({ path: ADULT_LORA_URL, scale: 0.85 });
-      if (loras.length) body.loras = loras;
-
-      const res = await fetch("https://fal.run/fal-ai/flux-lora", {
-        method: "POST",
-        headers: {
-          "Authorization": `Key ${falKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-
-      if (!res.ok) throw new Error(`fal.ai error ${res.status}: ${await res.text()}`);
-
-      const data = await res.json();
-      const url  = data?.images?.[0]?.url;
-      if (!url) throw new Error("No image returned.");
-
-      // Step 2 — refine with gpt-image-1 if DETAILS + OpenAI key present
-      const finalUrl = details ? await refineWithGPT(url, details) : url;
-      showResult(finalUrl);
-    } catch(e) {
-      showError(e.message);
-    } finally {
-      setLoading(false, "");
-    }
-  }
-
-  // ── GPT-image-1 refinement pass ───────────────────────────────────────────
-  async function refineWithGPT(imageUrl, details) {
-    const openaiKey = document.getElementById("openaiKey").value.trim();
-    if (!openaiKey) return imageUrl;
-
-    setLoading(true, "Step 2/2 — Refining details with AI (~15s)…");
-
-    try {
-      // Fetch FLUX image as blob
-      const imgRes = await fetch(imageUrl);
-      if (!imgRes.ok) throw new Error("Could not fetch generated image for refinement.");
-      const imgBlob = await imgRes.blob();
-      const imgFile = new File([imgBlob], "image.png", { type: "image/png" });
-
-      const form = new FormData();
-      form.append("model", "gpt-image-1");
-      form.append("image[]", imgFile);
-      form.append("prompt", `This is a flat illustration style educational cartoon image. Apply ONLY this change: ${details}. Keep the art style, characters, colors, background, and overall composition completely identical. Do not redraw or redesign anything else.`);
-      form.append("n", "1");
-      form.append("size", "1536x1024");
-
-      const editRes = await fetch("https://api.openai.com/v1/images/edits", {
-        method: "POST",
-        headers: { "Authorization": `Bearer ${openaiKey}` },
-        body: form,
-      });
-
-      if (!editRes.ok) {
-        console.warn("GPT refinement failed:", editRes.status, await editRes.text());
-        return imageUrl; // fall back to FLUX image
-      }
-
-      const editData = await editRes.json();
-      // gpt-image-1 returns base64 by default
-      const b64 = editData?.data?.[0]?.b64_json;
-      if (!b64) return imageUrl;
-      return `data:image/png;base64,${b64}`;
-    } catch(e) {
-      console.warn("GPT refinement error:", e.message);
-      return imageUrl; // fall back gracefully
-    }
-  }
-
-  // ── UI helpers ────────────────────────────────────────────────────────────
-  function setLoading(on, msg = "") {
-    document.getElementById("loading").classList.toggle("visible", on);
-    document.getElementById("generateBtn").disabled = on;
-    document.getElementById("generateBtn").textContent = on ? "Generating…" : "Generate";
-    const p = document.querySelector("#loading p");
-    if (p) p.textContent = msg || "Generating image — ~15–30 seconds";
-  }
-
-  function showResult(url) {
-    const r = document.getElementById("result");
-    document.getElementById("resultImg").src = url;
-    r.classList.add("visible");
-  }
-
-  function hideResult() { document.getElementById("result").classList.remove("visible"); }
-
-  function showError(msg) {
-    const el = document.getElementById("errorMsg");
-    el.textContent = msg;
-    el.classList.add("visible");
-  }
-
-  function clearError() { document.getElementById("errorMsg").classList.remove("visible"); }
-
-  function downloadImg(resultId = "result") {
-    const a = document.createElement("a");
-    a.href = document.getElementById(resultId === "result" ? "resultImg" : "k-resultImg").src;
-    a.download = `bip-${Date.now()}.png`;
-    a.click();
-  }
-
-  // ── AI-powered PII Detection (OpenAI) ────────────────────────────────────
-  async function checkPIIWithAI(fields) {
-    const openaiKey = document.getElementById("openaiKey").value.trim();
-    if (!openaiKey) return null; // skip if no key provided
-
-    const payload = {
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: `You are a strict PII filter for a special education app. Your ONLY job is to detect and replace three specific types of real personally identifiable information:
-
-1. Real personal names — first names, last names, or full names of real people (e.g. "John", "Maria Lopez", "Mrs. Johnson"). Replace with a generic role such as "the student", "the teacher", or "the adult". Do NOT treat common words as names.
-2. Email addresses (e.g. user@example.com). Replace with "example@example.com".
-3. Physical street addresses that include a street number (e.g. "123 Main St", "45 Oak Avenue"). Replace with "the address".
-
-You MUST NOT change anything else. Specifically, never change:
-- Family relationship words: mother, father, mom, dad, parent, caregiver, guardian, grandma, grandpa, grandmother, grandfather, aunt, uncle, sibling, brother, sister
-- Job or role titles: teacher, counselor, therapist, librarian, doctor, aide, principal, staff
-- Gender words: girl, boy, man, woman, she, he, her, his, they
-- Any location, setting, or place name: pool, playground, classroom, gym, bedroom, park, school, hospital, store — leave ALL location words completely unchanged
-- Any action, emotion, or descriptive word
-- Phone numbers (leave as-is)
-- School names (leave as-is)
-
-When in doubt, leave the text unchanged. Do not be overly cautious.
-
-Return ONLY valid JSON:
-{
-  "scrubbed": { "verb": "...", "location": "...", "objects": "...", "supporting": "...", "details": "..." },
-  "found": ["personal name"]
-}
-If no PII found, return original text and empty found array.`
-        },
-        {
-          role: "user",
-          content: JSON.stringify(fields)
-        }
-      ],
-      temperature: 0,
-      max_tokens: 300,
-    };
-
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${openaiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      console.warn("OpenAI PII check failed:", res.status);
-      return null;
-    }
-
-    const data = await res.json();
-    const text = data?.choices?.[0]?.message?.content?.trim();
-    try {
-      return JSON.parse(text);
-    } catch {
-      console.warn("OpenAI PII response could not be parsed:", text);
-      return null;
-    }
-  }
-
-  function showPIIWarning(found) {
-    const types = [...new Set(found)].join(", ");
-    const el = document.getElementById("piiWarning");
-    el.innerHTML = `<strong>⚠️ Personal information detected and removed.</strong> We found and replaced: ${types}. Your inputs have been updated to keep this session HIPAA compliant.`;
-    el.classList.add("visible");
-  }
-
-  function hidePIIWarning() { document.getElementById("piiWarning").classList.remove("visible"); }
-
-  // ── PII Detection & Replacement (regex fallback) ──────────────────────────
-
-  const FAKE_NAMES    = ["the student", "the child", "a young girl", "a young boy", "the kid"];
-  const FAKE_ADULTS   = ["the teacher", "a caregiver", "the adult", "a parent", "a guardian"];
-  const FAKE_PLACES   = ["the school", "the facility", "the center", "the building"];
-
-  const PII_PATTERNS = [
-    // Phone numbers
-    { label: "phone number",    regex: /(\+?1?\s?)?(\(?\d{3}\)?[\s.\-]?\d{3}[\s.\-]?\d{4})/g,      replacement: () => "555-000-0000" },
-    // Email addresses
-    { label: "email address",   regex: /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g,        replacement: () => "student@example.com" },
-    // SSN
-    { label: "SSN",             regex: /\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b/g,                          replacement: () => "XXX-XX-XXXX" },
-    // Dates of birth / dates (MM/DD/YYYY or similar)
-    { label: "date",            regex: /\b(0?[1-9]|1[0-2])[\/\-](0?[1-9]|[12]\d|3[01])[\/\-](\d{2}|\d{4})\b/g, replacement: () => "a date of birth" },
-    // Medical record / ID numbers (6+ digit standalone numbers)
-    { label: "ID number",       regex: /\b\d{6,}\b/g,                                                replacement: () => "XXXXXXXX" },
-    // Full names — two or more capitalized words not at sentence start
-    { label: "name",            regex: /(?<![.!?]\s)(?<!\n)\b([A-Z][a-z]{1,15})(\s[A-Z][a-z]{1,15}){1,2}\b/g,
-      replacement: (match) => {
-        const lower = match.toLowerCase();
-        if (["monday","tuesday","wednesday","thursday","friday","saturday","sunday",
-             "january","february","march","april","june","july","august","september",
-             "october","november","december","south","north","east","west","united",
-             "states","new york","living room","bedroom","classroom"].some(w => lower.includes(w))) return match;
-        return FAKE_NAMES[Math.floor(Math.random() * FAKE_NAMES.length)];
-      }
-    },
-  ];
-
-  function scrubPII(text) {
-    let scrubbed = text;
-    const found = [];
-    PII_PATTERNS.forEach(({ label, regex, replacement }) => {
-      scrubbed = scrubbed.replace(regex, (match) => {
-        found.push({ label, original: match });
-        return typeof replacement === "function" ? replacement(match) : replacement;
-      });
-    });
-    return { scrubbed, found };
-  }
-
-  function scrubAllInputs() {
-    const fields = ["verb", "location", "objects", "supporting", "details"];
-    const allFound = [];
-    fields.forEach(id => {
-      const el = document.getElementById(id);
-      if (!el || !el.value.trim()) return;
-      const { scrubbed, found } = scrubPII(el.value);
-      if (found.length) {
-        el.value = scrubbed;
-        allFound.push(...found);
-      }
-    });
-    if (allFound.length) {
-      const types = [...new Set(allFound.map(f => f.label))].join(", ");
-      const originals = allFound.map(f => `<span class="pii-replaced">${f.original}</span>`).join(", ");
-      const el = document.getElementById("piiWarning");
-      el.innerHTML = `<strong>⚠️ We noticed personal information in your prompt.</strong>
-        We detected and removed: ${originals} (${types}). Your inputs have been updated to keep this session HIPAA compliant.`;
-      el.classList.add("visible");
-    }
-  }
-
-  // Scrub on blur of each input field
-  ["verb", "location", "objects", "supporting"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener("blur", scrubAllInputs);
-  });
-
-  // ── Tab switching ─────────────────────────────────────────────────────────
-  function switchTab(tab, btn) {
-    document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
-    document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
-    document.getElementById(`tab-${tab}`).classList.add("active");
-    btn.classList.add("active");
-  }
-
-  // ── Kontext: reference images ─────────────────────────────────────────────
-  let refImageBlob      = null;
-  let refAdultImageBlob = null;
-
-  function handleRefFile(file) {
-    if (!file) return;
-    refImageBlob = file;
-    const preview = document.getElementById("refPreview");
-    preview.src = URL.createObjectURL(file);
-    preview.style.display = "block";
-    document.querySelector("#refDrop strong").textContent = "✓ " + file.name;
-  }
-  function handleRefDrop(e) {
-    e.preventDefault();
-    document.getElementById("refDrop").classList.remove("drag-over");
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith("image/")) handleRefFile(file);
-  }
-
-  function handleRefAdultFile(file) {
-    if (!file) return;
-    refAdultImageBlob = file;
-    const preview = document.getElementById("refAdultPreview");
-    preview.src = URL.createObjectURL(file);
-    preview.style.display = "block";
-    document.querySelector("#refAdultDrop strong").textContent = "✓ " + file.name;
-  }
-  function handleRefAdultDrop(e) {
-    e.preventDefault();
-    document.getElementById("refAdultDrop").classList.remove("drag-over");
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith("image/")) handleRefAdultFile(file);
-  }
-
-  // Stitch child (left) + adult (right) into one image for Kontext
-  function stitchImages(childBlob, adultBlob) {
-    return new Promise((resolve) => {
-      const childImg = new Image();
-      const adultImg = new Image();
-      const childUrl = URL.createObjectURL(childBlob);
-      const adultUrl = URL.createObjectURL(adultBlob);
-      childImg.onload = () => {
-        adultImg.onload = () => {
-          const h  = Math.max(childImg.naturalHeight, adultImg.naturalHeight);
-          const cw = Math.round(childImg.naturalWidth  * (h / childImg.naturalHeight));
-          const aw = Math.round(adultImg.naturalWidth  * (h / adultImg.naturalHeight));
-          const canvas = document.createElement("canvas");
-          canvas.width  = cw + aw;
-          canvas.height = h;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(childImg, 0, 0, cw, h);
-          ctx.drawImage(adultImg, cw, 0, aw, h);
-          URL.revokeObjectURL(childUrl);
-          URL.revokeObjectURL(adultUrl);
-          resolve(canvas.toDataURL("image/png"));
-        };
-        adultImg.src = adultUrl;
-      };
-      childImg.src = childUrl;
-    });
-  }
-
-  let selectedSkinTone = "";
-  let skinToneAppended = ""; // tracks what we last appended to the field
-
-  function selectSkinTone(btn) {
-    const input = document.getElementById("k-supporting");
-    const tone  = btn.dataset.tone;
-
-    // Remove previously appended skin tone from field
-    if (skinToneAppended && input.value.endsWith(skinToneAppended)) {
-      input.value = input.value.slice(0, -skinToneAppended.length).trimEnd();
-    }
-
-    document.querySelectorAll(".skin-btn").forEach(b => b.classList.remove("active"));
-
-    if (tone && tone !== selectedSkinTone) {
-      // Append tone to the field so user sees it and it carries full prompt weight
-      const toAppend = ` with ${tone}`;
-      input.value   = (input.value.trim() + toAppend);
-      skinToneAppended  = toAppend;
-      selectedSkinTone  = tone;
-      btn.classList.add("active");
-    } else {
-      // Same button clicked again — deselect
-      selectedSkinTone = "";
-      skinToneAppended = "";
-    }
-  }
-
-  const SKIN_TONE_WORDS = ["dark","light","pale","brown","black","white","tan","olive","fair","asian","latino","latina","hispanic","south asian","east asian","african","caucasian","mixed","biracial","medium","deep","rich","warm","cool"];
-  function adultHasSkinTone(text) { return SKIN_TONE_WORDS.some(w => text.toLowerCase().includes(w)); }
-  function kShowPIIWarning(found) {
-    const el = document.getElementById("k-piiWarning");
-    el.innerHTML = `<strong>⚠️ Personal information detected and removed.</strong> We found and replaced: ${[...new Set(found)].join(", ")}. Your inputs have been updated to keep this session HIPAA compliant.`;
-    el.classList.add("visible");
-  }
-  function kHidePIIWarning() { document.getElementById("k-piiWarning").classList.remove("visible"); }
-
-  // ── Kontext: generate ─────────────────────────────────────────────────────
-  async function generateKontext() {
+  async function generateImage() {
     const falKey = document.getElementById("falKey").value.trim();
+    if (!falKey) { showError("Enter your fal.ai key at the top."); return; }
 
-    if (!falKey)       { kShowError("Enter your fal.ai key at the top."); return; }
-    if (!refImageBlob) { kShowError("Upload a reference image of the character first."); return; }
-    if (!document.getElementById("k-verb").value.trim())     { kShowError("Enter an action."); return; }
-    if (!document.getElementById("k-location").value.trim()) { kShowError("Enter a location."); return; }
+    const char1 = chars[0];
+    if (!char1.charId) { showError("Select a character for Character 1 first."); return; }
+    if (!char1.refBlob) { showError("Character image not loaded — please re-select the character."); return; }
 
-    const verb       = document.getElementById("k-verb").value.trim();
-    const location   = document.getElementById("k-location").value.trim();
-    const objects    = document.getElementById("k-objects").value.trim();
-    const supporting = document.getElementById("k-supporting").value.trim();
-    const details    = document.getElementById("k-details").value.trim();
+    const char1Action = document.getElementById("slot-0-action").value.trim();
+    if (!char1Action) { showError("Enter what Character 1 is doing."); return; }
 
-    const hasAdult      = supporting && !["none","no","n/a"].includes(supporting.toLowerCase().trim());
+    const location = document.getElementById("gen-location").value.trim();
+    if (!location) { showError("Enter a location."); return; }
+
+    const objects = document.getElementById("gen-objects").value.trim();
+    const details = document.getElementById("gen-details").value.trim();
+
+    const hasChar2    = slot1Visible && chars[1]?.charId && chars[1]?.refBlob;
+    const char2       = chars[1];
+    const char2Action = slot1Visible ? document.getElementById("slot-1-action").value.trim() : "";
+
     const objectsClause = objects ? `, ${objects} clearly visible` : "";
-    const soloClause    = hasAdult ? "" : ", only one child in the scene, no other people";
     const detailsStr    = details ? `${details}. ` : "";
 
-    const hasAdultRef = !!refAdultImageBlob;
-
-    let adultDesc, prompt;
-    if (hasAdultRef && hasAdult) {
-      // Adult reference image provided — describe by position in stitched image
-      adultDesc = `${supporting} (right figure in reference image), much taller than the child, adult proportions`;
-      prompt = `${detailsStr}${location}. The reference image shows two characters side by side: the child on the left and the adult on the right. Keep both characters' faces, hair, skin tones, and clothing identical to their respective figures in the reference. The child is actively ${verb}${objectsClause}. ${adultDesc} stands nearby, full body visible from head to toe${soloClause}. All characters fully visible from head to toe, no cropping. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.${details ? ` Important: ${details}.` : ""}`;
+    let prompt;
+    if (hasChar2) {
+      prompt = `${detailsStr}${location}. The reference image shows two characters: ${char1.label} on the left and ${char2.label} on the right. The ${char1.label} (left figure) is ${char1Action}${objectsClause}. The ${char2.label} (right figure) is ${char2Action}. Keep both characters' faces, hair, skin tones, and clothing identical to their respective figures in the reference. All characters fully visible from head to toe. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.`;
     } else {
-      adultDesc = hasAdult ? `${supporting}, wearing completely different clothes than the child, much taller, adult proportions` : "";
-      prompt = `${detailsStr}${location}. The child from the reference image is actively ${verb}${objectsClause}${hasAdult ? `. ${adultDesc} stands nearby, full body visible from head to toe` : ""}${soloClause}. All characters fully visible from head to toe, no cropping of heads or feet. Keep the child's face, hair, skin tone, and clothing identical to the reference. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.${details ? ` Important: ${details}.` : ""}`;
+      prompt = `${detailsStr}${location}. The child from the reference image is ${char1Action}${objectsClause}. Only one character in the scene. Full body visible from head to toe. Keep the child's face, hair, skin tone, and clothing identical to the reference. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.`;
     }
 
-    kSetLoading(true);
-    kClearError();
-    document.getElementById("k-result").classList.remove("visible");
+    setGenLoading(true, "Generating — ~15–30 seconds");
+    clearError();
 
     try {
-      // Build reference: stitch child+adult if adult ref provided, else just child
-      const refUrl = hasAdultRef
-        ? await stitchImages(refImageBlob, refAdultImageBlob)
-        : await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(refImageBlob);
-          });
+      // Build reference image
+      let refDataUrl;
+      if (hasChar2) {
+        refDataUrl = await stitchImages(char1.refBlob, char2.refBlob);
+      } else {
+        refDataUrl = await blobToDataUrl(char1.refBlob);
+      }
 
-      // Call FLUX Kontext
       const res = await fetch("https://fal.run/fal-ai/flux-kontext/dev", {
         method: "POST",
         headers: {
@@ -1199,7 +773,7 @@ If no PII found, return original text and empty found array.`
         },
         body: JSON.stringify({
           prompt,
-          image_url: refUrl,
+          image_url: refDataUrl,
           image_size: { width: 1024, height: 1024 },
           num_inference_steps: 35,
           guidance_scale: 12.0,
@@ -1212,48 +786,89 @@ If no PII found, return original text and empty found array.`
       const url  = data?.images?.[0]?.url;
       if (!url) throw new Error("No image returned.");
 
-      // Store params for landscape re-generation in crop tool
-      _lastKontextBody = { prompt, image_url: refUrl, num_inference_steps: 35, guidance_scale: 12.0, num_images: 1 };
-
-      // Fetch as blob so canvas can read it without CORS taint
+      // Fetch as blob to avoid CORS canvas taint
       const imgBlob = await (await fetch(url)).blob();
       const blobUrl = URL.createObjectURL(imgBlob);
-      document.getElementById("k-resultImg").src = blobUrl;
-      document.getElementById("k-result").classList.add("visible");
+
+      showResult(blobUrl);
       initCropTool(blobUrl);
+      document.getElementById("regen-btn").disabled = false;
+
     } catch(e) {
-      kShowError(e.message);
+      showError(e.message);
     } finally {
-      kSetLoading(false);
+      setGenLoading(false);
     }
   }
 
-  function kSetLoading(on) {
-    document.getElementById("k-loading").classList.toggle("visible", on);
-    document.getElementById("kontextBtn").disabled = on;
-    document.getElementById("kontextBtn").textContent = on ? "Generating…" : "Generate";
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function blobToDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
   }
-  function kShowError(msg) {
-    const el = document.getElementById("k-errorMsg");
+
+  function stitchImages(blob1, blob2) {
+    return new Promise(resolve => {
+      const img1 = new Image(), img2 = new Image();
+      const url1 = URL.createObjectURL(blob1), url2 = URL.createObjectURL(blob2);
+      img1.onload = () => {
+        img2.onload = () => {
+          const h  = Math.max(img1.naturalHeight, img2.naturalHeight);
+          const w1 = Math.round(img1.naturalWidth * (h / img1.naturalHeight));
+          const w2 = Math.round(img2.naturalWidth * (h / img2.naturalHeight));
+          const canvas = document.createElement("canvas");
+          canvas.width = w1 + w2; canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img1, 0, 0, w1, h);
+          ctx.drawImage(img2, w1, 0, w2, h);
+          URL.revokeObjectURL(url1); URL.revokeObjectURL(url2);
+          resolve(canvas.toDataURL("image/png"));
+        };
+        img2.src = url2;
+      };
+      img1.src = url1;
+    });
+  }
+
+  function setGenLoading(on, msg) {
+    document.getElementById("gen-loading").classList.toggle("visible", on);
+    document.getElementById("gen-btn").disabled = on;
+    document.getElementById("gen-btn").textContent = on ? "Generating…" : "Generate";
+    if (msg) document.getElementById("gen-loading-msg").textContent = msg;
+  }
+
+  function showResult(blobUrl) {
+    const img = document.getElementById("gen-result-img");
+    img.src = blobUrl;
+    img.style.display = "block";
+    document.getElementById("result-placeholder").style.display = "none";
+    document.getElementById("result-area").classList.add("has-image");
+  }
+
+  function showError(msg) {
+    const el = document.getElementById("gen-error");
     el.textContent = msg;
     el.classList.add("visible");
   }
-  function kClearError() { document.getElementById("k-errorMsg").classList.remove("visible"); }
 
-  // ── Crop tool (pan + zoom) ────────────────────────────────────────────────
-  let cs = { scale: 1, ox: 0, oy: 0, natW: 0, natH: 0 }; // crop state
+  function clearError() {
+    document.getElementById("gen-error").classList.remove("visible");
+  }
 
-  let _cropDragSetup   = false;
-  let _lastKontextBody = null;
+  // ── Crop tool ─────────────────────────────────────────────────────────────
   function initCropTool(imgSrc) {
-    const tool  = document.getElementById("k-crop-tool");
-    const frame = document.getElementById("k-crop-frame");
-    const img   = document.getElementById("k-crop-img");
+    const tool  = document.getElementById("crop-tool");
+    const frame = document.getElementById("crop-frame");
+    const img   = document.getElementById("crop-img");
     img.src = imgSrc;
     img.onload = () => {
       cs.natW = img.naturalWidth;
       cs.natH = img.naturalHeight;
-      tool.style.display = "block"; // show first so frame has layout dimensions
+      tool.classList.add("visible");
       requestAnimationFrame(() => {
         const fw = frame.clientWidth;
         const fh = frame.clientHeight;
@@ -1268,16 +883,12 @@ If no PII found, return original text and empty found array.`
   }
 
   function applyCropTransform() {
-    document.getElementById("k-crop-img").style.transform =
+    document.getElementById("crop-img").style.transform =
       `translate(${cs.ox}px,${cs.oy}px) scale(${cs.scale})`;
   }
 
-  function clampCrop() {
-    // no clamping — allow free pan and zoom out
-  }
-
   function zoomCrop(delta) {
-    const frame = document.getElementById("k-crop-frame");
+    const frame = document.getElementById("crop-frame");
     const fw = frame.clientWidth, fh = frame.clientHeight;
     const newScale = Math.max(0.05, cs.scale + delta);
     const ratio = newScale / cs.scale;
@@ -1297,7 +908,7 @@ If no PII found, return original text and empty found array.`
       if (!drag) return;
       cs.ox = sox + (e.clientX - sx);
       cs.oy = soy + (e.clientY - sy);
-      clampCrop(); applyCropTransform();
+      applyCropTransform();
     });
     window.addEventListener("mouseup", () => { drag = false; frame.style.cursor = "grab"; });
     frame.addEventListener("touchstart", e => {
@@ -1309,7 +920,7 @@ If no PII found, return original text and empty found array.`
       if (!drag || e.touches.length !== 1) return;
       cs.ox = sox + (e.touches[0].clientX - sx);
       cs.oy = soy + (e.touches[0].clientY - sy);
-      clampCrop(); applyCropTransform();
+      applyCropTransform();
     }, { passive: false });
     frame.addEventListener("touchend", () => { drag = false; });
     frame.addEventListener("wheel", e => {
@@ -1319,35 +930,31 @@ If no PII found, return original text and empty found array.`
   }
 
   function applyCrop() {
-    const img   = document.getElementById("k-crop-img");
-    const frame = document.getElementById("k-crop-frame");
+    const img   = document.getElementById("crop-img");
+    const frame = document.getElementById("crop-frame");
     const fw = frame.clientWidth, fh = frame.clientHeight;
 
     const OUTW = 650, OUTH = 315;
     const scaleX = OUTW / fw, scaleY = OUTH / fh;
-    const drawX = cs.ox * scaleX, drawY = cs.oy * scaleY;
-    const drawW = cs.natW * cs.scale * scaleX, drawH = cs.natH * cs.scale * scaleY;
+    const drawX  = cs.ox * scaleX,           drawY  = cs.oy * scaleY;
+    const drawW  = cs.natW * cs.scale * scaleX, drawH = cs.natH * cs.scale * scaleY;
 
     const canvas = document.createElement("canvas");
     canvas.width = OUTW; canvas.height = OUTH;
     const ctx = canvas.getContext("2d");
 
-    // Layer 1: blurred stretched version of full image fills any empty areas
+    // Blurred background fill
     ctx.filter = "blur(28px) saturate(1.1)";
-    ctx.drawImage(img, -30, -30, OUTW + 60, OUTH + 60); // oversized to avoid blur edge fringing
+    ctx.drawImage(img, -30, -30, OUTW + 60, OUTH + 60);
     ctx.filter = "none";
 
-    // Layer 2: sharp positioned image on top
+    // Sharp image on top
     ctx.drawImage(img, drawX, drawY, drawW, drawH);
 
-    document.getElementById("k-resultImg").src = canvas.toDataURL("image/png");
-    document.getElementById("k-result").classList.add("visible");
-    document.getElementById("k-crop-tool").style.display = "none";
+    document.getElementById("gen-result-img").src = canvas.toDataURL("image/png");
+    document.getElementById("crop-tool").classList.remove("visible");
   }
 
-  // ── Init ──────────────────────────────────────────────────────────────────
-  renderChars();
 </script>
-
 </body>
 </html>
