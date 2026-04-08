@@ -652,56 +652,107 @@
 
     .picker-divider { height: 1px; background: #e5e7eb; flex-shrink: 0; }
 
-    .picker-filters-section {
-      padding: 20px 32px 14px;
+    .picker-filter-bar {
+      padding: 16px 32px 8px;
       flex-shrink: 0;
+      position: relative;
     }
-    .picker-filters-label {
-      font-size: 13px;
-      font-weight: 700;
-      color: #161616;
-      margin-bottom: 10px;
-    }
-    .picker-filters-row {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 4px 2px;
-    }
-    .filter-group-label {
-      font-size: 13px;
-      font-weight: 500;
-      color: #6b7280;
-      padding: 0 6px 0 2px;
-    }
-    .filter-chip {
+    .picker-filter-btn {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 8px;
+      padding: 8px 16px;
+      background: #fff;
+      border: 1.5px solid #CCCAC5;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .picker-filter-btn:hover,
+    .picker-filter-btn.open { border-color: #161616; color: #161616; }
+    .filter-badge {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      background: #161616;
+      color: #fff;
+      border-radius: 9px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 0 4px;
+      line-height: 1;
+    }
+    .filter-popover {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 32px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      width: 288px;
+      padding: 16px;
+      z-index: 10;
+    }
+    .filter-popover-group { margin-bottom: 16px; }
+    .filter-popover-group:last-child { margin-bottom: 0; }
+    .filter-popover-group-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+    .filter-popover-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .filter-popover-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       padding: 4px 10px;
+      border: 1px solid #e5e7eb;
       border-radius: 6px;
       font-size: 13px;
-      font-weight: 500;
       color: #374151;
       cursor: pointer;
       user-select: none;
-      transition: background 0.12s;
+      transition: border-color 0.12s;
     }
-    .filter-chip:hover { background: #f3f4f6; }
-    .filter-chip input[type="checkbox"] {
-      width: 15px;
-      height: 15px;
+    .filter-popover-chip:hover { border-color: #9ca3af; }
+    .filter-popover-chip input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
       accent-color: #161616;
       cursor: pointer;
       flex-shrink: 0;
     }
-    .filter-sep {
-      width: 1px;
-      height: 18px;
-      background: #d1d5db;
-      margin: 0 8px;
-      flex-shrink: 0;
+    .filter-popover-footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid #f3f4f6;
+      text-align: right;
     }
+    .filter-clear-btn {
+      background: none;
+      border: none;
+      font-size: 12px;
+      font-weight: 500;
+      color: #9ca3af;
+      cursor: pointer;
+      padding: 0;
+      transition: color 0.12s;
+    }
+    .filter-clear-btn:hover { color: #161616; }
 
     .picker-gallery-wrap {
       flex: 1;
@@ -1041,24 +1092,41 @@
     <div class="picker-divider"></div>
 
     <!-- Filters -->
-    <div class="picker-filters-section">
-      <div class="picker-filters-label">Filters</div>
-      <div class="picker-filters-row">
-        <span class="filter-group-label">Gender</span>
-        <label class="filter-chip"><input type="checkbox" id="f-male"   onchange="toggleFilter('gender','male',this.checked)"> Male</label>
-        <label class="filter-chip"><input type="checkbox" id="f-female" onchange="toggleFilter('gender','female',this.checked)"> Female</label>
-        <div class="filter-sep"></div>
-        <span class="filter-group-label">Age</span>
-        <label class="filter-chip"><input type="checkbox" id="f-child" onchange="toggleFilter('age','child',this.checked)"> Child</label>
-        <label class="filter-chip"><input type="checkbox" id="f-teen"  onchange="toggleFilter('age','teen',this.checked)"> Teen</label>
-        <label class="filter-chip"><input type="checkbox" id="f-adult" onchange="toggleFilter('age','adult',this.checked)"> Adult</label>
-        <div class="filter-sep"></div>
-        <span class="filter-group-label">Skin Tone</span>
-        <label class="filter-chip"><input type="checkbox" id="f-light"        onchange="toggleFilter('skinTone','light',this.checked)"> Light</label>
-        <label class="filter-chip"><input type="checkbox" id="f-light-medium" onchange="toggleFilter('skinTone','light-medium',this.checked)"> Light-Medium</label>
-        <label class="filter-chip"><input type="checkbox" id="f-medium"       onchange="toggleFilter('skinTone','medium',this.checked)"> Medium</label>
-        <label class="filter-chip"><input type="checkbox" id="f-tan"          onchange="toggleFilter('skinTone','tan',this.checked)"> Tan</label>
-        <label class="filter-chip"><input type="checkbox" id="f-deep"         onchange="toggleFilter('skinTone','deep',this.checked)"> Deep</label>
+    <div class="picker-filter-bar">
+      <button class="picker-filter-btn" id="picker-filter-btn" onclick="toggleFilterPopover(event)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+        Filters
+        <span class="filter-badge" id="filter-badge"></span>
+      </button>
+      <div class="filter-popover" id="filter-popover">
+        <div class="filter-popover-group">
+          <div class="filter-popover-group-label">Gender</div>
+          <div class="filter-popover-options">
+            <label class="filter-popover-chip"><input type="checkbox" id="f-male"   onchange="toggleFilter('gender','male',this.checked)"> Male</label>
+            <label class="filter-popover-chip"><input type="checkbox" id="f-female" onchange="toggleFilter('gender','female',this.checked)"> Female</label>
+          </div>
+        </div>
+        <div class="filter-popover-group">
+          <div class="filter-popover-group-label">Age</div>
+          <div class="filter-popover-options">
+            <label class="filter-popover-chip"><input type="checkbox" id="f-child" onchange="toggleFilter('age','child',this.checked)"> Child</label>
+            <label class="filter-popover-chip"><input type="checkbox" id="f-teen"  onchange="toggleFilter('age','teen',this.checked)"> Teen</label>
+            <label class="filter-popover-chip"><input type="checkbox" id="f-adult" onchange="toggleFilter('age','adult',this.checked)"> Adult</label>
+          </div>
+        </div>
+        <div class="filter-popover-group">
+          <div class="filter-popover-group-label">Skin Tone</div>
+          <div class="filter-popover-options">
+            <label class="filter-popover-chip"><input type="checkbox" id="f-light"        onchange="toggleFilter('skinTone','light',this.checked)"> Light</label>
+            <label class="filter-popover-chip"><input type="checkbox" id="f-light-medium" onchange="toggleFilter('skinTone','light-medium',this.checked)"> Light-Medium</label>
+            <label class="filter-popover-chip"><input type="checkbox" id="f-medium"       onchange="toggleFilter('skinTone','medium',this.checked)"> Medium</label>
+            <label class="filter-popover-chip"><input type="checkbox" id="f-tan"          onchange="toggleFilter('skinTone','tan',this.checked)"> Tan</label>
+            <label class="filter-popover-chip"><input type="checkbox" id="f-deep"         onchange="toggleFilter('skinTone','deep',this.checked)"> Deep</label>
+          </div>
+        </div>
+        <div class="filter-popover-footer">
+          <button class="filter-clear-btn" onclick="clearAllFilters()">Clear all</button>
+        </div>
       </div>
     </div>
 
@@ -1105,11 +1173,13 @@
   function openPicker(slotIndex) {
     pickerTargetSlot = slotIndex;
     pickerTempSelected = chars[slotIndex].charId; // pre-select current character
+    closeFilterPopover();
     renderPickerGallery();
     document.getElementById("picker-overlay").classList.add("visible");
   }
 
   function closePicker() {
+    closeFilterPopover();
     document.getElementById("picker-overlay").classList.remove("visible");
   }
 
@@ -1117,9 +1187,55 @@
     if (e.target === document.getElementById("picker-overlay")) closePicker();
   }
 
+  function toggleFilterPopover(e) {
+    e.stopPropagation();
+    const popover = document.getElementById("filter-popover");
+    const btn     = document.getElementById("picker-filter-btn");
+    const isOpen  = popover.style.display === "block";
+    popover.style.display = isOpen ? "none" : "block";
+    btn.classList.toggle("open", !isOpen);
+  }
+
+  function closeFilterPopover() {
+    const popover = document.getElementById("filter-popover");
+    const btn     = document.getElementById("picker-filter-btn");
+    if (popover) popover.style.display = "none";
+    if (btn) btn.classList.remove("open");
+  }
+
+  // Close popover when clicking anywhere outside it
+  document.addEventListener("click", function(e) {
+    const popover = document.getElementById("filter-popover");
+    const btn     = document.getElementById("picker-filter-btn");
+    if (popover && popover.style.display === "block" &&
+        btn && !popover.contains(e.target) && !btn.contains(e.target)) {
+      closeFilterPopover();
+    }
+  });
+
   function toggleFilter(group, value, checked) {
     if (checked) pickerFilters[group].add(value);
     else pickerFilters[group].delete(value);
+    updateFilterBadge();
+    renderPickerGallery();
+  }
+
+  function updateFilterBadge() {
+    const count  = pickerFilters.gender.size + pickerFilters.age.size + pickerFilters.skinTone.size;
+    const badge  = document.getElementById("filter-badge");
+    if (!badge) return;
+    badge.textContent    = count;
+    badge.style.display  = count > 0 ? "inline-flex" : "none";
+  }
+
+  function clearAllFilters() {
+    pickerFilters.gender.clear();
+    pickerFilters.age.clear();
+    pickerFilters.skinTone.clear();
+    ["f-male","f-female","f-child","f-teen","f-adult",
+     "f-light","f-light-medium","f-medium","f-tan","f-deep"]
+      .forEach(id => { const el = document.getElementById(id); if (el) el.checked = false; });
+    updateFilterBadge();
     renderPickerGallery();
   }
 
