@@ -1208,6 +1208,25 @@
     return `${h.cm} cm (${h.imperial}) tall`;
   }
 
+  function relativeHeightNote(charId1, charId2) {
+    const ch1 = BASE_CHARACTERS.find(c => c.id === charId1);
+    const ch2 = BASE_CHARACTERS.find(c => c.id === charId2);
+    if (!ch1 || !ch2) return "";
+    const h1 = CHARACTER_HEIGHTS[ch1.age];
+    const h2 = CHARACTER_HEIGHTS[ch2.age];
+    if (!h1 || !h2 || h1.cm === h2.cm) return "";
+    const [taller, shorter, tallerH, shorterH] =
+      h1.cm >= h2.cm ? [ch1, ch2, h1, h2] : [ch2, ch1, h2, h1];
+    const ratio = shorterH.cm / tallerH.cm;
+    if (ratio < 0.78) {
+      return ` Size difference is critical: the ${shorter.age} is significantly shorter — their head reaches only to the ${taller.age}'s shoulder. Enforce this height difference strictly.`;
+    }
+    if (ratio < 0.90) {
+      return ` The ${shorter.age} is noticeably shorter than the ${taller.age}.`;
+    }
+    return ` The ${shorter.age} is slightly shorter than the ${taller.age}.`;
+  }
+
   // ── State ─────────────────────────────────────────────────────────────────
   const chars = [
     { charId: null, label: "", refBlob: null },
@@ -1442,10 +1461,11 @@
     const char2Height = hasChar2 ? charHeightDesc(char2.charId) : "";
     const char1HeightClause = char1Height ? ` (${char1Height})` : "";
     const char2HeightClause = char2Height ? ` (${char2Height})` : "";
+    const heightRelNote = hasChar2 ? relativeHeightNote(char1.charId, char2.charId) : "";
 
     let prompt;
     if (hasChar2) {
-      prompt = `${detailsStr}${location}. The reference image shows two characters: ${char1.label}${char1HeightClause} on the left and ${char2.label}${char2HeightClause} on the right. The ${char1.label} (left figure) is ${char1Action}${objectsClause}. The ${char2.label} (right figure) is ${char2Action}. Keep both characters' faces, hair, skin tones, and clothing identical to their respective figures in the reference. All characters fully visible from head to toe. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.`;
+      prompt = `${detailsStr}${location}. The reference image shows two characters: ${char1.label}${char1HeightClause} on the left and ${char2.label}${char2HeightClause} on the right.${heightRelNote} The ${char1.label} (left figure) is ${char1Action}${objectsClause}. The ${char2.label} (right figure) is ${char2Action}. Keep both characters' faces, hair, skin tones, and clothing identical to their respective figures in the reference. All characters fully visible from head to toe. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.`;
     } else {
       prompt = `${detailsStr}${location}. The character from the reference image${char1HeightClause} is ${char1Action}${objectsClause}. Only one character in the scene. Full body visible from head to toe. Keep the character's face, hair, skin tone, and clothing identical to the reference. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.`;
     }
