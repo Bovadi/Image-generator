@@ -416,15 +416,14 @@
 
     /* Result image */
     .result-area {
-      flex: 1;
       border-radius: 16px;
-      overflow: hidden;
       background: #ffffff;
       border: 1px solid #161616;
-      min-height: 400px;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 24px;
+      width: 100%;
     }
 
     .result-placeholder {
@@ -437,12 +436,12 @@
 
     #gen-result-img {
       max-width: 100%;
-      max-height: 100%;
+      max-height: 480px;
       width: auto;
       height: auto;
       display: none;
       object-fit: contain;
-      border-radius: 14px;
+      border-radius: 8px;
     }
 
     /* Crop tool */
