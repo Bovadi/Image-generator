@@ -1275,8 +1275,10 @@
       const card = document.createElement("div");
       const isSelected = ch.id === pickerTempSelected;
       card.className = "picker-card" + (isSelected ? " selected" : "");
+      // Use cached transparent blob URL if available; otherwise cache-bust the file path
+      const imgSrc = ch.blobUrl || (ch.refPath + "?cb=" + Date.now());
       card.innerHTML = `
-        <img src="${ch.refPath}" alt="${ch.label}" onerror="this.style.display='none'" />
+        <img src="${imgSrc}" alt="${ch.label}" onerror="this.style.display='none'" />
         <div class="picker-check">
           <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><polyline points="2,7 6,11 12,3" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
@@ -1299,31 +1301,51 @@
   async function selectCharacter(slotIndex, ch) {
     closePicker();
 
-    // Show image immediately in slot
     const img   = document.getElementById(`slot-${slotIndex}-img`);
     const empty = document.getElementById(`slot-${slotIndex}-empty`);
-    img.src = ch.refPath;
-    img.style.display = "block";
-    empty.style.display = "none";
 
     // Mark box as filled so hover overlay activates
     const box = document.getElementById(`slot-${slotIndex}-box`);
     if (box) box.classList.add("has-char");
 
-    // Enable Edit button now that a character is selected
+    // Enable Edit button
     const editBtn = document.getElementById(`slot-${slotIndex}-edit`);
     if (editBtn) editBtn.disabled = false;
 
-    // Load as blob, strip white background, update thumbnail with clean version
+    // Hide empty state; show thumb-loading spinner while we process
+    empty.style.display = "none";
+    img.style.display = "none";
+    const thumbLoading = document.getElementById(`slot-${slotIndex}-thumb-loading`);
+    if (thumbLoading) thumbLoading.style.display = "flex";
+
     chars[slotIndex] = { charId: ch.id, label: ch.label, refBlob: null };
+
+    // Fetch fresh bytes (cache:'reload' bypasses browser cache), strip background
+    let cleanBlob;
     try {
-      const rawBlob  = await imgToBlob(ch.refPath);
-      const cleanBlob = await removeWhiteBg(rawBlob);
-      chars[slotIndex].refBlob = cleanBlob;
-      // Replace thumbnail src with the transparent version
-      const cleanUrl = URL.createObjectURL(cleanBlob);
-      img.src = cleanUrl;
-    } catch(e) {}
+      const res = await fetch(ch.refPath, { cache: "reload" });
+      const rawBlob = await res.blob();
+      cleanBlob = await removeWhiteBg(rawBlob);
+    } catch(fetchErr) {
+      // Fallback for file:// — load via canvas
+      try {
+        const rawBlob = await imgToBlob(ch.refPath);
+        cleanBlob = await removeWhiteBg(rawBlob);
+      } catch(e) {
+        // Last resort: show raw image
+        img.src = ch.refPath;
+        img.style.display = "block";
+        if (thumbLoading) thumbLoading.style.display = "none";
+        return;
+      }
+    }
+
+    chars[slotIndex].refBlob = cleanBlob;
+    const cleanUrl = URL.createObjectURL(cleanBlob);
+    ch.blobUrl = cleanUrl;   // cache so picker reuses transparent version
+    img.src = cleanUrl;
+    img.style.display = "block";
+    if (thumbLoading) thumbLoading.style.display = "none";
   }
 
   // Load a local image path into a Blob via canvas (avoids fetch() CORS on file://)
