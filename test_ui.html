@@ -1111,9 +1111,6 @@
   }
 
   async function submitEdit() {
-    const falKey = document.getElementById("falKey").value.trim();
-    if (!falKey) { showEditError("Enter your fal.ai key at the top."); return; }
-
     const userPrompt = document.getElementById("edit-prompt-input").value.trim();
     if (!userPrompt) { showEditError("Please describe what you'd like to change."); return; }
 
@@ -1161,7 +1158,7 @@
               { inlineData: { mimeType, data: base64 } },
               { text: prompt }
             ]}],
-            generationConfig: { responseModalities: ["image", "text"] }
+            generationConfig: { responseModalities: ["TEXT", "IMAGE"] }
           })
         }
       );
