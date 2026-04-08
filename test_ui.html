@@ -1134,8 +1134,9 @@
       const slot = chars[slotIndex];
       if (!slot.charId) { alert("Select a character first."); return; }
       document.getElementById("edit-modal-title").textContent = "Edit Character";
-      const ch = BASE_CHARACTERS.find(c => c.id === slot.charId);
-      if (ch) { preview.src = ch.refPath; preview.style.display = "block"; }
+      // Prefer the latest edited URL; fall back to original ref image
+      const currentSrc = slot.editedUrl || BASE_CHARACTERS.find(c => c.id === slot.charId)?.refPath;
+      if (currentSrc) { preview.src = currentSrc; preview.style.display = "block"; }
       else { preview.style.display = "none"; }
     } else {
       const img = document.getElementById("gen-result-img");
@@ -1246,8 +1247,9 @@
       const resultUrl    = URL.createObjectURL(resultBlob);
 
       if (type === 'character') {
-        // Replace character reference blob + thumbnail
+        // Replace character reference blob + thumbnail; store latest URL for modal reopen
         chars[slotIndex].refBlob = resultBlob;
+        chars[slotIndex].editedUrl = resultUrl;
         const img = document.getElementById(`slot-${slotIndex}-img`);
         img.src = resultUrl;
         img.style.display = "block";
