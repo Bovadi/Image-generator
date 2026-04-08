@@ -790,22 +790,46 @@
 </div><!-- end modal-wrapper -->
 
 <!-- ── Edit Modal ── -->
-<div id="edit-overlay" onclick="editOverlayClick(event)" class="overlay-anim" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1001;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:20px;padding:28px;width:560px;max-width:95vw;box-shadow:0 24px 64px rgba(0,0,0,0.3);">
-    <div id="edit-modal-title" style="font-size:17px;font-weight:700;color:#161616;margin-bottom:4px;"></div>
-    <div id="edit-modal-sub" style="font-size:13px;color:#6b7280;margin-bottom:16px;"></div>
-    <img id="edit-modal-preview" src="" alt="" style="display:none;width:100%;max-height:320px;object-fit:contain;border-radius:12px;border:1px solid #e5e7eb;background:#f9fafb;margin-bottom:16px;" />
-    <label style="font-size:12px;font-weight:700;color:#6b7280;display:block;margin-bottom:6px;">WHAT WOULD YOU LIKE TO EDIT?</label>
-    <textarea id="edit-prompt-input" placeholder="Describe what you'd like to change…" style="width:100%;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;resize:vertical;min-height:80px;outline:none;"></textarea>
-    <div id="edit-error" style="display:none;background:#fff5f5;border:1px solid #fed7d7;border-radius:8px;padding:8px 12px;font-size:13px;color:#c53030;margin-top:10px;"></div>
-    <div style="display:flex;gap:10px;margin-top:16px;align-items:center;">
-      <button id="edit-close-btn" onclick="closeEditModal()" style="flex:1;padding:10px;border:1.5px solid #161616;border-radius:10px;background:#fff;font-size:13px;font-weight:600;color:#161616;cursor:pointer;transition:background 0.15s,color 0.15s;" onmouseover="this.style.background='#161616';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#161616'">Cancel</button>
-      <button id="edit-submit-btn" onclick="submitEdit()" style="flex:2;padding:10px;background:#fff;color:#161616;border:1.5px solid #161616;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:background 0.15s,color 0.15s;" onmouseover="this.style.background='#161616';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#161616'">Apply Edit</button>
+<div id="edit-overlay" onclick="editOverlayClick(event)" class="overlay-anim" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1001;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,0.25);">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;">
+      <span id="edit-modal-title" style="font-size:17px;font-weight:700;color:#161616;"></span>
+      <button onclick="closeEditModal()" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;color:#9ca3af;border-radius:6px;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
     </div>
-    <div id="edit-loading" style="display:none;align-items:center;gap:10px;margin-top:12px;">
-      <div style="width:18px;height:18px;border:2.5px solid #e5e7eb;border-top-color:#161616;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;"></div>
-      <span style="font-size:13px;color:#6b7280;font-weight:600;">Applying edit — ~15 seconds</span>
+    <div style="height:1px;background:#e5e7eb;margin:0 24px;"></div>
+
+    <!-- Image preview with loading overlay -->
+    <div style="padding:20px 24px 0;">
+      <div id="edit-preview-wrap" style="position:relative;background:#F8F5EF;border-radius:12px;overflow:hidden;min-height:200px;display:flex;align-items:center;justify-content:center;">
+        <img id="edit-modal-preview" src="" alt="" style="display:none;max-width:100%;max-height:340px;object-fit:contain;border-radius:12px;" />
+        <!-- Loading overlay on image -->
+        <div id="edit-img-loading" style="display:none;position:absolute;inset:0;background:rgba(248,245,239,0.85);border-radius:12px;flex-direction:column;align-items:center;justify-content:center;gap:12px;transition:opacity 0.2s;">
+          <div style="width:32px;height:32px;border:3px solid #ccfbf1;border-top-color:#2B9996;border-radius:50%;animation:spin 0.7s linear infinite;"></div>
+          <span style="font-size:13px;font-weight:600;color:#2B9996;text-align:center;padding:0 16px;">Working on your edit…<br><span style="font-weight:400;color:#6b7280;">Feel free to close this window</span></span>
+        </div>
+      </div>
     </div>
+
+    <!-- Prompt -->
+    <div style="padding:16px 24px 0;">
+      <label style="font-size:11px;font-weight:700;color:#2B9996;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:8px;">What would you like to edit?</label>
+      <textarea id="edit-prompt-input" placeholder="Describe what you'd like to change…" style="width:100%;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;resize:vertical;min-height:88px;outline:none;transition:border-color 0.15s;" onfocus="this.style.borderColor='#161616'" onblur="this.style.borderColor='#e5e7eb'"></textarea>
+      <div id="edit-error" style="display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 12px;font-size:13px;color:#dc2626;margin-top:8px;"></div>
+    </div>
+
+    <!-- Buttons -->
+    <div style="display:flex;gap:12px;padding:16px 24px 24px;">
+      <button id="edit-submit-btn" onclick="submitEdit()" style="flex:1;padding:11px 16px;background:#F8F5EF;color:#161616;border:1px solid #CCCAC5;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.15s,border-color 0.15s;" onmouseover="this.style.borderColor='#161616'" onmouseout="this.style.borderColor='#CCCAC5'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487z"/></svg>
+        <span id="edit-submit-label">Edit</span>
+      </button>
+      <button id="edit-close-btn" onclick="closeEditModal()" style="flex:1;padding:11px 16px;background:#fff;color:#161616;border:1px solid #CCCAC5;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:background 0.15s,border-color 0.15s;" onmouseover="this.style.borderColor='#161616'" onmouseout="this.style.borderColor='#CCCAC5'">Save and close</button>
+    </div>
+
   </div>
 </div>
 
@@ -1196,8 +1220,7 @@
       // Update modal preview to latest result, stay open for further edits
       document.getElementById("edit-modal-preview").src = resultUrl;
       document.getElementById("edit-prompt-input").value = "";
-      document.getElementById("edit-modal-sub").textContent = "Edit applied. Make another change or close.";
-      document.getElementById("edit-close-btn").textContent = "Close";
+      document.getElementById("edit-close-btn").textContent = "Save and close";
       setTimeout(() => document.getElementById("edit-prompt-input").focus(), 50);
     } catch(e) {
       showEditError(e.message);
@@ -1207,9 +1230,14 @@
   }
 
   function setEditLoading(on) {
-    document.getElementById("edit-loading").style.display = on ? "flex" : "none";
-    document.getElementById("edit-submit-btn").disabled = on;
-    document.getElementById("edit-submit-btn").textContent = on ? "Applying…" : "Apply Edit";
+    const imgLoading = document.getElementById("edit-img-loading");
+    const submitBtn  = document.getElementById("edit-submit-btn");
+    const submitLabel = document.getElementById("edit-submit-label");
+    imgLoading.style.display = on ? "flex" : "none";
+    submitBtn.disabled = on;
+    submitBtn.style.opacity = on ? "0.6" : "1";
+    submitBtn.style.cursor  = on ? "not-allowed" : "pointer";
+    submitLabel.textContent = on ? "Editing…" : "Edit";
   }
 
   function showEditError(msg) {
