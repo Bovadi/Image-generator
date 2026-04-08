@@ -1100,9 +1100,6 @@
       const slot = chars[slotIndex];
       if (!slot.charId) { alert("Select a character first."); return; }
       document.getElementById("edit-modal-title").textContent = "Edit Character";
-      document.getElementById("edit-modal-sub").textContent =
-        "Changes apply to this character only — clothing, hair, expression, accessories.";
-      // Show character image (full-res path)
       const ch = BASE_CHARACTERS.find(c => c.id === slot.charId);
       if (ch) { preview.src = ch.refPath; preview.style.display = "block"; }
       else { preview.style.display = "none"; }
@@ -1110,8 +1107,6 @@
       const img = document.getElementById("gen-result-img");
       if (!img.src || img.style.display === "none") { alert("Generate an image first."); return; }
       document.getElementById("edit-modal-title").textContent = "Edit Image";
-      document.getElementById("edit-modal-sub").textContent =
-        "Describe what you'd like to change in the generated image.";
       preview.src = img.src;
       preview.style.display = "block";
     }
@@ -1119,9 +1114,9 @@
     _editContext = { type, slotIndex };
     document.getElementById("edit-prompt-input").value = "";
     document.getElementById("edit-error").style.display = "none";
-    document.getElementById("edit-loading").style.display = "none";
+    document.getElementById("edit-img-loading").style.display = "none";
     document.getElementById("edit-submit-btn").disabled = false;
-    document.getElementById("edit-close-btn").textContent = "Cancel";
+    document.getElementById("edit-close-btn").textContent = "Save and close";
     document.getElementById("edit-overlay").style.display = "flex";
     setTimeout(() => document.getElementById("edit-prompt-input").focus(), 50);
   }
