@@ -602,93 +602,192 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.45);
+      background: rgba(0,0,0,0.4);
       z-index: 100;
       align-items: center;
       justify-content: center;
+      padding: 24px;
     }
-
     #picker-overlay.visible { display: flex; }
 
     .picker-modal {
       background: #fff;
-      border-radius: 16px;
-      padding: 28px;
-      width: 500px;
-      max-width: 95vw;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-
-    .picker-modal h2 {
-      font-size: 17px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .picker-modal p {
-      font-size: 13px;
-      color: #6b7280;
-      margin-bottom: 20px;
-    }
-
-    .picker-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-
-    .picker-card {
-      border: 1.5px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 14px 10px 12px;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.15s;
-    }
-
-    .picker-card:hover:not(.disabled) { border-color: #161616; background: #f0fdfa; }
-    .picker-card.disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .picker-thumb {
-      width: 70px;
-      height: 86px;
-      margin: 0 auto 10px;
-      border-radius: 8px;
-      background: #f3f4f6;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 960px;
+      max-height: 90vh;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 40px;
+      flex-direction: column;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.18);
       overflow: hidden;
     }
 
-    .picker-thumb img { width: 100%; height: 100%; object-fit: cover; }
-
-    .picker-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: #2d2d2d;
+    .picker-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 32px 24px;
+      flex-shrink: 0;
     }
+    .picker-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #161616;
+    }
+    .picker-close-btn {
+      width: 32px;
+      height: 32px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+    .picker-close-btn:hover { background: #f3f4f6; color: #161616; }
+
+    .picker-divider { height: 1px; background: #e5e7eb; flex-shrink: 0; }
+
+    .picker-filters-section {
+      padding: 20px 32px 14px;
+      flex-shrink: 0;
+    }
+    .picker-filters-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #161616;
+      margin-bottom: 10px;
+    }
+    .picker-filters-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px 2px;
+    }
+    .filter-group-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #6b7280;
+      padding: 0 6px 0 2px;
+    }
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.12s;
+    }
+    .filter-chip:hover { background: #f3f4f6; }
+    .filter-chip input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      accent-color: #161616;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .filter-sep {
+      width: 1px;
+      height: 18px;
+      background: #d1d5db;
+      margin: 0 8px;
+      flex-shrink: 0;
+    }
+
+    .picker-gallery-wrap {
+      flex: 1;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 8px 32px 24px;
+    }
+    .picker-gallery {
+      display: flex;
+      gap: 12px;
+      height: 100%;
+      min-height: 240px;
+      align-items: flex-start;
+      padding-bottom: 2px;
+    }
+    .picker-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 220px;
+      font-size: 14px;
+      color: #9ca3af;
+    }
+
+    .picker-card {
+      width: 158px;
+      min-height: 220px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 14px;
+      background: #f9fafb;
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      overflow: visible;
+    }
+    .picker-card:hover { border-color: #9ca3af; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .picker-card.selected { border: 2px solid #161616; }
+
+    .picker-card img {
+      width: 130px;
+      height: 190px;
+      object-fit: contain;
+      display: block;
+      pointer-events: none;
+    }
+
+    .picker-check {
+      display: none;
+      position: absolute;
+      bottom: -9px;
+      right: -9px;
+      width: 26px;
+      height: 26px;
+      background: #161616;
+      border-radius: 50%;
+      border: 2.5px solid #fff;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+    .picker-card.selected .picker-check { display: flex; }
 
     .picker-footer {
-      margin-top: 20px;
-      text-align: right;
+      padding: 14px 32px 24px;
+      display: flex;
+      justify-content: flex-end;
+      border-top: 1px solid #f3f4f6;
+      flex-shrink: 0;
     }
-
-    .btn-cancel {
-      padding: 8px 18px;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 8px;
+    .picker-save-btn {
+      padding: 11px 48px;
       background: #fff;
-      font-size: 13px;
+      border: 1.5px solid #CCCAC5;
+      border-radius: 10px;
+      font-size: 14px;
       font-weight: 600;
-      color: #2d2d2d;
+      color: #161616;
       cursor: pointer;
+      transition: border-color 0.15s;
     }
-
-    .btn-cancel:hover { background: #f9fafb; }
+    .picker-save-btn:hover { border-color: #161616; }
 
     @media (max-width: 900px) {
       .layout { flex-direction: column; }
@@ -930,13 +1029,47 @@
 </div>
 
 <!-- ── Character Picker Overlay ── -->
-<div id="picker-overlay" class="overlay-anim" onclick="pickerBgClick(event)">
+<div id="picker-overlay" onclick="pickerBgClick(event)">
   <div class="picker-modal">
-    <h2>Select a Character</h2>
-    <p>Choose a base character for this slot</p>
-    <div class="picker-grid" id="picker-grid"></div>
+    <!-- Header -->
+    <div class="picker-header">
+      <span class="picker-title">Choose Your Character</span>
+      <button class="picker-close-btn" onclick="closePicker()" title="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="picker-divider"></div>
+
+    <!-- Filters -->
+    <div class="picker-filters-section">
+      <div class="picker-filters-label">Filters</div>
+      <div class="picker-filters-row">
+        <span class="filter-group-label">Gender</span>
+        <label class="filter-chip"><input type="checkbox" id="f-male"   onchange="toggleFilter('gender','male',this.checked)"> Male</label>
+        <label class="filter-chip"><input type="checkbox" id="f-female" onchange="toggleFilter('gender','female',this.checked)"> Female</label>
+        <div class="filter-sep"></div>
+        <span class="filter-group-label">Age</span>
+        <label class="filter-chip"><input type="checkbox" id="f-child" onchange="toggleFilter('age','child',this.checked)"> Child</label>
+        <label class="filter-chip"><input type="checkbox" id="f-teen"  onchange="toggleFilter('age','teen',this.checked)"> Teen</label>
+        <label class="filter-chip"><input type="checkbox" id="f-adult" onchange="toggleFilter('age','adult',this.checked)"> Adult</label>
+        <div class="filter-sep"></div>
+        <span class="filter-group-label">Skin Tone</span>
+        <label class="filter-chip"><input type="checkbox" id="f-light"        onchange="toggleFilter('skinTone','light',this.checked)"> Light</label>
+        <label class="filter-chip"><input type="checkbox" id="f-light-medium" onchange="toggleFilter('skinTone','light-medium',this.checked)"> Light-Medium</label>
+        <label class="filter-chip"><input type="checkbox" id="f-medium"       onchange="toggleFilter('skinTone','medium',this.checked)"> Medium</label>
+        <label class="filter-chip"><input type="checkbox" id="f-tan"          onchange="toggleFilter('skinTone','tan',this.checked)"> Tan</label>
+        <label class="filter-chip"><input type="checkbox" id="f-deep"         onchange="toggleFilter('skinTone','deep',this.checked)"> Deep</label>
+      </div>
+    </div>
+
+    <!-- Gallery -->
+    <div class="picker-gallery-wrap">
+      <div class="picker-gallery" id="picker-gallery"></div>
+    </div>
+
+    <!-- Footer -->
     <div class="picker-footer">
-      <button class="btn-cancel" onclick="closePicker()">Cancel</button>
+      <button class="picker-save-btn" onclick="savePickerSelection()">Save</button>
     </div>
   </div>
 </div>
@@ -945,14 +1078,14 @@
 
   // ── Base characters ───────────────────────────────────────────────────────
   const BASE_CHARACTERS = [
-    { id: "boy_black",        label: "Boy — Dark",    color: "#f3f0ff", refPath: "images/Boy-Black.png" },
-    { id: "boy_light_black",  label: "Boy — Medium",  color: "#fef9ec", refPath: "images/Boy-Light-Black.png" },
-    { id: "boy_tan",          label: "Boy — Tan",     color: "#fff4e6", refPath: "images/Boy-Tan.png" },
-    { id: "boy_white",        label: "Boy — Light",   color: "#f0f8ff", refPath: "images/Boy-White.png" },
-    { id: "teen_black",       label: "Teen — Dark",   color: "#f3f0ff", refPath: "images/Teen-Black.png" },
-    { id: "teen_light_black", label: "Teen — Medium", color: "#fef9ec", refPath: "images/Teen-Light-Black.png" },
-    { id: "teen_tan",         label: "Teen — Tan",    color: "#fff4e6", refPath: "images/Teen-Tan.png" },
-    { id: "teen_white",       label: "Teen — Light",  color: "#f0f8ff", refPath: "images/Teen-White.png" },
+    { id: "boy_black",        label: "Boy — Dark",    color: "#f3f0ff", refPath: "images/Boy-Black.png",        gender: "male", age: "child", skinTone: "deep" },
+    { id: "boy_light_black",  label: "Boy — Medium",  color: "#fef9ec", refPath: "images/Boy-Light-Black.png",  gender: "male", age: "child", skinTone: "medium" },
+    { id: "boy_tan",          label: "Boy — Tan",     color: "#fff4e6", refPath: "images/Boy-Tan.png",           gender: "male", age: "child", skinTone: "tan" },
+    { id: "boy_white",        label: "Boy — Light",   color: "#f0f8ff", refPath: "images/Boy-White.png",         gender: "male", age: "child", skinTone: "light" },
+    { id: "teen_black",       label: "Teen — Dark",   color: "#f3f0ff", refPath: "images/Teen-Black.png",        gender: "male", age: "teen",  skinTone: "deep" },
+    { id: "teen_light_black", label: "Teen — Medium", color: "#fef9ec", refPath: "images/Teen-Light-Black.png",  gender: "male", age: "teen",  skinTone: "medium" },
+    { id: "teen_tan",         label: "Teen — Tan",    color: "#fff4e6", refPath: "images/Teen-Tan.png",           gender: "male", age: "teen",  skinTone: "tan" },
+    { id: "teen_white",       label: "Teen — Light",  color: "#f0f8ff", refPath: "images/Teen-White.png",         gender: "male", age: "teen",  skinTone: "light" },
   ];
 
   // ── State ─────────────────────────────────────────────────────────────────
@@ -966,9 +1099,13 @@
   let cs = { scale: 1, ox: 0, oy: 0, natW: 0, natH: 0 };
 
   // ── Picker ────────────────────────────────────────────────────────────────
+  let pickerFilters = { gender: new Set(), age: new Set(), skinTone: new Set() };
+  let pickerTempSelected = null;
+
   function openPicker(slotIndex) {
     pickerTargetSlot = slotIndex;
-    renderPickerGrid();
+    pickerTempSelected = chars[slotIndex].charId; // pre-select current character
+    renderPickerGallery();
     document.getElementById("picker-overlay").classList.add("visible");
   }
 
@@ -980,21 +1117,54 @@
     if (e.target === document.getElementById("picker-overlay")) closePicker();
   }
 
-  function renderPickerGrid() {
-    const grid = document.getElementById("picker-grid");
-    grid.innerHTML = "";
-    BASE_CHARACTERS.forEach(ch => {
-      const card = document.createElement("div");
-      card.className = "picker-card" + (ch.disabled ? " disabled" : "");
-      card.innerHTML = `
-        <div class="picker-thumb" style="background:${ch.color || '#f3f4f6'};">
-          ${ch.refPath ? `<img src="${ch.refPath}" style="width:100%;height:100%;object-fit:contain;" onerror="this.style.display='none'" />` : `<span style="font-size:40px;">👤</span>`}
-        </div>
-        <div class="picker-label">${ch.label}</div>
-      `;
-      if (!ch.disabled) card.onclick = () => selectCharacter(pickerTargetSlot, ch);
-      grid.appendChild(card);
+  function toggleFilter(group, value, checked) {
+    if (checked) pickerFilters[group].add(value);
+    else pickerFilters[group].delete(value);
+    renderPickerGallery();
+  }
+
+  function pickerFilteredChars() {
+    return BASE_CHARACTERS.filter(ch => {
+      const gOk = pickerFilters.gender.size   === 0 || pickerFilters.gender.has(ch.gender);
+      const aOk = pickerFilters.age.size      === 0 || pickerFilters.age.has(ch.age);
+      const sOk = pickerFilters.skinTone.size === 0 || pickerFilters.skinTone.has(ch.skinTone);
+      return gOk && aOk && sOk;
     });
+  }
+
+  function renderPickerGallery() {
+    const gallery = document.getElementById("picker-gallery");
+    const filtered = pickerFilteredChars();
+    gallery.innerHTML = "";
+
+    if (filtered.length === 0) {
+      gallery.innerHTML = '<div class="picker-empty">No characters match the selected filters.</div>';
+      return;
+    }
+
+    filtered.forEach(ch => {
+      const card = document.createElement("div");
+      const isSelected = ch.id === pickerTempSelected;
+      card.className = "picker-card" + (isSelected ? " selected" : "");
+      card.innerHTML = `
+        <img src="${ch.refPath}" alt="${ch.label}" onerror="this.style.display='none'" />
+        <div class="picker-check">
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><polyline points="2,7 6,11 12,3" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      `;
+      card.onclick = () => {
+        pickerTempSelected = ch.id;
+        renderPickerGallery();
+      };
+      gallery.appendChild(card);
+    });
+  }
+
+  async function savePickerSelection() {
+    if (!pickerTempSelected) { closePicker(); return; }
+    const ch = BASE_CHARACTERS.find(c => c.id === pickerTempSelected);
+    if (ch) await selectCharacter(pickerTargetSlot, ch);
+    else closePicker();
   }
 
   async function selectCharacter(slotIndex, ch) {
