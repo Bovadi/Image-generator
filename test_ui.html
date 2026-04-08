@@ -455,12 +455,26 @@
       background: #fef2f2;
       border: 1px solid #fecaca;
       border-radius: 8px;
-      padding: 8px 16px;
+      padding: 10px 16px;
       font-size: 13px;
       color: #dc2626;
       margin-top: 8px;
     }
-    .error-msg.visible { display: block; }
+    .error-msg.visible { display: flex; align-items: flex-start; gap: 10px; }
+    .error-msg-body { flex: 1; }
+    .error-retry-btn {
+      margin-top: 6px;
+      display: inline-block;
+      background: none;
+      border: 1px solid #dc2626;
+      border-radius: 6px;
+      color: #dc2626;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      cursor: pointer;
+    }
+    .error-retry-btn:hover { background: #fecaca; }
 
     /* ── Right panel ── */
     .top-actions {
@@ -1475,38 +1489,65 @@
 
     try {
       let refDataUrl;
-      if (hasChar2) {
-        refDataUrl = await stitchImages(char1.refBlob, char2.refBlob);
-      } else {
-        refDataUrl = await blobToDataUrl(char1.refBlob);
+      try {
+        refDataUrl = hasChar2
+          ? await stitchImages(char1.refBlob, char2.refBlob)
+          : await blobToDataUrl(char1.refBlob);
+      } catch(prepErr) {
+        throw friendlyErr("Could not prepare the character image. Please try again.", prepErr);
       }
 
-      const res = await fetch("https://fal.run/fal-ai/flux-kontext/dev", {
-        method: "POST",
-        headers: { "Authorization": `Key ${falKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt,
-          image_url: refDataUrl,
-          image_size: { width: 1024, height: 1024 },
-          num_inference_steps: 35,
-          guidance_scale: 12.0,
-          num_images: 1,
-        }),
-      });
+      let res;
+      try {
+        res = await fetch("https://fal.run/fal-ai/flux-kontext/dev", {
+          method: "POST",
+          headers: { "Authorization": `Key ${falKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt,
+            image_url: refDataUrl,
+            image_size: { width: 1024, height: 1024 },
+            num_inference_steps: 35,
+            guidance_scale: 12.0,
+            num_images: 1,
+          }),
+        });
+      } catch(networkErr) {
+        throw friendlyErr("Could not connect to the image generation service. Check your internet connection and try again.", networkErr);
+      }
 
-      if (!res.ok) throw new Error(`fal.ai error ${res.status}: ${await res.text()}`);
-      const data = await res.json();
-      const url  = data?.images?.[0]?.url;
-      if (!url) throw new Error("No image returned.");
+      if (!res.ok) {
+        const rawBody = await res.text().catch(() => "(unreadable)");
+        console.error(`[ImageGen] fal.ai ${res.status}:`, rawBody);
+        if (res.status === 401 || res.status === 403)
+          throw friendlyErr("Your fal.ai API key appears to be invalid. Please check and try again.");
+        if (res.status === 429)
+          throw friendlyErr("Too many requests. Please wait a moment and try again.");
+        if (res.status >= 500)
+          throw friendlyErr("The image generation service is temporarily unavailable. Please try again shortly.");
+        throw friendlyErr("Something went wrong while generating your image. Please try again.");
+      }
 
-      const imgBlob = await (await fetch(url)).blob();
+      let data;
+      try { data = await res.json(); }
+      catch(parseErr) { throw friendlyErr("Received an unexpected response from the server. Please try again.", parseErr); }
+
+      const url = data?.images?.[0]?.url;
+      if (!url) {
+        console.error("[ImageGen] No image URL in response:", data);
+        throw friendlyErr("Something went wrong — no image was returned. Please try again.");
+      }
+
+      let imgBlob;
+      try { imgBlob = await (await fetch(url)).blob(); }
+      catch(dlErr) { throw friendlyErr("Image was generated but could not be downloaded. Please try again.", dlErr); }
+
       const blobUrl = URL.createObjectURL(imgBlob);
-
       showResult(blobUrl);
       initCropTool(blobUrl);
 
     } catch(e) {
-      showError(e.message);
+      if (!e.friendly) console.error("[ImageGen] Unexpected error:", e);
+      showError(e.friendly ? e.message : "Something went wrong while generating your image. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -1654,9 +1695,26 @@
     document.getElementById("result-placeholder").style.display = "none";
   }
 
+  // Tag an error as user-facing friendly (won't be re-wrapped with generic fallback)
+  function friendlyErr(userMsg, rawDetails) {
+    if (rawDetails) console.error("[ImageGen]", userMsg, rawDetails);
+    const e = new Error(userMsg);
+    e.friendly = true;
+    return e;
+  }
+
   function showError(msg) {
     const el = document.getElementById("gen-error");
-    el.textContent = msg;
+    el.innerHTML =
+      `<svg style="flex-shrink:0;margin-top:1px" width="15" height="15" viewBox="0 0 16 16" fill="none">` +
+        `<circle cx="8" cy="8" r="7" stroke="#dc2626" stroke-width="1.5"/>` +
+        `<line x1="8" y1="4.5" x2="8" y2="8.5" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round"/>` +
+        `<circle cx="8" cy="11" r="0.8" fill="#dc2626"/>` +
+      `</svg>` +
+      `<div class="error-msg-body">` +
+        `<div>${msg}</div>` +
+        `<button class="error-retry-btn" onclick="generateImage()">Try again</button>` +
+      `</div>`;
     el.classList.add("visible");
   }
 
@@ -1775,13 +1833,30 @@
           }
         );
       } catch(networkErr) {
-        throw new Error(`Network error — could not reach Google API. Check your internet connection. (${networkErr.message})`);
+        throw friendlyErr("Could not connect to the editing service. Check your internet connection and try again.", networkErr);
       }
 
-      if (!res.ok) throw new Error(`Google API error ${res.status}: ${await res.text()}`);
-      const data = await res.json();
+      if (!res.ok) {
+        const rawBody = await res.text().catch(() => "(unreadable)");
+        console.error(`[EditGen] Google API ${res.status}:`, rawBody);
+        if (res.status === 401 || res.status === 403)
+          throw friendlyErr("Your Google AI Studio key appears to be invalid. Please check and try again.");
+        if (res.status === 429)
+          throw friendlyErr("Too many requests. Please wait a moment and try again.");
+        if (res.status >= 500)
+          throw friendlyErr("The editing service is temporarily unavailable. Please try again shortly.");
+        throw friendlyErr("Something went wrong while editing. Please try again.");
+      }
+
+      let data;
+      try { data = await res.json(); }
+      catch(parseErr) { throw friendlyErr("Received an unexpected response from the server. Please try again.", parseErr); }
+
       const imgPart = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-      if (!imgPart) throw new Error("No image returned from Google.");
+      if (!imgPart) {
+        console.error("[EditGen] No image in response:", data);
+        throw friendlyErr("Something went wrong — no edited image was returned. Please try again.");
+      }
 
       // Convert base64 result to blob, strip white background, get URL
       const resultBase64 = imgPart.inlineData.data;
@@ -1810,7 +1885,8 @@
       document.getElementById("edit-close-btn").textContent = "Save and close";
       setTimeout(() => document.getElementById("edit-prompt-input").focus(), 50);
     } catch(e) {
-      showEditError(e.message);
+      if (!e.friendly) console.error("[EditGen] Unexpected error:", e);
+      showEditError(e.friendly ? e.message : "Something went wrong while editing. Please try again.");
     } finally {
       setEditLoading(false);
     }
