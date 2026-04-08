@@ -1122,8 +1122,10 @@
   }
 
   // ── Edit modal ────────────────────────────────────────────────────────────
-  let _editContext = null;    // { type: 'character'|'image', slotIndex? }
-  let _editInProgress = false; // true while API call is running
+  let _editContext = null;      // { type: 'character'|'image', slotIndex? }
+  let _editInProgress = false;  // true while API call is running
+  let _editingType = null;      // persists across modal close
+  let _editingSlotIndex = null; // persists across modal close
 
   function openEditModal(type, slotIndex) {
     const preview = document.getElementById("edit-modal-preview");
@@ -1144,6 +1146,8 @@
     }
 
     _editContext = { type, slotIndex };
+    _editingType = type;
+    _editingSlotIndex = slotIndex;
     document.getElementById("edit-error").style.display = "none";
     document.getElementById("edit-overlay").style.display = "flex";
 
@@ -1163,6 +1167,9 @@
   function closeEditModal() {
     document.getElementById("edit-overlay").style.display = "none";
     _editContext = null;
+    // Note: _editingType and _editingSlotIndex intentionally NOT cleared here
+    // so setEditLoading(false) can still find and hide the thumbnail overlay
+    // after the API call completes with the modal closed.
   }
 
   function editOverlayClick(e) {
@@ -1273,9 +1280,15 @@
     if (submitLabel) submitLabel.textContent = on ? "Editing…" : "Edit";
 
     // Show/hide thumbnail loading overlay on the character slot
-    if (_editContext && _editContext.type === 'character') {
-      const thumbOverlay = document.getElementById(`slot-${_editContext.slotIndex}-thumb-loading`);
+    // Use persistent _editingType/_editingSlotIndex (survive modal close)
+    if (_editingType === 'character' && _editingSlotIndex !== null) {
+      const thumbOverlay = document.getElementById(`slot-${_editingSlotIndex}-thumb-loading`);
       if (thumbOverlay) thumbOverlay.style.display = on ? "flex" : "none";
+    }
+    // Clear persistent edit tracking when loading ends
+    if (!on) {
+      _editingType = null;
+      _editingSlotIndex = null;
     }
   }
 
