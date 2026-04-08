@@ -1193,6 +1193,21 @@
     { id: "teen_white",       label: "Teen — Light",  color: "#f0f8ff", refPath: "images/Teen-White.png",         gender: "male", age: "teen",  skinTone: "light" },
   ];
 
+  // ── Character height defaults (injected into prompt, not shown in UI) ─────
+  const CHARACTER_HEIGHTS = {
+    child: { cm: 125, imperial: "4'1\""  },
+    teen:  { cm: 165, imperial: "5'5\""  },
+    adult: { cm: 175, imperial: "5'9\""  },
+  };
+
+  function charHeightDesc(charId) {
+    const ch = BASE_CHARACTERS.find(c => c.id === charId);
+    if (!ch) return "";
+    const h = CHARACTER_HEIGHTS[ch.age];
+    if (!h) return "";
+    return `${h.cm} cm (${h.imperial}) tall`;
+  }
+
   // ── State ─────────────────────────────────────────────────────────────────
   const chars = [
     { charId: null, label: "", refBlob: null },
@@ -1422,11 +1437,17 @@
     const objectsClause = objects ? `, ${objects} clearly visible` : "";
     const detailsStr    = details ? `${details}. ` : "";
 
+    // Height descriptors (hidden from UI, injected into prompt for scale consistency)
+    const char1Height = charHeightDesc(char1.charId);
+    const char2Height = hasChar2 ? charHeightDesc(char2.charId) : "";
+    const char1HeightClause = char1Height ? ` (${char1Height})` : "";
+    const char2HeightClause = char2Height ? ` (${char2Height})` : "";
+
     let prompt;
     if (hasChar2) {
-      prompt = `${detailsStr}${location}. The reference image shows two characters: ${char1.label} on the left and ${char2.label} on the right. The ${char1.label} (left figure) is ${char1Action}${objectsClause}. The ${char2.label} (right figure) is ${char2Action}. Keep both characters' faces, hair, skin tones, and clothing identical to their respective figures in the reference. All characters fully visible from head to toe. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.`;
+      prompt = `${detailsStr}${location}. The reference image shows two characters: ${char1.label}${char1HeightClause} on the left and ${char2.label}${char2HeightClause} on the right. The ${char1.label} (left figure) is ${char1Action}${objectsClause}. The ${char2.label} (right figure) is ${char2Action}. Keep both characters' faces, hair, skin tones, and clothing identical to their respective figures in the reference. All characters fully visible from head to toe. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.`;
     } else {
-      prompt = `${detailsStr}${location}. The child from the reference image is ${char1Action}${objectsClause}. Only one character in the scene. Full body visible from head to toe. Keep the child's face, hair, skin tone, and clothing identical to the reference. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.`;
+      prompt = `${detailsStr}${location}. The character from the reference image${char1HeightClause} is ${char1Action}${objectsClause}. Only one character in the scene. Full body visible from head to toe. Keep the character's face, hair, skin tone, and clothing identical to the reference. Flat illustration style, clean lines, minimal shading, solid flat colors, child-friendly cartoon, edge to edge background, no text.`;
     }
 
     setLoading(true);
