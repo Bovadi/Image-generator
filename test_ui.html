@@ -160,9 +160,9 @@
     }
 
     .field-helper {
-      font-size: 12px;
-      color: #161616;
-      line-height: 1.4;
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.5;
     }
 
     /* ── Character slot ── */
@@ -376,7 +376,7 @@
     .scene-section .section-label { margin-bottom: 0; }
 
     /* Group label + helper tightly; gap between this block and the input */
-    .field-header { display: flex; flex-direction: column; gap: 4px; }
+    .field-header { display: flex; flex-direction: column; gap: 8px; }
     .scene-field { display: flex; flex-direction: column; gap: 16px; }
 
     .field-label {
@@ -914,10 +914,12 @@
             </button>
           </div>
           <div class="char-content">
-            <div class="char-header">
-              <span class="char-title">Main Character</span>
+            <div class="field-header">
+              <div class="char-header">
+                <span class="char-title">Main Character</span>
+              </div>
+              <p class="char-subtitle">Describe what this character is doing in the scene</p>
             </div>
-            <p class="char-subtitle">Describe what this character is doing in the scene</p>
             <div class="info-banner">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
               <span class="info-banner-text">Select a character first, then describe their action below.</span>
@@ -944,11 +946,13 @@
             </button>
           </div>
           <div class="char-content">
-            <div class="char-header">
-              <span class="char-title">Additional Character</span>
-              <span class="badge-optional">Optional</span>
+            <div class="field-header">
+              <div class="char-header">
+                <span class="char-title">Additional Character</span>
+                <span class="badge-optional">Optional</span>
+              </div>
+              <p class="char-subtitle">Add a second character to the scene</p>
             </div>
-            <p class="char-subtitle">Add a second character to the scene</p>
             <div class="info-banner">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
               <span class="info-banner-text">Leave blank to generate a single-character scene.</span>
