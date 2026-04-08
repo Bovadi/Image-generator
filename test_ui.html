@@ -145,10 +145,11 @@
       margin-bottom: 12px;
     }
 
+    .scene-field { display: flex; flex-direction: column; gap: 4px; }
+
     .field-helper {
       font-size: 12px;
       color: #9ca3af;
-      margin-top: 4px;
       line-height: 1.4;
     }
 
@@ -239,9 +240,9 @@
     }
 
     .char-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: #161616;
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
     }
 
     .badge-optional {
@@ -301,7 +302,7 @@
     .divider { height: 1px; background: #e5e7eb; }
 
     /* ── Scene fields ── */
-    .scene-section { display: flex; flex-direction: column; gap: 16px; }
+    .scene-section { display: flex; flex-direction: column; gap: 16px; margin-top: -8px; }
 
     .field-label {
       display: flex;
@@ -310,7 +311,6 @@
       font-size: 13px;
       font-weight: 600;
       color: #374151;
-      margin-bottom: 6px;
     }
 
     .scene-field input {
@@ -705,20 +705,20 @@
 
         <div class="scene-field">
           <div class="field-label">Location</div>
-          <input type="text" id="gen-location" placeholder="e.g. a classroom, an office, a park…" />
           <p class="field-helper">Where does this scene take place?</p>
+          <input type="text" id="gen-location" placeholder="e.g. a classroom, an office, a park…" />
         </div>
 
         <div class="scene-field">
           <div class="field-label">Objects <span class="badge-optional">Optional</span></div>
-          <input type="text" id="gen-objects" placeholder="e.g. a whiteboard, a backpack, a lunch box…" />
           <p class="field-helper">Any props or items that should be visible in the scene.</p>
+          <input type="text" id="gen-objects" placeholder="e.g. a whiteboard, a backpack, a lunch box…" />
         </div>
 
         <div class="scene-field">
           <div class="field-label">Additional notes <span class="badge-optional">Optional</span></div>
-          <input type="text" id="gen-details" placeholder="e.g. warm afternoon light, autumn setting…" />
           <p class="field-helper">Mood, lighting, time of day, or any other details.</p>
+          <input type="text" id="gen-details" placeholder="e.g. warm afternoon light, autumn setting…" />
         </div>
       </div>
 
