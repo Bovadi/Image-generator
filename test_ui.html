@@ -159,8 +159,6 @@
       margin-bottom: 16px;
     }
 
-    .scene-field { display: flex; flex-direction: column; gap: 8px; }
-
     .field-helper {
       font-size: 12px;
       color: #161616;
@@ -171,14 +169,15 @@
     .char-slot {
       display: flex;
       gap: 16px;
-      align-items: flex-start;
+      align-items: stretch;
     }
 
     .char-image-col {
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      justify-content: space-between;
+      gap: 16px;
     }
 
     .char-image-box {
@@ -362,7 +361,7 @@
       background: #fff;
       outline: none;
       resize: vertical;
-      min-height: 96px;
+      min-height: 64px;
       transition: border-color 0.15s;
       line-height: 1.5;
     }
@@ -370,10 +369,15 @@
     textarea.char-textarea:focus { border-color: #161616; }
     textarea.char-textarea::placeholder { color: #d1d5db; }
 
-    .divider { height: 1px; background: #e5e7eb; }
+    .divider { height: 1px; background: #e5e7eb; margin: 8px 0; }
 
     /* ── Scene fields ── */
     .scene-section { display: flex; flex-direction: column; gap: 16px; }
+    .scene-section .section-label { margin-bottom: 0; }
+
+    /* Group label + helper tightly; gap between this block and the input */
+    .field-header { display: flex; flex-direction: column; gap: 4px; }
+    .scene-field { display: flex; flex-direction: column; gap: 16px; }
 
     .field-label {
       display: flex;
@@ -961,20 +965,26 @@
         <div class="section-label">Scene</div>
 
         <div class="scene-field">
-          <div class="field-label">Location</div>
-          <p class="field-helper">Where does this scene take place?</p>
+          <div class="field-header">
+            <div class="field-label">Location</div>
+            <p class="field-helper">Where does this scene take place?</p>
+          </div>
           <input type="text" id="gen-location" placeholder="e.g. a classroom, an office, a park…" />
         </div>
 
         <div class="scene-field">
-          <div class="field-label">Objects <span class="badge-optional">Optional</span></div>
-          <p class="field-helper">Any props or items that should be visible in the scene.</p>
+          <div class="field-header">
+            <div class="field-label">Objects <span class="badge-optional">Optional</span></div>
+            <p class="field-helper">Any props or items that should be visible in the scene.</p>
+          </div>
           <input type="text" id="gen-objects" placeholder="e.g. a whiteboard, a backpack, a lunch box…" />
         </div>
 
         <div class="scene-field">
-          <div class="field-label">Additional notes <span class="badge-optional">Optional</span></div>
-          <p class="field-helper">Mood, lighting, time of day, or any other details.</p>
+          <div class="field-header">
+            <div class="field-label">Additional notes <span class="badge-optional">Optional</span></div>
+            <p class="field-helper">Mood, lighting, time of day, or any other details.</p>
+          </div>
           <input type="text" id="gen-details" placeholder="e.g. warm afternoon light, autumn setting…" />
         </div>
       </div>
