@@ -488,6 +488,16 @@
     .btn-top-action:hover:not(:disabled) { border-color: #161616; }
     .btn-top-action:disabled { color: #9ca3af; border-color: #e5e7eb; cursor: not-allowed; }
 
+    .btn-top-spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid #e5e7eb;
+      border-top-color: #9ca3af;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
     /* Result image */
     .result-area {
       display: flex;
@@ -1019,8 +1029,8 @@
 
     <div class="top-actions">
       <button class="btn-top-action" id="regen-btn" disabled onclick="generateImage()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
-        Re-generate
+        <span id="regen-btn-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg></span>
+        <span id="regen-btn-label">Re-generate</span>
       </button>
       <button class="btn-top-action" id="edit-image-btn" disabled onclick="openEditModal('image')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487z"/></svg>
@@ -1037,7 +1047,7 @@
         <img id="gen-result-img" src="" alt="Generated image" />
         <div id="gen-img-editing-overlay">
           <div class="gen-edit-spinner"></div>
-          <span>Editing…</span>
+          <span id="gen-img-overlay-text">Editing…</span>
         </div>
       </div>
     </div>
@@ -1453,8 +1463,6 @@
 
       showResult(blobUrl);
       initCropTool(blobUrl);
-      document.getElementById("regen-btn").disabled = false;
-      document.getElementById("edit-image-btn").disabled = false;
 
     } catch(e) {
       showError(e.message);
@@ -1559,9 +1567,43 @@
   }
 
   function setLoading(on) {
+    // Left panel — generate button + spinner bar
     document.getElementById("gen-loading").classList.toggle("visible", on);
     document.getElementById("gen-btn").disabled = on;
-    document.getElementById("gen-btn").textContent = on ? "Generating…" : "Generate";
+    document.getElementById("gen-btn").textContent = on ? "Generating…" : "Generate Image";
+
+    // Right panel — regen button
+    const regenBtn   = document.getElementById("regen-btn");
+    const regenIcon  = document.getElementById("regen-btn-icon");
+    const regenLabel = document.getElementById("regen-btn-label");
+    if (on) {
+      regenBtn.disabled = true;
+      if (regenIcon)  regenIcon.innerHTML  = '<div class="btn-top-spinner"></div>';
+      if (regenLabel) regenLabel.textContent = "Regenerating…";
+    } else {
+      regenBtn.disabled = false;
+      if (regenIcon)  regenIcon.innerHTML  = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>';
+      if (regenLabel) regenLabel.textContent = "Re-generate";
+    }
+
+    // Right panel — image overlay (only shown when an image already exists = regen)
+    const wrap    = document.getElementById("gen-img-wrap");
+    const overlay = document.getElementById("gen-img-editing-overlay");
+    const overlayText = document.getElementById("gen-img-overlay-text");
+    const isRegen = wrap && wrap.style.display !== "none";
+    if (overlay) overlay.style.display = (on && isRegen) ? "flex" : "none";
+    if (overlayText) overlayText.textContent = "Regenerating image…";
+
+    // Edit Image button — disable while generating; re-enable if image is available
+    const editImageBtn = document.getElementById("edit-image-btn");
+    if (editImageBtn) {
+      if (on) {
+        editImageBtn.disabled = true;
+      } else if (isRegen) {
+        editImageBtn.disabled = false;
+      }
+      // If first gen and failed, editImageBtn stays disabled (no image to edit)
+    }
   }
 
   function showResult(blobUrl) {
