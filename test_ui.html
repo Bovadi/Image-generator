@@ -637,16 +637,12 @@
           <div class="char-image-col">
             <div class="char-image-box" onclick="openPicker(0)">
               <img id="slot-0-img" style="display:none" alt="" />
-              <span id="slot-0-empty" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
-                <span style="font-size:11px;color:#9ca3af;text-align:center;line-height:1.4;">Click to<br>select</span>
+              <span id="slot-0-empty" style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+                <span style="font-size:13px;font-weight:500;color:#6b7280;">Add Character</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>
               </span>
             </div>
-            <button class="btn-char" onclick="openPicker(0)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>
-              Add
-            </button>
-            <button class="btn-char-secondary" onclick="openEditModal('character', 0)">
+            <button id="slot-0-edit" class="btn-char-secondary" style="display:none" onclick="openEditModal('character', 0)">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487z"/></svg>
               Edit
             </button>
@@ -669,16 +665,12 @@
           <div class="char-image-col">
             <div class="char-image-box" onclick="openPicker(1)">
               <img id="slot-1-img" style="display:none" alt="" />
-              <span id="slot-1-empty" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
-                <span style="font-size:11px;color:#9ca3af;text-align:center;line-height:1.4;">Click to<br>select</span>
+              <span id="slot-1-empty" style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+                <span style="font-size:13px;font-weight:500;color:#6b7280;">Add Character</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>
               </span>
             </div>
-            <button class="btn-char" onclick="openPicker(1)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>
-              Add
-            </button>
-            <button class="btn-char-secondary" onclick="openEditModal('character', 1)">
+            <button id="slot-1-edit" class="btn-char-secondary" style="display:none" onclick="openEditModal('character', 1)">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487z"/></svg>
               Edit
             </button>
@@ -880,6 +872,10 @@
     img.src = ch.refPath;
     img.style.display = "block";
     empty.style.display = "none";
+
+    // Reveal Edit button now that a character is selected
+    const editBtn = document.getElementById(`slot-${slotIndex}-edit`);
+    if (editBtn) editBtn.style.display = "flex";
 
     // Load as blob in background using canvas (works for file:// URLs)
     chars[slotIndex] = { charId: ch.id, label: ch.label, refBlob: null };
