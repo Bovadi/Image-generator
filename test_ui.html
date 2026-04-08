@@ -237,7 +237,7 @@
       letter-spacing: 0.01em;
       padding: 0 8px;
     }
-    .char-image-box.has-char:hover .char-change-overlay {
+    .char-image-box.has-char:not(.is-editing):hover .char-change-overlay {
       opacity: 1;
       pointer-events: auto;
     }
@@ -1355,6 +1355,8 @@
     if (_editingType === 'character' && _editingSlotIndex !== null) {
       const thumbOverlay = document.getElementById(`slot-${_editingSlotIndex}-thumb-loading`);
       if (thumbOverlay) thumbOverlay.style.display = on ? "flex" : "none";
+      const box = document.getElementById(`slot-${_editingSlotIndex}-box`);
+      if (box) box.classList.toggle("is-editing", on);
     }
     // Show/hide spinner overlay on the generated image panel
     if (_editingType === 'image') {
