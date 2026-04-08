@@ -121,8 +121,8 @@
     .left-footer {
       flex-shrink: 0;
       padding: 16px 32px;
-      background: #f0fdfa;
-      border-top: 1px solid #ccfbf1;
+      background: #E7F3F3;
+      border-top: 1px solid #d4eaea;
     }
 
     /* Right panel */
@@ -162,7 +162,7 @@
     .char-image-box {
       width: 120px;
       height: 160px;
-      background: #f3f4f6;
+      background: #F6F6F6;
       border-radius: 12px;
       display: flex;
       flex-direction: column;
@@ -170,7 +170,7 @@
       justify-content: center;
       cursor: pointer;
       overflow: hidden;
-      border: 1.5px solid #e5e7eb;
+      border: 1.5px solid #CCCAC5;
       transition: border-color 0.15s, background 0.15s;
     }
 
@@ -241,7 +241,8 @@
       display: inline-flex;
       align-items: center;
       padding: 2px 8px;
-      background: #f3f4f6;
+      background: #F6F6F6;
+      border: 1px solid #CCCAC5;
       border-radius: 99px;
       font-size: 11px;
       font-weight: 600;
@@ -258,17 +259,16 @@
       display: flex;
       align-items: flex-start;
       gap: 8px;
-      background: #f0fdfa;
-      border: 1px solid #99f6e4;
+      background: #E7F3F3;
       border-radius: 8px;
       padding: 10px 12px;
     }
 
-    .info-banner svg { color: #0d9488; flex-shrink: 0; margin-top: 1px; }
+    .info-banner svg { color: #2B9996; flex-shrink: 0; margin-top: 1px; }
 
     .info-banner-text {
       font-size: 12px;
-      color: #0f766e;
+      color: #2B9996;
       line-height: 1.5;
     }
 
@@ -326,8 +326,8 @@
     .btn-generate {
       width: 100%;
       padding: 14px 20px;
-      background: #0d9488;
-      color: #fff;
+      background: #E7F3F3;
+      color: #2B9996;
       border: none;
       border-radius: 10px;
       font-size: 15px;
@@ -337,12 +337,12 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: background 0.15s, transform 80ms ease;
+      transition: background 0.15s, color 0.15s, transform 80ms ease;
     }
 
-    .btn-generate:hover:not(:disabled) { background: #0f766e; }
+    .btn-generate:hover:not(:disabled) { background: #2B9996; color: #fff; }
     .btn-generate:active:not(:disabled) { transform: scale(0.98); }
-    .btn-generate:disabled { background: #ccfbf1; color: #5eead4; cursor: not-allowed; }
+    .btn-generate:disabled { background: #E7F3F3; color: #a0c8c8; cursor: not-allowed; }
 
     /* Loading */
     .loading { display: none; align-items: center; gap: 10px; margin-top: 10px; }
