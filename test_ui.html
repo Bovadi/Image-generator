@@ -181,6 +181,35 @@
       overflow: hidden;
       border: 1px solid #CCCAC5;
       transition: border-color 0.15s, background 0.15s;
+      position: relative;
+    }
+
+    .thumb-editing-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(248,245,239,0.88);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .thumb-editing-overlay .thumb-spinner {
+      width: 22px;
+      height: 22px;
+      border: 2.5px solid #ccfbf1;
+      border-top-color: #2B9996;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    .thumb-editing-overlay span {
+      font-size: 10px;
+      font-weight: 600;
+      color: #2B9996;
+      text-align: center;
+      line-height: 1.3;
     }
 
     .char-image-box:hover { border-color: #ADADAD; background: #E0E0E0; }
@@ -648,6 +677,7 @@
           <div class="char-image-col">
             <div class="char-image-box" onclick="openPicker(0)">
               <img id="slot-0-img" style="display:none" alt="" />
+              <div id="slot-0-thumb-loading" class="thumb-editing-overlay"><div class="thumb-spinner"></div><span>Editing…</span></div>
               <span id="slot-0-empty" style="display:flex;flex-direction:column;align-items:center;gap:10px;">
                 <span style="font-size:13px;font-weight:500;color:#6b7280;">Add Character</span>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>
@@ -676,6 +706,7 @@
           <div class="char-image-col">
             <div class="char-image-box" onclick="openPicker(1)">
               <img id="slot-1-img" style="display:none" alt="" />
+              <div id="slot-1-thumb-loading" class="thumb-editing-overlay"><div class="thumb-spinner"></div><span>Editing…</span></div>
               <span id="slot-1-empty" style="display:flex;flex-direction:column;align-items:center;gap:10px;">
                 <span style="font-size:13px;font-weight:500;color:#6b7280;">Add Character</span>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>
@@ -816,14 +847,14 @@
 
     <!-- Prompt -->
     <div style="padding:16px 24px 0;">
-      <label style="font-size:11px;font-weight:700;color:#2B9996;letter-spacing:0.08em;text-transform:uppercase;display:block;margin-bottom:8px;">What would you like to edit?</label>
+      <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:8px;">What would you like to edit?</label>
       <textarea id="edit-prompt-input" placeholder="Describe what you'd like to change…" style="width:100%;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;resize:vertical;min-height:88px;outline:none;transition:border-color 0.15s;" onfocus="this.style.borderColor='#161616'" onblur="this.style.borderColor='#e5e7eb'"></textarea>
       <div id="edit-error" style="display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 12px;font-size:13px;color:#dc2626;margin-top:8px;"></div>
     </div>
 
     <!-- Buttons -->
     <div style="display:flex;gap:12px;padding:16px 24px 24px;">
-      <button id="edit-submit-btn" onclick="submitEdit()" style="flex:1;padding:11px 16px;background:#F8F5EF;color:#161616;border:1px solid #CCCAC5;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.15s,border-color 0.15s;" onmouseover="this.style.borderColor='#161616'" onmouseout="this.style.borderColor='#CCCAC5'">
+      <button id="edit-submit-btn" onclick="submitEdit()" style="flex:1;padding:11px 16px;background:#fff;color:#161616;border:1px solid #CCCAC5;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.15s,border-color 0.15s;" onmouseover="this.style.borderColor='#161616'" onmouseout="this.style.borderColor='#CCCAC5'">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487z"/></svg>
         <span id="edit-submit-label">Edit</span>
       </button>
@@ -1091,7 +1122,8 @@
   }
 
   // ── Edit modal ────────────────────────────────────────────────────────────
-  let _editContext = null; // { type: 'character'|'image', slotIndex? }
+  let _editContext = null;    // { type: 'character'|'image', slotIndex? }
+  let _editInProgress = false; // true while API call is running
 
   function openEditModal(type, slotIndex) {
     const preview = document.getElementById("edit-modal-preview");
@@ -1112,13 +1144,20 @@
     }
 
     _editContext = { type, slotIndex };
-    document.getElementById("edit-prompt-input").value = "";
     document.getElementById("edit-error").style.display = "none";
-    document.getElementById("edit-img-loading").style.display = "none";
-    document.getElementById("edit-submit-btn").disabled = false;
-    document.getElementById("edit-close-btn").textContent = "Save and close";
     document.getElementById("edit-overlay").style.display = "flex";
-    setTimeout(() => document.getElementById("edit-prompt-input").focus(), 50);
+
+    // Restore loading state if edit is still in progress
+    if (_editInProgress) {
+      setEditLoading(true);
+    } else {
+      document.getElementById("edit-prompt-input").value = "";
+      document.getElementById("edit-img-loading").style.display = "none";
+      document.getElementById("edit-submit-btn").disabled = false;
+      document.getElementById("edit-submit-btn").style.opacity = "1";
+      document.getElementById("edit-close-btn").textContent = "Save and close";
+      setTimeout(() => document.getElementById("edit-prompt-input").focus(), 50);
+    }
   }
 
   function closeEditModal() {
@@ -1225,14 +1264,19 @@
   }
 
   function setEditLoading(on) {
-    const imgLoading = document.getElementById("edit-img-loading");
-    const submitBtn  = document.getElementById("edit-submit-btn");
+    _editInProgress = on;
+    const imgLoading  = document.getElementById("edit-img-loading");
+    const submitBtn   = document.getElementById("edit-submit-btn");
     const submitLabel = document.getElementById("edit-submit-label");
-    imgLoading.style.display = on ? "flex" : "none";
-    submitBtn.disabled = on;
-    submitBtn.style.opacity = on ? "0.6" : "1";
-    submitBtn.style.cursor  = on ? "not-allowed" : "pointer";
-    submitLabel.textContent = on ? "Editing…" : "Edit";
+    if (imgLoading)  imgLoading.style.display  = on ? "flex" : "none";
+    if (submitBtn)   { submitBtn.disabled = on; submitBtn.style.opacity = on ? "0.6" : "1"; submitBtn.style.cursor = on ? "not-allowed" : "pointer"; }
+    if (submitLabel) submitLabel.textContent = on ? "Editing…" : "Edit";
+
+    // Show/hide thumbnail loading overlay on the character slot
+    if (_editContext && _editContext.type === 'character') {
+      const thumbOverlay = document.getElementById(`slot-${_editContext.slotIndex}-thumb-loading`);
+      if (thumbOverlay) thumbOverlay.style.display = on ? "flex" : "none";
+    }
   }
 
   function showEditError(msg) {
