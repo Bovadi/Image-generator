@@ -517,7 +517,7 @@
       // Use cached transparent blob URL if available; otherwise cache-bust the file path
       const imgSrc = ch.blobUrl || (ch.refPath + "?cb=" + Date.now());
       card.innerHTML = `
-        <img src="${imgSrc}" alt="${ch.label}" class="w-[160px] h-[240px] object-contain block pointer-events-none" onerror="this.style.display='none'" />
+        <img src="${imgSrc}" alt="${ch.label}" loading="lazy" class="w-[160px] h-[240px] object-contain block pointer-events-none" onerror="this.style.display='none'" />
         <div class="picker-check absolute -bottom-[9px] -right-[9px] w-[26px] h-[26px] bg-[#161616] rounded-full border-[2.5px] border-white items-center justify-center z-[2]" style="display:none">
           <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><polyline points="2,7 6,11 12,3" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
@@ -622,7 +622,7 @@
     // Load blobs on-demand if background load hasn't finished
     const ch1Data = BASE_CHARACTERS.find(c => c.id === char1.charId);
     if (!chars[0].refBlob && ch1Data) {
-      try { chars[0].refBlob = await imgToBlob(ch1Data.refPath); } catch(e) {}
+      try { chars[0].refBlob = await imgToBlob(ch1Data.refPath); } catch(e) { console.warn("[ImageGen] Could not reload char 1 image", e); }
     }
     if (!chars[0].refBlob) { showError("Could not load character image."); return; }
 
@@ -630,7 +630,7 @@
     const char2Action = document.getElementById("slot-1-action").value.trim();
     const ch2Data     = BASE_CHARACTERS.find(c => c.id === char2.charId);
     if (char2.charId && !chars[1].refBlob && ch2Data) {
-      try { chars[1].refBlob = await imgToBlob(ch2Data.refPath); } catch(e) {}
+      try { chars[1].refBlob = await imgToBlob(ch2Data.refPath); } catch(e) { console.warn("[ImageGen] Could not reload char 2 image", e); }
     }
     const hasChar2 = !!(char2.charId && chars[1].refBlob && char2Action);
 
@@ -845,7 +845,7 @@
     const overlayText = document.getElementById("gen-img-overlay-text");
     const isRegen = wrap && wrap.style.display !== "none";
     if (overlay) overlay.style.display = (on && isRegen) ? "flex" : "none";
-    if (overlayText) overlayText.textContent = "Regenerating image…";
+    if (on && isRegen && overlayText) overlayText.textContent = "Regenerating image…";
 
     // Edit Image button — disable while generating; re-enable if image is available
     const editImageBtn = document.getElementById("edit-image-btn");
@@ -1028,7 +1028,7 @@
       if (!slot.refBlob) {
         // Try to reload
         const ch = BASE_CHARACTERS.find(c => c.id === slot.charId);
-        if (ch) try { slot.refBlob = await imgToBlob(ch.refPath); } catch(e) {}
+        if (ch) try { slot.refBlob = await imgToBlob(ch.refPath); } catch(e) { console.warn("[EditGen] Could not reload character image", e); }
       }
       if (!slot.refBlob) { showEditError("Character image not available."); return; }
       imageBlob = slot.refBlob;
