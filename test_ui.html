@@ -50,7 +50,7 @@
       opacity: 1;
       pointer-events: auto;
     }
-    .picker-card.selected { border: 2px solid #161616 !important; }
+    .picker-card.selected { border: 1.5px solid #161616 !important; }
     .picker-card.selected .picker-check { display: flex !important; }
     .picker-filter-btn.open { border-color: #161616 !important; color: #161616 !important; }
   </style>
@@ -1011,6 +1011,7 @@
   }
 
   async function submitEdit() {
+    if (!_editContext) return;
     const userPrompt = document.getElementById("edit-prompt-input").value.trim();
     if (!userPrompt) { showEditError("Please describe what you'd like to change."); return; }
 
@@ -1176,7 +1177,6 @@
     const tool  = document.getElementById("crop-tool");
     const frame = document.getElementById("crop-frame");
     const img   = document.getElementById("crop-img");
-    img.src = imgSrc;
     img.onload = () => {
       cs.natW = img.naturalWidth;
       cs.natH = img.naturalHeight;
@@ -1190,7 +1190,7 @@
         if (!_cropDragSetup) { setupCropDrag(frame); _cropDragSetup = true; }
       });
     };
-    if (img.complete && img.naturalWidth) img.onload();
+    img.src = imgSrc;
   }
 
   function applyCropTransform() {
