@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full overflow-hidden">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,90 +7,25 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    *, *::before, *::after { font-family: 'Inter', sans-serif; }
+    * { font-family: 'Inter', sans-serif; }
 
-    html, body { height: 100%; overflow: hidden; background: #fff; }
-
-    .modal-wrapper {
-      width: 100vw;
-      height: 100vh;
-      background: #fff;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+    /* ── Animations ── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes modal-backdrop-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
     }
-
-    /* ── Page header ── */
-    .page-header {
-      flex-shrink: 0;
-      height: 64px;
-      padding: 0 32px;
-      border-bottom: 1px solid #e5e7eb;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    @keyframes modal-panel-in {
+      from { opacity: 0; transform: scale(0.97) translateY(6px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
     }
+    .anim-spin { animation: spin 0.7s linear infinite; }
+    .overlay-anim { animation: modal-backdrop-in 180ms ease forwards; }
+    .overlay-anim > div { animation: modal-panel-in 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-    .page-header h1 {
-      font-size: 18px;
-      font-weight: 400;
-      color: #161616;
-    }
-
-    .modal-close {
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #9ca3af;
-      border-radius: 6px;
-      transition: color 0.15s, background 0.15s;
-    }
-
-    .modal-close:hover { color: #161616; background: #f3f4f6; }
-
-    /* ── Key bar ── */
-    .key-bar {
-      flex-shrink: 0;
-      background: #f9fafb;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 0 32px;
-      height: 48px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .key-bar label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      color: #9ca3af;
-      white-space: nowrap;
-    }
-
-    .key-bar input {
-      width: 260px;
-      border: 1px solid #e5e7eb;
-      border-radius: 6px;
-      padding: 4px 10px;
-      font-size: 12px;
-      font-family: monospace;
-      color: #374151;
-      outline: none;
-      background: #fff;
-      transition: border-color 0.15s;
-    }
-
-    .key-bar input:focus { border-color: #161616; }
-
-    /* Suppress browser autofill blue/yellow background on all inputs and textareas */
+    /* ── Suppress browser autofill blue/yellow background ── */
     input:-webkit-autofill,
     input:-webkit-autofill:hover,
     input:-webkit-autofill:focus,
@@ -103,925 +38,157 @@
       transition: background-color 5000s ease-in-out 0s;
     }
 
-    .key-sep { width: 1px; height: 24px; background: #e5e7eb; margin: 0 8px; }
+    /* ── JS-toggled state classes (preserve original behavior) ── */
+    .loading.visible { display: flex !important; }
+    .error-msg.visible { display: flex !important; }
+    #picker-overlay.visible { display: flex !important; }
+    #crop-tool.visible { display: block !important; }
 
-    /* ── Main layout ── */
-    .layout {
-      flex: 1;
-      display: flex;
-      overflow: hidden;
-    }
-
-    /* Left panel */
-    .left-panel {
-      width: 50%;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      border-right: 1px solid #e5e7eb;
-      overflow: hidden;
-    }
-
-    .left-scroll {
-      flex: 1;
-      overflow-y: auto;
-      padding: 32px 32px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    .left-footer {
-      flex-shrink: 0;
-      padding: 16px 32px;
-      background: #fff;
-      border-top: 1px solid #e5e7eb;
-    }
-
-    /* Right panel */
-    .right-panel {
-      flex: 1;
-      overflow-y: auto;
-      padding: 32px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      background: #F8F5EF;
-    }
-
-    /* Section label */
-    .section-label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      color: #9ca3af;
-      text-transform: uppercase;
-      margin-bottom: 16px;
-    }
-
-    .field-helper {
-      font-size: 13px;
-      color: #6b7280;
-      line-height: 1.5;
-    }
-
-    /* ── Character slot ── */
-    .char-slot {
-      display: flex;
-      gap: 16px;
-      align-items: stretch;
-    }
-
-    .char-image-col {
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .char-image-box {
-      width: 120px;
-      height: 160px;
-      background: #F8F5EF;
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      overflow: hidden;
-      border: 1px solid #CCCAC5;
-      transition: border-color 0.15s, background 0.15s;
-      position: relative;
-    }
-
-    .thumb-editing-overlay {
-      display: none;
-      position: absolute;
-      inset: 0;
-      background: rgba(248,245,239,0.88);
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .thumb-editing-overlay .thumb-spinner {
-      width: 22px;
-      height: 22px;
-      border: 2.5px solid #ccfbf1;
-      border-top-color: #2B9996;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
-    .thumb-editing-overlay span {
-      font-size: 10px;
-      font-weight: 600;
-      color: #2B9996;
-      text-align: center;
-      line-height: 1.3;
-    }
-
-    .char-image-box:hover { border-color: #ADADAD; background: #E0E0E0; }
-    .char-image-box.has-char:hover { background: #F8F5EF; } /* suppress bg change when filled */
-    .char-image-box img { width: 100%; height: 100%; object-fit: contain; }
-
-    .char-change-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(22,22,22,0.55);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 12px;
-      opacity: 0;
-      transition: opacity 0.18s;
-      pointer-events: none;
-    }
-    .char-change-overlay span {
-      font-size: 11px;
-      font-weight: 700;
-      color: #ffffff;
-      text-align: center;
-      line-height: 1.4;
-      letter-spacing: 0.01em;
-      padding: 0 8px;
-    }
+    /* ── Complex parent → child / state selectors ── */
+    .char-image-box.has-char:hover { background-color: #F8F5EF; }
     .char-image-box.has-char:not(.is-editing):hover .char-change-overlay {
       opacity: 1;
       pointer-events: auto;
     }
-
-    .btn-char {
-      width: 120px;
-      padding: 8px 12px;
-      background: #fff;
-      color: #161616;
-      border: 1px solid #161616;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-      transition: background 0.15s, color 0.15s;
-    }
-
-    .btn-char:hover:not(:disabled) { background: #161616; color: #fff; }
-    .btn-char:disabled { background: #f3f4f6; color: #9ca3af; border-color: #e5e7eb; cursor: not-allowed; }
-
-    .btn-char-secondary {
-      width: 120px;
-      padding: 8px 12px;
-      background: #fff;
-      color: #161616;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-      transition: border-color 0.15s, background 0.15s;
-    }
-
-    .btn-char-secondary:hover:not(:disabled) { border-color: #161616; background: #f9fafb; }
-    .btn-char-secondary:disabled { color: #9ca3af; border-color: #e5e7eb; cursor: not-allowed; }
-
-    /* Right side of character slot */
-    .char-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      min-width: 0;
-    }
-
-    .char-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .char-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: #374151;
-    }
-
-    .badge-optional {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px 8px;
-      background: #F8F5EF;
-      border: 1px solid #CCCAC5;
-      border-radius: 99px;
-      font-size: 11px;
-      font-weight: 600;
-      color: #6b7280;
-    }
-
-    .char-subtitle {
-      font-size: 13px;
-      color: #6b7280;
-      line-height: 1.5;
-    }
-
-    .info-banner {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      background: #E7F3F3;
-      border-radius: 8px;
-      padding: 12px 16px;
-    }
-
-    .info-banner svg { color: #2B9996; flex-shrink: 0; margin-top: 1px; }
-
-    .info-banner-text {
-      font-size: 12px;
-      color: #2B9996;
-      line-height: 1.5;
-    }
-
-    textarea.char-textarea {
-      width: 100%;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 10px 12px;
-      font-size: 13px;
-      font-family: inherit;
-      color: #161616;
-      background: #fff;
-      outline: none;
-      resize: vertical;
-      min-height: 64px;
-      transition: border-color 0.15s;
-      line-height: 1.5;
-    }
-
-    textarea.char-textarea:focus { border-color: #161616; }
-    textarea.char-textarea::placeholder { color: #d1d5db; }
-
-    .divider { height: 1px; background: #e5e7eb; margin: 8px 0; }
-
-    /* ── Scene fields ── */
-    .scene-section { display: flex; flex-direction: column; gap: 16px; }
-    .scene-section .section-label { margin-bottom: 0; }
-
-    /* Group label + helper tightly; gap between this block and the input */
-    .field-header { display: flex; flex-direction: column; gap: 8px; }
-    .scene-field { display: flex; flex-direction: column; gap: 16px; }
-
-    .field-label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #374151;
-    }
-
-    .scene-field input {
-      width: 100%;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 9px 12px;
-      font-size: 13px;
-      font-family: inherit;
-      color: #161616;
-      outline: none;
-      background: #fff;
-      transition: border-color 0.15s;
-    }
-
-    .scene-field input:focus { border-color: #161616; }
-    .scene-field input::placeholder { color: #d1d5db; }
-
-    /* Generate button */
-    .btn-generate {
-      width: 100%;
-      padding: 14px 20px;
-      background: #E7F3F3;
-      color: #2B9996;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: background 0.15s, color 0.15s, transform 80ms ease;
-    }
-
-    .btn-generate:hover:not(:disabled) { background: #2B9996; color: #fff; }
-    .btn-generate:active:not(:disabled) { transform: scale(0.98); }
-    .btn-generate:disabled { background: #E7F3F3; color: #a0c8c8; cursor: not-allowed; }
-
-    /* Loading */
-    .loading { display: none; align-items: center; gap: 8px; margin-top: 8px; }
-    .loading.visible { display: flex; }
-    .spinner {
-      width: 16px; height: 16px;
-      border: 2px solid #ccfbf1;
-      border-top-color: #0d9488;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      flex-shrink: 0;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    @keyframes modal-backdrop-in {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-    @keyframes modal-panel-in {
-      from { opacity: 0; transform: scale(0.97) translateY(6px); }
-      to   { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    .overlay-anim { animation: modal-backdrop-in 180ms ease forwards; }
-    .overlay-anim > div { animation: modal-panel-in 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-    .error-msg {
-      display: none;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      border-radius: 8px;
-      padding: 10px 16px;
-      font-size: 13px;
-      color: #dc2626;
-      margin-top: 8px;
-    }
-    .error-msg.visible { display: flex; align-items: flex-start; gap: 10px; }
-    .error-msg-body { flex: 1; }
-    .error-retry-btn {
-      margin-top: 6px;
-      display: inline-block;
-      background: none;
-      border: 1px solid #dc2626;
-      border-radius: 6px;
-      color: #dc2626;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 3px 10px;
-      cursor: pointer;
-    }
-    .error-retry-btn:hover { background: #fecaca; }
-
-    /* ── Right panel ── */
-    .top-actions {
-      display: flex;
-      gap: 16px;
-    }
-
-    .btn-top-action {
-      flex: 1;
-      padding: 11px 16px;
-      background: #fff;
-      color: #161616;
-      border: 1px solid #CCCAC5;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: border-color 0.15s;
-    }
-
-    .btn-top-action:hover:not(:disabled) { border-color: #161616; }
-    .btn-top-action:disabled { color: #9ca3af; border-color: #e5e7eb; cursor: not-allowed; }
-
-    .btn-top-spinner {
-      width: 14px;
-      height: 14px;
-      border: 2px solid #e5e7eb;
-      border-top-color: #9ca3af;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      flex-shrink: 0;
-    }
-
-    /* Result image */
-    .result-area {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-    }
-
-    .result-placeholder {
-      text-align: center;
-      color: #d1d5db;
-      padding: 48px;
-    }
-
-    .result-placeholder p { font-size: 14px; color: #9ca3af; margin-top: 12px; font-weight: 500; }
-
-    #gen-img-wrap {
-      position: relative;
-      display: none;
-      line-height: 0;
-    }
-
-    #gen-result-img {
-      max-width: 100%;
-      max-height: 480px;
-      width: auto;
-      height: auto;
-      display: block;
-      object-fit: contain;
-      border-radius: 8px;
-      border: 1px solid #161616;
-    }
-
-    #gen-img-editing-overlay {
-      display: none;
-      position: absolute;
-      inset: 0;
-      background: rgba(248,245,239,0.88);
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      border-radius: 8px;
-    }
-
-    #gen-img-editing-overlay .gen-edit-spinner {
-      width: 36px;
-      height: 36px;
-      border: 3px solid #ccfbf1;
-      border-top-color: #2B9996;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
-    #gen-img-editing-overlay span {
-      font-size: 13px;
-      font-weight: 600;
-      color: #2B9996;
-    }
-
-    /* Crop tool */
-    #crop-tool { display: none; }
-    #crop-tool.visible { display: block; }
-
-    .crop-hint {
-      font-size: 12px;
-      color: #6b7280;
-      margin-bottom: 8px;
-    }
-
-    #crop-frame {
-      position: relative;
-      width: 100%;
-      overflow: hidden;
-      border-radius: 10px;
-      border: 2.5px solid #0d9488;
-      cursor: grab;
-      touch-action: none;
-      background: #e5e7eb;
-    }
-
-    #crop-img {
-      position: absolute;
-      top: 0; left: 0;
-      transform-origin: 0 0;
-      will-change: transform;
-      user-select: none;
-      pointer-events: none;
-    }
-
-    .crop-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .btn-zoom {
-      flex: 1;
-      padding: 10px;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 8px;
-      background: #fff;
-      font-size: 13px;
-      font-weight: 600;
-      color: #2d2d2d;
-      cursor: pointer;
-      transition: border-color 0.15s;
-    }
-
-    .btn-zoom:hover { border-color: #6b7280; }
-
-    .btn-implement {
-      flex: 2;
-      padding: 10px;
-      background: #E7F3F3;
-      color: #2B9996;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s;
-    }
-
-    .btn-implement:hover { background: #2B9996; color: #fff; }
-
-    /* ── Character picker overlay ── */
-    #picker-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      z-index: 100;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-    #picker-overlay.visible { display: flex; }
-
-    .picker-modal {
-      background: #fff;
-      border-radius: 20px;
-      width: 100%;
-      max-width: 960px;
-      max-height: 90vh;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 24px 64px rgba(0,0,0,0.18);
-      overflow: hidden;
-    }
-
-    .picker-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 28px 32px 24px;
-      flex-shrink: 0;
-    }
-    .picker-title {
-      font-size: 22px;
-      font-weight: 400;
-      color: #161616;
-    }
-    .picker-close-btn {
-      width: 32px;
-      height: 32px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #6b7280;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      transition: background 0.15s, color 0.15s;
-      flex-shrink: 0;
-    }
-    .picker-close-btn:hover { background: #f3f4f6; color: #161616; }
-
-    .picker-divider { height: 1px; background: #e5e7eb; flex-shrink: 0; }
-
-    .picker-filter-bar {
-      padding: 16px 32px 8px;
-      flex-shrink: 0;
-      position: relative;
-    }
-    .picker-filter-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      background: #fff;
-      border: 1.5px solid #CCCAC5;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #374151;
-      cursor: pointer;
-      transition: border-color 0.15s, color 0.15s;
-    }
-    .picker-filter-btn:hover,
-    .picker-filter-btn.open { border-color: #161616; color: #161616; }
-    .filter-badge {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      min-width: 18px;
-      height: 18px;
-      background: #161616;
-      color: #fff;
-      border-radius: 9px;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 0 4px;
-      line-height: 1;
-    }
-    .filter-popover {
-      display: none;
-      position: absolute;
-      top: calc(100% + 4px);
-      left: 32px;
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-      width: 288px;
-      padding: 16px;
-      z-index: 10;
-    }
-    .filter-popover-group { margin-bottom: 16px; }
-    .filter-popover-group:last-child { margin-bottom: 0; }
-    .filter-popover-group-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: #9ca3af;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 8px;
-    }
-    .filter-popover-options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .filter-popover-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border: 1px solid #e5e7eb;
-      border-radius: 6px;
-      font-size: 13px;
-      color: #374151;
-      cursor: pointer;
-      user-select: none;
-      transition: border-color 0.12s;
-    }
-    .filter-popover-chip:hover { border-color: #9ca3af; }
-    .filter-popover-chip input[type="checkbox"] {
-      width: 14px;
-      height: 14px;
-      accent-color: #161616;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .filter-popover-footer {
-      margin-top: 16px;
-      padding-top: 12px;
-      border-top: 1px solid #f3f4f6;
-      text-align: right;
-    }
-    .filter-clear-btn {
-      background: none;
-      border: none;
-      font-size: 12px;
-      font-weight: 500;
-      color: #9ca3af;
-      cursor: pointer;
-      padding: 0;
-      transition: color 0.12s;
-    }
-    .filter-clear-btn:hover { color: #161616; }
-
-    .picker-gallery-wrap {
-      flex: 1;
-      overflow-x: auto;
-      overflow-y: hidden;
-      padding: 8px 32px 24px;
-    }
-    .picker-gallery {
-      display: flex;
-      gap: 16px;
-      height: 100%;
-      min-height: 296px;
-      align-items: flex-start;
-      padding-bottom: 2px;
-    }
-    .picker-empty {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      min-height: 220px;
-      font-size: 14px;
-      color: #9ca3af;
-    }
-
-    .picker-card {
-      width: 200px;
-      min-height: 272px;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 14px;
-      background: #F8F5EF;
-      cursor: pointer;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: border-color 0.15s, box-shadow 0.15s;
-      overflow: visible;
-    }
-    .picker-card:hover { border-color: #9ca3af; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
-    .picker-card.selected { border: 2px solid #161616; }
-
-    .picker-card img {
-      width: 160px;
-      height: 240px;
-      object-fit: contain;
-      display: block;
-      pointer-events: none;
-    }
-
-    .picker-check {
-      display: none;
-      position: absolute;
-      bottom: -9px;
-      right: -9px;
-      width: 26px;
-      height: 26px;
-      background: #161616;
-      border-radius: 50%;
-      border: 2.5px solid #fff;
-      align-items: center;
-      justify-content: center;
-      z-index: 2;
-    }
-    .picker-card.selected .picker-check { display: flex; }
-
-    .picker-footer {
-      padding: 14px 32px 24px;
-      display: flex;
-      justify-content: flex-end;
-      border-top: 1px solid #f3f4f6;
-      flex-shrink: 0;
-    }
-    .picker-save-btn {
-      padding: 11px 48px;
-      background: #fff;
-      border: 1.5px solid #CCCAC5;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      color: #161616;
-      cursor: pointer;
-      transition: border-color 0.15s;
-    }
-    .picker-save-btn:hover { border-color: #161616; }
-
-    @media (max-width: 900px) {
-      .layout { flex-direction: column; }
-      .left-panel { width: 100%; border-right: none; border-bottom: 1px solid #e5e7eb; height: auto; max-height: 60vh; }
-      .right-panel { padding: 24px; }
-    }
+    .picker-card.selected { border: 2px solid #161616 !important; }
+    .picker-card.selected .picker-check { display: flex !important; }
+    .picker-filter-btn.open { border-color: #161616 !important; color: #161616 !important; }
   </style>
 </head>
-<body>
+<body class="h-full overflow-hidden bg-white">
 
-<div class="modal-wrapper">
+<div class="w-screen h-screen bg-white flex flex-col overflow-hidden">
 
 <!-- Header -->
-<div class="page-header">
-  <h1>Image Generator</h1>
-  <button class="modal-close" title="Close">
+<div class="shrink-0 h-16 px-8 border-b border-[#e5e7eb] flex items-center justify-between">
+  <h1 class="text-[18px] font-normal text-[#161616]">Image Generator</h1>
+  <button class="w-8 h-8 flex items-center justify-center bg-transparent border-0 cursor-pointer text-[#9ca3af] rounded-md transition-colors duration-150 hover:text-[#161616] hover:bg-[#f3f4f6]" title="Close">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6M6 6l12 12"/></svg>
   </button>
 </div>
 
 <!-- Key bar -->
-<div class="key-bar">
-  <label>FAL KEY</label>
-  <input type="password" id="falKey" placeholder="paste your fal.ai key" />
-  <div class="key-sep"></div>
-  <label>GOOGLE KEY</label>
-  <input type="password" id="googleKey" placeholder="paste your Google AI Studio key" />
+<div class="shrink-0 bg-[#f9fafb] border-b border-[#e5e7eb] px-8 h-12 flex items-center gap-2">
+  <label class="text-[11px] font-bold tracking-[0.05em] text-[#9ca3af] whitespace-nowrap">FAL KEY</label>
+  <input type="password" id="falKey" placeholder="paste your fal.ai key" class="w-[260px] border border-[#e5e7eb] rounded-md py-1 px-2.5 text-xs font-mono text-[#374151] outline-none bg-white transition-colors duration-150 focus:border-[#161616]" />
+  <div class="w-px h-6 bg-[#e5e7eb] mx-2"></div>
+  <label class="text-[11px] font-bold tracking-[0.05em] text-[#9ca3af] whitespace-nowrap">GOOGLE KEY</label>
+  <input type="password" id="googleKey" placeholder="paste your Google AI Studio key" class="w-[260px] border border-[#e5e7eb] rounded-md py-1 px-2.5 text-xs font-mono text-[#374151] outline-none bg-white transition-colors duration-150 focus:border-[#161616]" />
 </div>
 
 <!-- Main layout -->
-<div class="layout">
+<div class="flex-1 flex flex-col min-[901px]:flex-row overflow-hidden">
 
   <!-- ── LEFT PANEL ── -->
-  <div class="left-panel">
-    <div class="left-scroll">
+  <div class="w-full min-[901px]:w-1/2 shrink-0 flex flex-col border-[#e5e7eb] border-b min-[901px]:border-b-0 min-[901px]:border-r overflow-hidden h-auto max-h-[60vh] min-[901px]:max-h-none min-[901px]:h-auto">
+    <div class="flex-1 overflow-y-auto pt-8 px-8 pb-6 flex flex-col gap-6">
 
       <!-- Characters -->
       <div>
-        <div class="section-label">Characters</div>
+        <div class="text-[11px] font-bold tracking-[0.08em] text-[#9ca3af] uppercase mb-4">Characters</div>
 
         <!-- Character 1 -->
-        <div class="char-slot" style="margin-bottom:24px;">
-          <div class="char-image-col">
-            <div class="char-image-box" id="slot-0-box" onclick="openPicker(0)">
-              <img id="slot-0-img" style="display:none" alt="" />
-              <div class="char-change-overlay"><span>Change<br>Character</span></div>
-              <div id="slot-0-thumb-loading" class="thumb-editing-overlay"><div class="thumb-spinner"></div><span>Editing…</span></div>
-              <span id="slot-0-empty" style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-                <span style="font-size:13px;font-weight:500;color:#6b7280;">Add Character</span>
+        <div class="char-slot flex gap-4 items-stretch mb-6">
+          <div class="shrink-0 flex flex-col justify-between gap-4">
+            <div class="char-image-box w-[120px] h-[160px] bg-[#F8F5EF] rounded-xl flex flex-col items-center justify-center cursor-pointer overflow-hidden border border-[#CCCAC5] transition-colors duration-150 relative hover:border-[#ADADAD] hover:bg-[#E0E0E0]" id="slot-0-box" onclick="openPicker(0)">
+              <img id="slot-0-img" style="display:none" class="w-full h-full object-contain" alt="" />
+              <div class="char-change-overlay absolute inset-0 bg-[rgba(22,22,22,0.55)] flex items-center justify-center rounded-xl opacity-0 transition-opacity duration-[180ms] pointer-events-none"><span class="text-[11px] font-bold text-white text-center leading-[1.4] tracking-[0.01em] px-2">Change<br>Character</span></div>
+              <div id="slot-0-thumb-loading" class="absolute inset-0 bg-[rgba(248,245,239,0.88)] flex-col items-center justify-center gap-2" style="display:none"><div class="w-[22px] h-[22px] border-[2.5px] border-[#ccfbf1] border-t-[#2B9996] rounded-full anim-spin"></div><span class="text-[10px] font-semibold text-[#2B9996] text-center leading-[1.3]">Editing…</span></div>
+              <span id="slot-0-empty" class="flex flex-col items-center gap-2">
+                <span class="text-[13px] font-medium text-[#6b7280]">Add Character</span>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>
               </span>
             </div>
-            <button id="slot-0-edit" class="btn-char-secondary" disabled onclick="openEditModal('character', 0)">
+            <button id="slot-0-edit" class="w-[120px] py-2 px-3 bg-white text-[#161616] border border-[#e5e7eb] rounded-lg text-xs font-semibold cursor-pointer flex items-center justify-center gap-[5px] transition-colors duration-150 enabled:hover:border-[#161616] enabled:hover:bg-[#f9fafb] disabled:text-[#9ca3af] disabled:border-[#e5e7eb] disabled:cursor-not-allowed" disabled onclick="openEditModal('character', 0)">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487z"/></svg>
               Edit
             </button>
           </div>
-          <div class="char-content">
-            <div class="field-header">
-              <div class="char-header">
-                <span class="char-title">Main Character</span>
+          <div class="flex-1 flex flex-col gap-4 min-w-0">
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center gap-2">
+                <span class="text-[13px] font-semibold text-[#374151]">Main Character</span>
               </div>
-              <p class="char-subtitle">Describe what this character is doing in the scene</p>
+              <p class="text-[13px] text-[#6b7280] leading-normal">Describe what this character is doing in the scene</p>
             </div>
-            <div class="info-banner">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
-              <span class="info-banner-text">Select a character first, then describe their action below.</span>
+            <div class="flex items-start gap-2 bg-[#E7F3F3] rounded-lg py-3 px-4">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-[#2B9996] shrink-0 mt-px"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
+              <span class="text-xs text-[#2B9996] leading-normal">Select a character first, then describe their action below.</span>
             </div>
-            <textarea class="char-textarea" id="slot-0-action" placeholder="e.g. crying at their desk, asking for a break…"></textarea>
+            <textarea class="w-full border border-[#e5e7eb] rounded-lg py-2.5 px-3 text-[13px] text-[#161616] bg-white outline-none resize-y min-h-[64px] transition-colors duration-150 leading-normal placeholder:text-[#d1d5db] focus:border-[#161616]" id="slot-0-action" placeholder="e.g. crying at their desk, asking for a break…"></textarea>
           </div>
         </div>
 
         <!-- Character 2 -->
-        <div class="char-slot">
-          <div class="char-image-col">
-            <div class="char-image-box" id="slot-1-box" onclick="openPicker(1)">
-              <img id="slot-1-img" style="display:none" alt="" />
-              <div class="char-change-overlay"><span>Change<br>Character</span></div>
-              <div id="slot-1-thumb-loading" class="thumb-editing-overlay"><div class="thumb-spinner"></div><span>Editing…</span></div>
-              <span id="slot-1-empty" style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-                <span style="font-size:13px;font-weight:500;color:#6b7280;">Add Character</span>
+        <div class="char-slot flex gap-4 items-stretch">
+          <div class="shrink-0 flex flex-col justify-between gap-4">
+            <div class="char-image-box w-[120px] h-[160px] bg-[#F8F5EF] rounded-xl flex flex-col items-center justify-center cursor-pointer overflow-hidden border border-[#CCCAC5] transition-colors duration-150 relative hover:border-[#ADADAD] hover:bg-[#E0E0E0]" id="slot-1-box" onclick="openPicker(1)">
+              <img id="slot-1-img" style="display:none" class="w-full h-full object-contain" alt="" />
+              <div class="char-change-overlay absolute inset-0 bg-[rgba(22,22,22,0.55)] flex items-center justify-center rounded-xl opacity-0 transition-opacity duration-[180ms] pointer-events-none"><span class="text-[11px] font-bold text-white text-center leading-[1.4] tracking-[0.01em] px-2">Change<br>Character</span></div>
+              <div id="slot-1-thumb-loading" class="absolute inset-0 bg-[rgba(248,245,239,0.88)] flex-col items-center justify-center gap-2" style="display:none"><div class="w-[22px] h-[22px] border-[2.5px] border-[#ccfbf1] border-t-[#2B9996] rounded-full anim-spin"></div><span class="text-[10px] font-semibold text-[#2B9996] text-center leading-[1.3]">Editing…</span></div>
+              <span id="slot-1-empty" class="flex flex-col items-center gap-2">
+                <span class="text-[13px] font-medium text-[#6b7280]">Add Character</span>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>
               </span>
             </div>
-            <button id="slot-1-edit" class="btn-char-secondary" disabled onclick="openEditModal('character', 1)">
+            <button id="slot-1-edit" class="w-[120px] py-2 px-3 bg-white text-[#161616] border border-[#e5e7eb] rounded-lg text-xs font-semibold cursor-pointer flex items-center justify-center gap-[5px] transition-colors duration-150 enabled:hover:border-[#161616] enabled:hover:bg-[#f9fafb] disabled:text-[#9ca3af] disabled:border-[#e5e7eb] disabled:cursor-not-allowed" disabled onclick="openEditModal('character', 1)">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487z"/></svg>
               Edit
             </button>
           </div>
-          <div class="char-content">
-            <div class="field-header">
-              <div class="char-header">
-                <span class="char-title">Additional Character</span>
-                <span class="badge-optional">Optional</span>
+          <div class="flex-1 flex flex-col gap-4 min-w-0">
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center gap-2">
+                <span class="text-[13px] font-semibold text-[#374151]">Additional Character</span>
+                <span class="inline-flex items-center py-0.5 px-2 bg-[#F8F5EF] border border-[#CCCAC5] rounded-full text-[11px] font-semibold text-[#6b7280]">Optional</span>
               </div>
-              <p class="char-subtitle">Add a second character to the scene</p>
+              <p class="text-[13px] text-[#6b7280] leading-normal">Add a second character to the scene</p>
             </div>
-            <div class="info-banner">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
-              <span class="info-banner-text">Leave blank to generate a single-character scene.</span>
+            <div class="flex items-start gap-2 bg-[#E7F3F3] rounded-lg py-3 px-4">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-[#2B9996] shrink-0 mt-px"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
+              <span class="text-xs text-[#2B9996] leading-normal">Leave blank to generate a single-character scene.</span>
             </div>
-            <textarea class="char-textarea" id="slot-1-action" placeholder="e.g. sitting across the table, listening carefully…"></textarea>
+            <textarea class="w-full border border-[#e5e7eb] rounded-lg py-2.5 px-3 text-[13px] text-[#161616] bg-white outline-none resize-y min-h-[64px] transition-colors duration-150 leading-normal placeholder:text-[#d1d5db] focus:border-[#161616]" id="slot-1-action" placeholder="e.g. sitting across the table, listening carefully…"></textarea>
           </div>
         </div>
       </div>
 
-      <div class="divider"></div>
+      <div class="h-px bg-[#e5e7eb] my-2"></div>
 
       <!-- Scene -->
-      <div class="scene-section">
-        <div class="section-label">Scene</div>
+      <div class="flex flex-col gap-4">
+        <div class="text-[11px] font-bold tracking-[0.08em] text-[#9ca3af] uppercase">Scene</div>
 
-        <div class="scene-field">
-          <div class="field-header">
-            <div class="field-label">Location</div>
-            <p class="field-helper">Where does this scene take place?</p>
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center gap-1.5 text-[13px] font-semibold text-[#374151]">Location</div>
+            <p class="text-[13px] text-[#6b7280] leading-normal">Where does this scene take place?</p>
           </div>
-          <input type="text" id="gen-location" placeholder="e.g. a classroom, an office, a park…" />
+          <input type="text" id="gen-location" placeholder="e.g. a classroom, an office, a park…" class="w-full border border-[#e5e7eb] rounded-lg py-[9px] px-3 text-[13px] text-[#161616] outline-none bg-white transition-colors duration-150 placeholder:text-[#d1d5db] focus:border-[#161616]" />
         </div>
 
-        <div class="scene-field">
-          <div class="field-header">
-            <div class="field-label">Objects <span class="badge-optional">Optional</span></div>
-            <p class="field-helper">Any props or items that should be visible in the scene.</p>
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center gap-1.5 text-[13px] font-semibold text-[#374151]">Objects <span class="inline-flex items-center py-0.5 px-2 bg-[#F8F5EF] border border-[#CCCAC5] rounded-full text-[11px] font-semibold text-[#6b7280]">Optional</span></div>
+            <p class="text-[13px] text-[#6b7280] leading-normal">Any props or items that should be visible in the scene.</p>
           </div>
-          <input type="text" id="gen-objects" placeholder="e.g. a whiteboard, a backpack, a lunch box…" />
+          <input type="text" id="gen-objects" placeholder="e.g. a whiteboard, a backpack, a lunch box…" class="w-full border border-[#e5e7eb] rounded-lg py-[9px] px-3 text-[13px] text-[#161616] outline-none bg-white transition-colors duration-150 placeholder:text-[#d1d5db] focus:border-[#161616]" />
         </div>
 
-        <div class="scene-field">
-          <div class="field-header">
-            <div class="field-label">Additional notes <span class="badge-optional">Optional</span></div>
-            <p class="field-helper">Mood, lighting, time of day, or any other details.</p>
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center gap-1.5 text-[13px] font-semibold text-[#374151]">Additional notes <span class="inline-flex items-center py-0.5 px-2 bg-[#F8F5EF] border border-[#CCCAC5] rounded-full text-[11px] font-semibold text-[#6b7280]">Optional</span></div>
+            <p class="text-[13px] text-[#6b7280] leading-normal">Mood, lighting, time of day, or any other details.</p>
           </div>
-          <input type="text" id="gen-details" placeholder="e.g. warm afternoon light, autumn setting…" />
+          <input type="text" id="gen-details" placeholder="e.g. warm afternoon light, autumn setting…" class="w-full border border-[#e5e7eb] rounded-lg py-[9px] px-3 text-[13px] text-[#161616] outline-none bg-white transition-colors duration-150 placeholder:text-[#d1d5db] focus:border-[#161616]" />
         </div>
       </div>
 
     </div><!-- end left-scroll -->
 
     <!-- Sticky generate footer -->
-    <div class="left-footer">
-      <button class="btn-generate" id="gen-btn" onclick="generateImage()">
+    <div class="shrink-0 py-4 px-8 bg-white border-t border-[#e5e7eb]">
+      <button class="w-full py-3.5 px-5 bg-[#E7F3F3] text-[#2B9996] border-0 rounded-[10px] text-[15px] font-bold cursor-pointer flex items-center justify-center gap-2 transition-colors duration-150 enabled:hover:bg-[#2B9996] enabled:hover:text-white enabled:active:scale-[0.98] disabled:bg-[#E7F3F3] disabled:text-[#a0c8c8] disabled:cursor-not-allowed" id="gen-btn" onclick="generateImage()">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/>
           <path d="M17.8 11.8L19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2L19 5"/>
@@ -1029,54 +196,54 @@
         </svg>
         Generate Image
       </button>
-      <div class="loading" id="gen-loading">
-        <div class="spinner"></div>
-        <span id="gen-loading-msg" style="font-size:13px;color:#0f766e;font-weight:600;">Generating — ~15–30 seconds</span>
+      <div class="loading hidden items-center gap-2 mt-2" id="gen-loading">
+        <div class="w-4 h-4 border-2 border-[#ccfbf1] border-t-[#0d9488] rounded-full anim-spin shrink-0"></div>
+        <span id="gen-loading-msg" class="text-[13px] text-[#0f766e] font-semibold">Generating — ~15–30 seconds</span>
       </div>
-      <div class="error-msg" id="gen-error"></div>
+      <div class="error-msg hidden bg-[#fef2f2] border border-[#fecaca] rounded-lg py-2.5 px-4 text-[13px] text-[#dc2626] mt-2 items-start gap-2.5" id="gen-error"></div>
     </div>
 
   </div><!-- end left-panel -->
 
   <!-- ── RIGHT PANEL ── -->
-  <div class="right-panel">
+  <div class="flex-1 overflow-y-auto p-6 min-[901px]:p-8 flex flex-col gap-4 bg-[#F8F5EF]">
 
-    <div class="top-actions">
-      <button class="btn-top-action" id="regen-btn" disabled onclick="generateImage()">
+    <div class="flex gap-4">
+      <button class="flex-1 py-[11px] px-4 bg-white text-[#161616] border border-[#CCCAC5] rounded-[10px] text-[13px] font-semibold cursor-pointer flex items-center justify-center gap-2 transition-colors duration-150 enabled:hover:border-[#161616] disabled:text-[#9ca3af] disabled:border-[#e5e7eb] disabled:cursor-not-allowed" id="regen-btn" disabled onclick="generateImage()">
         <span id="regen-btn-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg></span>
         <span id="regen-btn-label">Re-generate</span>
       </button>
-      <button class="btn-top-action" id="edit-image-btn" disabled onclick="openEditModal('image')">
+      <button class="flex-1 py-[11px] px-4 bg-white text-[#161616] border border-[#CCCAC5] rounded-[10px] text-[13px] font-semibold cursor-pointer flex items-center justify-center gap-2 transition-colors duration-150 enabled:hover:border-[#161616] disabled:text-[#9ca3af] disabled:border-[#e5e7eb] disabled:cursor-not-allowed" id="edit-image-btn" disabled onclick="openEditModal('image')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487z"/></svg>
         Edit Image
       </button>
     </div>
 
-    <div class="result-area" id="result-area">
-      <div class="result-placeholder" id="result-placeholder">
+    <div class="flex items-center justify-center w-full" id="result-area">
+      <div class="text-center text-[#d1d5db] p-12" id="result-placeholder">
         <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
-        <p>Your generated image will appear here</p>
+        <p class="text-sm text-[#9ca3af] mt-3 font-medium">Your generated image will appear here</p>
       </div>
-      <div id="gen-img-wrap">
-        <img id="gen-result-img" src="" alt="Generated image" />
-        <div id="gen-img-editing-overlay">
-          <div class="gen-edit-spinner"></div>
-          <span id="gen-img-overlay-text">Editing…</span>
+      <div id="gen-img-wrap" class="relative leading-[0]" style="display:none">
+        <img id="gen-result-img" src="" alt="Generated image" class="max-w-full max-h-[480px] w-auto h-auto block object-contain rounded-lg border border-[#161616]" />
+        <div id="gen-img-editing-overlay" class="absolute inset-0 bg-[rgba(248,245,239,0.88)] flex-col items-center justify-center gap-3 rounded-lg" style="display:none">
+          <div class="w-9 h-9 border-[3px] border-[#ccfbf1] border-t-[#2B9996] rounded-full anim-spin"></div>
+          <span id="gen-img-overlay-text" class="text-[13px] font-semibold text-[#2B9996]">Editing…</span>
         </div>
       </div>
     </div>
 
     <!-- Crop tool -->
-    <div id="crop-tool">
-      <p class="crop-hint">Drag to pan · scroll or use buttons to zoom · then Crop</p>
-      <div id="crop-frame">
+    <div id="crop-tool" class="hidden">
+      <p class="text-xs text-[#6b7280] mb-2">Drag to pan · scroll or use buttons to zoom · then Crop</p>
+      <div id="crop-frame" class="relative w-full overflow-hidden rounded-[10px] border-[2.5px] border-[#0d9488] cursor-grab touch-none bg-[#e5e7eb]">
         <div style="padding-top:48.46%;"></div>
-        <img id="crop-img" />
+        <img id="crop-img" class="absolute top-0 left-0 origin-top-left will-change-transform select-none pointer-events-none" />
       </div>
-      <div class="crop-actions">
-        <button class="btn-zoom" onclick="zoomCrop(-0.1)">− Zoom Out</button>
-        <button class="btn-zoom" onclick="zoomCrop(0.1)">+ Zoom In</button>
-        <button class="btn-implement" onclick="applyCrop()">Implement</button>
+      <div class="flex gap-2 mt-2">
+        <button class="flex-1 p-2.5 border-[1.5px] border-[#e5e7eb] rounded-lg bg-white text-[13px] font-semibold text-[#2d2d2d] cursor-pointer transition-colors duration-150 hover:border-[#6b7280]" onclick="zoomCrop(-0.1)">− Zoom Out</button>
+        <button class="flex-1 p-2.5 border-[1.5px] border-[#e5e7eb] rounded-lg bg-white text-[13px] font-semibold text-[#2d2d2d] cursor-pointer transition-colors duration-150 hover:border-[#6b7280]" onclick="zoomCrop(0.1)">+ Zoom In</button>
+        <button class="flex-[2] p-2.5 bg-[#E7F3F3] text-[#2B9996] border-0 rounded-lg text-sm font-bold cursor-pointer transition-colors duration-150 hover:bg-[#2B9996] hover:text-white" onclick="applyCrop()">Implement</button>
       </div>
     </div>
 
@@ -1087,108 +254,108 @@
 </div><!-- end modal-wrapper -->
 
 <!-- ── Edit Modal ── -->
-<div id="edit-overlay" onclick="editOverlayClick(event)" class="overlay-anim" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1001;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:16px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,0.25);">
+<div id="edit-overlay" onclick="editOverlayClick(event)" class="overlay-anim fixed inset-0 bg-black/45 z-[1001] items-center justify-center" style="display:none">
+  <div class="bg-white rounded-2xl w-[520px] max-w-[95vw] max-h-[90vh] overflow-y-auto shadow-[0_24px_64px_rgba(0,0,0,0.25)]">
 
     <!-- Header -->
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:28px 32px 24px;">
-      <span id="edit-modal-title" style="font-size:22px;font-weight:400;color:#161616;"></span>
-      <button onclick="closeEditModal()" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;color:#9ca3af;border-radius:8px;flex-shrink:0;transition:background 0.15s,color 0.15s;" onmouseover="this.style.background='#f3f4f6';this.style.color='#161616'" onmouseout="this.style.background='none';this.style.color='#9ca3af'">
+    <div class="flex items-center justify-between pt-7 px-8 pb-6">
+      <span id="edit-modal-title" class="text-[22px] font-normal text-[#161616]"></span>
+      <button onclick="closeEditModal()" class="w-8 h-8 flex items-center justify-center bg-transparent border-0 cursor-pointer text-[#9ca3af] rounded-lg shrink-0 transition-colors duration-150 hover:bg-[#f3f4f6] hover:text-[#161616]">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
-    <div style="height:1px;background:#e5e7eb;"></div>
+    <div class="h-px bg-[#e5e7eb]"></div>
 
     <!-- Image preview with loading overlay -->
-    <div style="padding:24px 32px 0;">
-      <div id="edit-preview-wrap" style="position:relative;background:#F8F5EF;border-radius:12px;overflow:hidden;min-height:200px;display:flex;align-items:center;justify-content:center;">
-        <img id="edit-modal-preview" src="" alt="" style="display:none;max-width:100%;max-height:340px;object-fit:contain;border-radius:12px;" />
+    <div class="pt-6 px-8">
+      <div id="edit-preview-wrap" class="relative bg-[#F8F5EF] rounded-xl overflow-hidden min-h-[200px] flex items-center justify-center">
+        <img id="edit-modal-preview" src="" alt="" class="max-w-full max-h-[340px] object-contain rounded-xl" style="display:none" />
         <!-- Loading overlay on image -->
-        <div id="edit-img-loading" style="display:none;position:absolute;inset:0;background:rgba(248,245,239,0.85);border-radius:12px;flex-direction:column;align-items:center;justify-content:center;gap:12px;transition:opacity 0.2s;">
-          <div style="width:32px;height:32px;border:3px solid #ccfbf1;border-top-color:#2B9996;border-radius:50%;animation:spin 0.7s linear infinite;"></div>
-          <span style="font-size:13px;font-weight:600;color:#2B9996;text-align:center;padding:0 16px;">Working on your edit…<br><span style="font-weight:400;color:#6b7280;">Feel free to close this window</span></span>
+        <div id="edit-img-loading" class="absolute inset-0 bg-[rgba(248,245,239,0.85)] rounded-xl flex-col items-center justify-center gap-3 transition-opacity duration-200" style="display:none">
+          <div class="w-8 h-8 border-[3px] border-[#ccfbf1] border-t-[#2B9996] rounded-full anim-spin"></div>
+          <span class="text-[13px] font-semibold text-[#2B9996] text-center px-4">Working on your edit…<br><span class="font-normal text-[#6b7280]">Feel free to close this window</span></span>
         </div>
       </div>
     </div>
 
     <!-- Prompt -->
-    <div style="padding:16px 32px 0;">
-      <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:8px;">What would you like to edit?</label>
-      <textarea id="edit-prompt-input" placeholder="Describe what you'd like to change…" style="width:100%;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;font-size:13px;font-family:inherit;resize:vertical;min-height:88px;outline:none;transition:border-color 0.15s;" onfocus="this.style.borderColor='#161616'" onblur="this.style.borderColor='#e5e7eb'"></textarea>
-      <div id="edit-error" style="display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 12px;font-size:13px;color:#dc2626;margin-top:8px;"></div>
+    <div class="pt-4 px-8">
+      <label class="text-[13px] font-semibold text-[#374151] block mb-2">What would you like to edit?</label>
+      <textarea id="edit-prompt-input" placeholder="Describe what you'd like to change…" class="w-full border border-[#e5e7eb] rounded-[10px] py-2.5 px-3 text-[13px] resize-y min-h-[88px] outline-none transition-colors duration-150 focus:border-[#161616]"></textarea>
+      <div id="edit-error" class="bg-[#fef2f2] border border-[#fecaca] rounded-lg py-2 px-3 text-[13px] text-[#dc2626] mt-2" style="display:none"></div>
     </div>
 
     <!-- Buttons -->
-    <div style="display:flex;gap:16px;padding:16px 32px 32px;">
-      <button id="edit-submit-btn" onclick="submitEdit()" style="flex:1;padding:11px 16px;background:#fff;color:#161616;border:1px solid #CCCAC5;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.15s,border-color 0.15s;" onmouseover="this.style.borderColor='#161616'" onmouseout="this.style.borderColor='#CCCAC5'">
+    <div class="flex gap-4 py-4 px-8 pb-8">
+      <button id="edit-submit-btn" onclick="submitEdit()" class="flex-1 py-[11px] px-4 bg-white text-[#161616] border border-[#CCCAC5] rounded-[10px] text-[13px] font-semibold cursor-pointer flex items-center justify-center gap-2 transition-colors duration-150 hover:border-[#161616]">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487z"/></svg>
         <span id="edit-submit-label">Edit</span>
       </button>
-      <button id="edit-close-btn" onclick="closeEditModal()" style="flex:1;padding:11px 16px;background:#fff;color:#161616;border:1px solid #CCCAC5;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:background 0.15s,border-color 0.15s;" onmouseover="this.style.borderColor='#161616'" onmouseout="this.style.borderColor='#CCCAC5'">Save and close</button>
+      <button id="edit-close-btn" onclick="closeEditModal()" class="flex-1 py-[11px] px-4 bg-white text-[#161616] border border-[#CCCAC5] rounded-[10px] text-[13px] font-semibold cursor-pointer transition-colors duration-150 hover:border-[#161616]">Save and close</button>
     </div>
 
   </div>
 </div>
 
 <!-- ── Character Picker Overlay ── -->
-<div id="picker-overlay" onclick="pickerBgClick(event)">
-  <div class="picker-modal">
+<div id="picker-overlay" onclick="pickerBgClick(event)" class="hidden fixed inset-0 bg-black/40 z-[100] items-center justify-center p-6">
+  <div class="bg-white rounded-[20px] w-full max-w-[960px] max-h-[90vh] flex flex-col shadow-[0_24px_64px_rgba(0,0,0,0.18)] overflow-hidden">
     <!-- Header -->
-    <div class="picker-header">
-      <span class="picker-title">Choose Your Character</span>
-      <button class="picker-close-btn" onclick="closePicker()" title="Close">
+    <div class="flex items-center justify-between pt-7 px-8 pb-6 shrink-0">
+      <span class="text-[22px] font-normal text-[#161616]">Choose Your Character</span>
+      <button class="w-8 h-8 bg-transparent border-0 cursor-pointer text-[#6b7280] flex items-center justify-center rounded-lg transition-colors duration-150 shrink-0 hover:bg-[#f3f4f6] hover:text-[#161616]" onclick="closePicker()" title="Close">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
-    <div class="picker-divider"></div>
+    <div class="h-px bg-[#e5e7eb] shrink-0"></div>
 
     <!-- Filters -->
-    <div class="picker-filter-bar">
-      <button class="picker-filter-btn" id="picker-filter-btn" onclick="toggleFilterPopover(event)">
+    <div class="pt-4 px-8 pb-2 shrink-0 relative">
+      <button class="picker-filter-btn inline-flex items-center gap-2 py-2 px-4 bg-white border-[1.5px] border-[#CCCAC5] rounded-lg text-[13px] font-semibold text-[#374151] cursor-pointer transition-colors duration-150 hover:border-[#161616] hover:text-[#161616]" id="picker-filter-btn" onclick="toggleFilterPopover(event)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
         Filters
-        <span class="filter-badge" id="filter-badge"></span>
+        <span class="items-center justify-center min-w-[18px] h-[18px] bg-[#161616] text-white rounded-[9px] text-[11px] font-bold px-1 leading-none" id="filter-badge" style="display:none"></span>
       </button>
-      <div class="filter-popover" id="filter-popover">
-        <div class="filter-popover-group">
-          <div class="filter-popover-group-label">Gender</div>
-          <div class="filter-popover-options">
-            <label class="filter-popover-chip"><input type="checkbox" id="f-male"   onchange="toggleFilter('gender','male',this.checked)"> Male</label>
-            <label class="filter-popover-chip"><input type="checkbox" id="f-female" onchange="toggleFilter('gender','female',this.checked)"> Female</label>
+      <div class="absolute top-[calc(100%+4px)] left-8 bg-white border border-[#e5e7eb] rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] w-[288px] p-4 z-10" id="filter-popover" style="display:none">
+        <div class="mb-4">
+          <div class="text-[11px] font-bold text-[#9ca3af] uppercase tracking-[0.06em] mb-2">Gender</div>
+          <div class="flex flex-wrap gap-1.5">
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-male"   class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('gender','male',this.checked)"> Male</label>
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-female" class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('gender','female',this.checked)"> Female</label>
           </div>
         </div>
-        <div class="filter-popover-group">
-          <div class="filter-popover-group-label">Age</div>
-          <div class="filter-popover-options">
-            <label class="filter-popover-chip"><input type="checkbox" id="f-child" onchange="toggleFilter('age','child',this.checked)"> Child</label>
-            <label class="filter-popover-chip"><input type="checkbox" id="f-teen"  onchange="toggleFilter('age','teen',this.checked)"> Teen</label>
-            <label class="filter-popover-chip"><input type="checkbox" id="f-adult" onchange="toggleFilter('age','adult',this.checked)"> Adult</label>
+        <div class="mb-4">
+          <div class="text-[11px] font-bold text-[#9ca3af] uppercase tracking-[0.06em] mb-2">Age</div>
+          <div class="flex flex-wrap gap-1.5">
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-child" class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('age','child',this.checked)"> Child</label>
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-teen"  class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('age','teen',this.checked)"> Teen</label>
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-adult" class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('age','adult',this.checked)"> Adult</label>
           </div>
         </div>
-        <div class="filter-popover-group">
-          <div class="filter-popover-group-label">Skin Tone</div>
-          <div class="filter-popover-options">
-            <label class="filter-popover-chip"><input type="checkbox" id="f-light"        onchange="toggleFilter('skinTone','light',this.checked)"> Light</label>
-            <label class="filter-popover-chip"><input type="checkbox" id="f-light-medium" onchange="toggleFilter('skinTone','light-medium',this.checked)"> Light-Medium</label>
-            <label class="filter-popover-chip"><input type="checkbox" id="f-medium"       onchange="toggleFilter('skinTone','medium',this.checked)"> Medium</label>
-            <label class="filter-popover-chip"><input type="checkbox" id="f-tan"          onchange="toggleFilter('skinTone','tan',this.checked)"> Tan</label>
-            <label class="filter-popover-chip"><input type="checkbox" id="f-deep"         onchange="toggleFilter('skinTone','deep',this.checked)"> Deep</label>
+        <div>
+          <div class="text-[11px] font-bold text-[#9ca3af] uppercase tracking-[0.06em] mb-2">Skin Tone</div>
+          <div class="flex flex-wrap gap-1.5">
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-light"        class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('skinTone','light',this.checked)"> Light</label>
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-light-medium" class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('skinTone','light-medium',this.checked)"> Light-Medium</label>
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-medium"       class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('skinTone','medium',this.checked)"> Medium</label>
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-tan"          class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('skinTone','tan',this.checked)"> Tan</label>
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-deep"         class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('skinTone','deep',this.checked)"> Deep</label>
           </div>
         </div>
-        <div class="filter-popover-footer">
-          <button class="filter-clear-btn" onclick="clearAllFilters()">Clear all</button>
+        <div class="mt-4 pt-3 border-t border-[#f3f4f6] text-right">
+          <button class="bg-transparent border-0 text-xs font-medium text-[#9ca3af] cursor-pointer p-0 transition-colors duration-[120ms] hover:text-[#161616]" onclick="clearAllFilters()">Clear all</button>
         </div>
       </div>
     </div>
 
     <!-- Gallery -->
-    <div class="picker-gallery-wrap">
-      <div class="picker-gallery" id="picker-gallery"></div>
+    <div class="flex-1 overflow-x-auto overflow-y-hidden pt-2 px-8 pb-6">
+      <div class="flex gap-4 h-full min-h-[296px] items-start pb-0.5" id="picker-gallery"></div>
     </div>
 
     <!-- Footer -->
-    <div class="picker-footer">
-      <button class="picker-save-btn" onclick="savePickerSelection()">Save</button>
+    <div class="pt-3.5 px-8 pb-6 flex justify-end border-t border-[#f3f4f6] shrink-0">
+      <button class="py-[11px] px-12 bg-white border-[1.5px] border-[#CCCAC5] rounded-[10px] text-sm font-semibold text-[#161616] cursor-pointer transition-colors duration-150 hover:border-[#161616]" onclick="savePickerSelection()">Save</button>
     </div>
   </div>
 </div>
@@ -1339,19 +506,19 @@
     gallery.innerHTML = "";
 
     if (filtered.length === 0) {
-      gallery.innerHTML = '<div class="picker-empty">No characters match the selected filters.</div>';
+      gallery.innerHTML = '<div class="flex items-center justify-center w-full min-h-[220px] text-sm text-[#9ca3af]">No characters match the selected filters.</div>';
       return;
     }
 
     filtered.forEach(ch => {
       const card = document.createElement("div");
       const isSelected = ch.id === pickerTempSelected;
-      card.className = "picker-card" + (isSelected ? " selected" : "");
+      card.className = "picker-card relative w-[200px] min-h-[272px] border-[1.5px] border-[#e5e7eb] rounded-[14px] bg-[#F8F5EF] cursor-pointer flex items-center justify-center shrink-0 transition-shadow duration-150 overflow-visible hover:border-[#9ca3af] hover:shadow-[0_2px_8px_rgba(0,0,0,0.07)]" + (isSelected ? " selected" : "");
       // Use cached transparent blob URL if available; otherwise cache-bust the file path
       const imgSrc = ch.blobUrl || (ch.refPath + "?cb=" + Date.now());
       card.innerHTML = `
-        <img src="${imgSrc}" alt="${ch.label}" onerror="this.style.display='none'" />
-        <div class="picker-check">
+        <img src="${imgSrc}" alt="${ch.label}" class="w-[160px] h-[240px] object-contain block pointer-events-none" onerror="this.style.display='none'" />
+        <div class="picker-check absolute -bottom-[9px] -right-[9px] w-[26px] h-[26px] bg-[#161616] rounded-full border-[2.5px] border-white items-center justify-center z-[2]" style="display:none">
           <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><polyline points="2,7 6,11 12,3" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
       `;
@@ -1660,7 +827,7 @@
     const regenLabel = document.getElementById("regen-btn-label");
     if (on) {
       regenBtn.disabled = true;
-      if (regenIcon)  regenIcon.innerHTML  = '<div class="btn-top-spinner"></div>';
+      if (regenIcon)  regenIcon.innerHTML  = '<div class="w-3.5 h-3.5 border-2 border-[#e5e7eb] border-t-[#9ca3af] rounded-full anim-spin shrink-0"></div>';
       if (regenLabel) regenLabel.textContent = "Regenerating…";
     } else {
       regenBtn.disabled = false;
@@ -1706,14 +873,14 @@
   function showError(msg) {
     const el = document.getElementById("gen-error");
     el.innerHTML =
-      `<svg style="flex-shrink:0;margin-top:1px" width="15" height="15" viewBox="0 0 16 16" fill="none">` +
+      `<svg class="shrink-0 mt-px" width="15" height="15" viewBox="0 0 16 16" fill="none">` +
         `<circle cx="8" cy="8" r="7" stroke="#dc2626" stroke-width="1.5"/>` +
         `<line x1="8" y1="4.5" x2="8" y2="8.5" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round"/>` +
         `<circle cx="8" cy="11" r="0.8" fill="#dc2626"/>` +
       `</svg>` +
-      `<div class="error-msg-body">` +
+      `<div class="flex-1">` +
         `<div>${msg}</div>` +
-        `<button class="error-retry-btn" onclick="generateImage()">Try again</button>` +
+        `<button class="mt-1.5 inline-block bg-transparent border border-[#dc2626] rounded-md text-[#dc2626] text-xs font-semibold py-[3px] px-2.5 cursor-pointer hover:bg-[#fecaca]" onclick="generateImage()">Try again</button>` +
       `</div>`;
     el.classList.add("visible");
   }
