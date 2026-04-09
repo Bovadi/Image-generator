@@ -890,10 +890,57 @@
   }
 
   // ── Edit modal ────────────────────────────────────────────────────────────
-  let _editContext = null;      // { type: 'character'|'image', slotIndex? }
-  let _editInProgress = false;  // true while API call is running
-  let _editingType = null;      // persists across modal close
-  let _editingSlotIndex = null; // persists across modal close
+  // Currently open modal's context (or null when closed). Independent from
+  // any in-flight edit requests — opening the modal must NOT touch the state
+  // of edits that are already running for other targets.
+  let _editContext = null;            // { type: 'character'|'image', slotIndex? }
+  // Set of target keys that currently have an in-flight edit request. Each
+  // submitEdit() captures its own target up-front and only ever toggles the
+  // spinner for that target — so concurrent edits don't clobber each other.
+  const _editsInFlight = new Set();
+
+  function targetKey(t) {
+    return t.type === 'character' ? `character:${t.slotIndex}` : 'image';
+  }
+
+  function isLoading(t) {
+    return _editsInFlight.has(targetKey(t));
+  }
+
+  // Toggle the per-target spinner (character thumbnail OR generated-image
+  // overlay). Also keeps the in-flight set in sync, and — only if the
+  // currently open modal happens to target this same edit — syncs the
+  // modal's internal "Editing…" UI.
+  function setRequestSpinner(target, on) {
+    if (target.type === 'character') {
+      const thumbOverlay = document.getElementById(`slot-${target.slotIndex}-thumb-loading`);
+      if (thumbOverlay) thumbOverlay.style.display = on ? "flex" : "none";
+      const box = document.getElementById(`slot-${target.slotIndex}-box`);
+      if (box) box.classList.toggle("is-editing", on);
+    } else {
+      const genOverlay = document.getElementById("gen-img-editing-overlay");
+      if (genOverlay) genOverlay.style.display = on ? "flex" : "none";
+    }
+
+    const key = targetKey(target);
+    if (on) _editsInFlight.add(key);
+    else    _editsInFlight.delete(key);
+
+    if (_editContext && targetKey(_editContext) === key) {
+      setModalEditingUI(on);
+    }
+  }
+
+  // Toggles the in-modal "Editing…" loading UI (image overlay + submit button).
+  // Only ever called for the currently open modal.
+  function setModalEditingUI(on) {
+    const imgLoading  = document.getElementById("edit-img-loading");
+    const submitBtn   = document.getElementById("edit-submit-btn");
+    const submitLabel = document.getElementById("edit-submit-label");
+    if (imgLoading)  imgLoading.style.display  = on ? "flex" : "none";
+    if (submitBtn)   { submitBtn.disabled = on; submitBtn.style.opacity = on ? "0.6" : "1"; submitBtn.style.cursor = on ? "not-allowed" : "pointer"; }
+    if (submitLabel) submitLabel.textContent = on ? "Editing…" : "Edit";
+  }
 
   function openEditModal(type, slotIndex) {
     const preview = document.getElementById("edit-modal-preview");
@@ -915,19 +962,17 @@
     }
 
     _editContext = { type, slotIndex };
-    _editingType = type;
-    _editingSlotIndex = slotIndex;
     document.getElementById("edit-error").style.display = "none";
     document.getElementById("edit-overlay").style.display = "flex";
 
-    // Restore loading state if edit is still in progress
-    if (_editInProgress) {
-      setEditLoading(true);
+    // Restore the modal's loading UI ONLY if the edit currently in flight
+    // is for THIS exact target. Opening the character modal while an image
+    // edit is running must leave the character modal in fresh state.
+    if (isLoading(_editContext)) {
+      setModalEditingUI(true);
     } else {
+      setModalEditingUI(false);
       document.getElementById("edit-prompt-input").value = "";
-      document.getElementById("edit-img-loading").style.display = "none";
-      document.getElementById("edit-submit-btn").disabled = false;
-      document.getElementById("edit-submit-btn").style.opacity = "1";
       document.getElementById("edit-close-btn").textContent = "Save and close";
       setTimeout(() => document.getElementById("edit-prompt-input").focus(), 50);
     }
@@ -936,9 +981,9 @@
   function closeEditModal() {
     document.getElementById("edit-overlay").style.display = "none";
     _editContext = null;
-    // Note: _editingType and _editingSlotIndex intentionally NOT cleared here
-    // so setEditLoading(false) can still find and hide the thumbnail overlay
-    // after the API call completes with the modal closed.
+    // In-flight edits keep running independently — their spinners are
+    // tracked per-target via _editsInFlight, so closing the modal does not
+    // affect them and they will clear correctly when their request resolves.
   }
 
   function editOverlayClick(e) {
@@ -949,7 +994,11 @@
     const userPrompt = document.getElementById("edit-prompt-input").value.trim();
     if (!userPrompt) { showEditError("Please describe what you'd like to change."); return; }
 
+    // Capture this request's target up-front. All spinner toggles + result
+    // application below use this local `target` — never the global modal
+    // context — so opening another modal mid-flight cannot retarget us.
     const { type, slotIndex } = _editContext;
+    const target = { type, slotIndex };
 
     let imageBlob, prompt;
 
@@ -976,7 +1025,7 @@
     const googleKey = document.getElementById("googleKey").value.trim();
     if (!googleKey) { showEditError("Enter your Google AI Studio key at the top."); return; }
 
-    setEditLoading(true);
+    setRequestSpinner(target, true);
 
     try {
       // Convert blob to base64 for Gemini
@@ -1032,59 +1081,39 @@
       const resultBlob   = await removeWhiteBg(rawBlob);
       const resultUrl    = URL.createObjectURL(resultBlob);
 
-      if (type === 'character') {
+      if (target.type === 'character') {
         // Replace character reference blob + thumbnail; store latest URL for modal reopen
-        chars[slotIndex].refBlob = resultBlob;
-        chars[slotIndex].editedUrl = resultUrl;
-        const img = document.getElementById(`slot-${slotIndex}-img`);
+        chars[target.slotIndex].refBlob = resultBlob;
+        chars[target.slotIndex].editedUrl = resultUrl;
+        const img = document.getElementById(`slot-${target.slotIndex}-img`);
         img.src = resultUrl;
         img.style.display = "block";
-        document.getElementById(`slot-${slotIndex}-empty`).style.display = "none";
+        document.getElementById(`slot-${target.slotIndex}-empty`).style.display = "none";
       } else {
         // Replace generated image in background
         showResult(resultUrl);
         initCropTool(resultUrl);
       }
 
-      // Update modal preview to latest result, stay open for further edits
-      document.getElementById("edit-modal-preview").src = resultUrl;
-      document.getElementById("edit-prompt-input").value = "";
-      document.getElementById("edit-close-btn").textContent = "Save and close";
-      setTimeout(() => document.getElementById("edit-prompt-input").focus(), 50);
+      // Only refresh the modal preview if the modal still shows THIS target.
+      // If the user opened a different modal mid-flight, leave that modal alone.
+      if (_editContext && targetKey(_editContext) === targetKey(target)) {
+        document.getElementById("edit-modal-preview").src = resultUrl;
+        document.getElementById("edit-prompt-input").value = "";
+        document.getElementById("edit-close-btn").textContent = "Save and close";
+        setTimeout(() => document.getElementById("edit-prompt-input").focus(), 50);
+      }
     } catch(e) {
       if (!e.friendly) console.error("[EditGen] Unexpected error:", e);
-      showEditError(e.friendly ? e.message : "Something went wrong while editing. Please try again.");
+      // Only surface the error in the modal if it's still showing this target,
+      // otherwise the error would appear against the wrong context.
+      if (_editContext && targetKey(_editContext) === targetKey(target)) {
+        showEditError(e.friendly ? e.message : "Something went wrong while editing. Please try again.");
+      }
     } finally {
-      setEditLoading(false);
-    }
-  }
-
-  function setEditLoading(on) {
-    _editInProgress = on;
-    const imgLoading  = document.getElementById("edit-img-loading");
-    const submitBtn   = document.getElementById("edit-submit-btn");
-    const submitLabel = document.getElementById("edit-submit-label");
-    if (imgLoading)  imgLoading.style.display  = on ? "flex" : "none";
-    if (submitBtn)   { submitBtn.disabled = on; submitBtn.style.opacity = on ? "0.6" : "1"; submitBtn.style.cursor = on ? "not-allowed" : "pointer"; }
-    if (submitLabel) submitLabel.textContent = on ? "Editing…" : "Edit";
-
-    // Show/hide thumbnail loading overlay on the character slot
-    // Use persistent _editingType/_editingSlotIndex (survive modal close)
-    if (_editingType === 'character' && _editingSlotIndex !== null) {
-      const thumbOverlay = document.getElementById(`slot-${_editingSlotIndex}-thumb-loading`);
-      if (thumbOverlay) thumbOverlay.style.display = on ? "flex" : "none";
-      const box = document.getElementById(`slot-${_editingSlotIndex}-box`);
-      if (box) box.classList.toggle("is-editing", on);
-    }
-    // Show/hide spinner overlay on the generated image panel
-    if (_editingType === 'image') {
-      const genOverlay = document.getElementById("gen-img-editing-overlay");
-      if (genOverlay) genOverlay.style.display = on ? "flex" : "none";
-    }
-    // Clear persistent edit tracking when loading ends
-    if (!on) {
-      _editingType = null;
-      _editingSlotIndex = null;
+      // Always clear the spinner for THIS target — independent of whichever
+      // modal happens to be open right now.
+      setRequestSpinner(target, false);
     }
   }
 
