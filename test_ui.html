@@ -57,7 +57,7 @@
 </head>
 <body class="h-full overflow-hidden bg-white">
 
-<div class="w-screen h-screen bg-white flex flex-col overflow-hidden">
+<div class="w-screen h-[100dvh] bg-white flex flex-col overflow-hidden">
 
 <!-- Header -->
 <div class="shrink-0 h-16 px-8 border-b border-[#e5e7eb] flex items-center justify-between">
@@ -238,7 +238,7 @@
       <p class="text-xs text-[#6b7280] mb-2">Drag to pan · scroll or use buttons to zoom · then Crop</p>
       <div id="crop-frame" class="relative w-full overflow-hidden rounded-[10px] border-[2.5px] border-[#0d9488] cursor-grab touch-none bg-[#e5e7eb]">
         <div style="padding-top:48.46%;"></div>
-        <img id="crop-img" class="absolute top-0 left-0 origin-top-left will-change-transform select-none pointer-events-none" />
+        <img id="crop-img" class="absolute top-0 left-0 max-w-none origin-top-left will-change-transform select-none pointer-events-none" />
       </div>
       <div class="flex gap-2 mt-2">
         <button class="flex-1 p-2.5 border-[1.5px] border-[#e5e7eb] rounded-lg bg-white text-[13px] font-semibold text-[#2d2d2d] cursor-pointer transition-colors duration-150 hover:border-[#6b7280]" onclick="zoomCrop(-0.1)">− Zoom Out</button>
@@ -724,9 +724,10 @@
   // Flood-fill from image edges, making near-white pixels transparent.
   // threshold: how far from pure white (0-255) still counts as background.
   function removeWhiteBg(blob, threshold = 30) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       const url = URL.createObjectURL(blob);
       const img = new Image();
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("removeWhiteBg: image load failed")); };
       img.onload = () => {
         const w = img.naturalWidth, h = img.naturalHeight;
         const canvas = document.createElement("canvas");
@@ -793,9 +794,12 @@
   }
 
   function stitchImages(b1, b2) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       const i1 = new Image(), i2 = new Image();
       const u1 = URL.createObjectURL(b1), u2 = URL.createObjectURL(b2);
+      const fail = (err) => { URL.revokeObjectURL(u1); URL.revokeObjectURL(u2); reject(err); };
+      i1.onerror = () => fail(new Error("stitchImages: first image failed to load"));
+      i2.onerror = () => fail(new Error("stitchImages: second image failed to load"));
       i1.onload = () => {
         i2.onload = () => {
           const h  = Math.max(i1.naturalHeight, i2.naturalHeight);
@@ -857,6 +861,7 @@
 
   function showResult(blobUrl) {
     const img = document.getElementById("gen-result-img");
+    if (img.src && img.src.startsWith("blob:")) URL.revokeObjectURL(img.src);
     img.src = blobUrl;
     document.getElementById("gen-img-wrap").style.display = "inline-block";
     document.getElementById("result-placeholder").style.display = "none";
@@ -872,16 +877,31 @@
 
   function showError(msg) {
     const el = document.getElementById("gen-error");
-    el.innerHTML =
-      `<svg class="shrink-0 mt-px" width="15" height="15" viewBox="0 0 16 16" fill="none">` +
-        `<circle cx="8" cy="8" r="7" stroke="#dc2626" stroke-width="1.5"/>` +
-        `<line x1="8" y1="4.5" x2="8" y2="8.5" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round"/>` +
-        `<circle cx="8" cy="11" r="0.8" fill="#dc2626"/>` +
-      `</svg>` +
-      `<div class="flex-1">` +
-        `<div>${msg}</div>` +
-        `<button class="mt-1.5 inline-block bg-transparent border border-[#dc2626] rounded-md text-[#dc2626] text-xs font-semibold py-[3px] px-2.5 cursor-pointer hover:bg-[#fecaca]" onclick="generateImage()">Try again</button>` +
-      `</div>`;
+    el.textContent = "";
+
+    // SVG icon (static, safe to set once)
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("class", "shrink-0 mt-px");
+    svg.setAttribute("width", "15"); svg.setAttribute("height", "15");
+    svg.setAttribute("viewBox", "0 0 16 16"); svg.setAttribute("fill", "none");
+    svg.innerHTML =
+      '<circle cx="8" cy="8" r="7" stroke="#dc2626" stroke-width="1.5"/>' +
+      '<line x1="8" y1="4.5" x2="8" y2="8.5" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round"/>' +
+      '<circle cx="8" cy="11" r="0.8" fill="#dc2626"/>';
+
+    const body = document.createElement("div");
+    body.className = "flex-1";
+    const msgDiv = document.createElement("div");
+    msgDiv.textContent = msg;
+    const retryBtn = document.createElement("button");
+    retryBtn.className = "mt-1.5 inline-block bg-transparent border border-[#dc2626] rounded-md text-[#dc2626] text-xs font-semibold py-[3px] px-2.5 cursor-pointer hover:bg-[#fecaca]";
+    retryBtn.textContent = "Try again";
+    retryBtn.addEventListener("click", generateImage);
+    body.appendChild(msgDiv);
+    body.appendChild(retryBtn);
+
+    el.appendChild(svg);
+    el.appendChild(body);
     el.classList.add("visible");
   }
 
@@ -1035,10 +1055,10 @@
       let res;
       try {
         res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=${googleKey}`,
+          "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent",
           {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", "x-goog-api-key": googleKey },
             body: JSON.stringify({
               contents: [{ parts: [
                 { inlineData: { mimeType, data: base64 } },
@@ -1074,15 +1094,23 @@
         throw friendlyErr("Something went wrong — no edited image was returned. Please try again.");
       }
 
-      // Convert base64 result to blob, strip white background, get URL
+      // Convert base64 result to blob; strip white background only for characters
       const resultBase64 = imgPart.inlineData.data;
       const resultMime   = imgPart.inlineData.mimeType || "image/png";
       const rawBlob      = await fetch(`data:${resultMime};base64,${resultBase64}`).then(r => r.blob());
-      const resultBlob   = await removeWhiteBg(rawBlob);
+      let resultBlob;
+      if (target.type === 'character') {
+        try { resultBlob = await removeWhiteBg(rawBlob); }
+        catch(bgErr) { console.warn("[EditGen] Background removal failed, using raw image", bgErr); resultBlob = rawBlob; }
+      } else {
+        resultBlob = rawBlob;
+      }
       const resultUrl    = URL.createObjectURL(resultBlob);
 
       if (target.type === 'character') {
         // Replace character reference blob + thumbnail; store latest URL for modal reopen
+        const oldUrl = chars[target.slotIndex].editedUrl;
+        if (oldUrl) URL.revokeObjectURL(oldUrl);
         chars[target.slotIndex].refBlob = resultBlob;
         chars[target.slotIndex].editedUrl = resultUrl;
         const img = document.getElementById(`slot-${target.slotIndex}-img`);
