@@ -1,0 +1,90 @@
+Started GET "/health" for ::1 at 2026-04-02 15:17:07 -0700
+Processing by GenerationsController#health as */*
+Completed 200 OK in 4ms (Views: 0.1ms | GC: 0.0ms)
+
+
+[dotenv] Set [36mOPENAI_API_KEY[0m, [36mAWS_BUCKET_NAME[0m, [36mAWS_REGION[0m, [36mAWS_ACCESS_KEY_ID[0m, [36mAWS_SECRET_ACCESS_KEY[0m, [36mINBOUND_BEARER_TOKEN[0m, [36mCALLBACK_BEARER_TOKEN[0m, [36mSECRET_KEY_BASE[0m
+[dotenv] Loaded [33m.env[0m
+Started POST "/generate" for ::1 at 2026-04-02 15:35:58 -0700
+Processing by GenerationsController#create as */*
+Filter chain halted as :authenticate! rendered or redirected
+Completed 401 Unauthorized in 0ms (Views: 0.1ms | GC: 0.0ms)
+
+
+Started POST "/generate" for ::1 at 2026-04-02 15:40:32 -0700
+Processing by GenerationsController#create as */*
+  Parameters: {"character_id" => "south_asian_girl_child", "location" => "classroom", "objects" => "pencils and books", "adults" => "", "async" => false, "generation" => {"character_id" => "south_asian_girl_child", "action" => "create", "location" => "classroom", "objects" => "pencils and books", "adults" => "", "async" => false}}
+Completed 400 Bad Request in 10ms (Views: 0.2ms | GC: 0.0ms)
+
+
+[dotenv] Set [36mOPENAI_API_KEY[0m, [36mAWS_BUCKET_NAME[0m, [36mAWS_REGION[0m, [36mAWS_ACCESS_KEY_ID[0m, [36mAWS_SECRET_ACCESS_KEY[0m, [36mINBOUND_BEARER_TOKEN[0m, [36mCALLBACK_BEARER_TOKEN[0m, [36mSECRET_KEY_BASE[0m
+[dotenv] Loaded [33m.env[0m
+Started POST "/generate" for ::1 at 2026-04-02 15:41:57 -0700
+Processing by GenerationsController#create as */*
+  Parameters: {"character_id" => "south_asian_girl_child", "location" => "classroom", "objects" => "pencils and books", "adults" => "", "async" => false, "generation" => {"character_id" => "south_asian_girl_child", "action" => "create", "location" => "classroom", "objects" => "pencils and books", "adults" => "", "async" => false}}
+Completed 400 Bad Request in 4ms (Views: 0.1ms | GC: 0.0ms)
+
+
+Started POST "/generate" for ::1 at 2026-04-02 15:42:24 -0700
+Processing by GenerationsController#create as */*
+  Parameters: {"character_id" => "south_asian_girl_child", "scenario" => "doing homework at a desk", "supporting" => "", "sync" => true, "generation" => {"character_id" => "south_asian_girl_child", "scenario" => "doing homework at a desk", "supporting" => "", "sync" => true}}
+Moderation API error: the server responded with status 429 for POST https://api.openai.com/v1/moderations
+Completed 500 Internal Server Error in 2391ms (GC: 0.0ms)
+
+
+  
+NameError (uninitialized constant ApplicationJob):
+  
+app/jobs/generation_job.rb:1:in '<top (required)>'
+app/controllers/generations_controller.rb:43:in 'GenerationsController#create'
+[dotenv] Set [36mOPENAI_API_KEY[0m, [36mAWS_BUCKET_NAME[0m, [36mAWS_REGION[0m, [36mAWS_ACCESS_KEY_ID[0m, [36mAWS_SECRET_ACCESS_KEY[0m, [36mINBOUND_BEARER_TOKEN[0m, [36mCALLBACK_BEARER_TOKEN[0m, [36mSECRET_KEY_BASE[0m
+[dotenv] Loaded [33m.env[0m
+Started POST "/generate" for ::1 at 2026-04-02 15:44:36 -0700
+Processing by GenerationsController#create as */*
+  Parameters: {"character_id" => "south_asian_girl_child", "scenario" => "doing homework at a desk", "supporting" => "", "sync" => true, "generation" => {"character_id" => "south_asian_girl_child", "scenario" => "doing homework at a desk", "supporting" => "", "sync" => true}}
+Moderation API error: the server responded with status 429 for POST https://api.openai.com/v1/moderations
+[ActiveJob] [GenerationJob] [59f7e827-f32d-47e7-ab0b-60245fd51e7b] Performing GenerationJob (Job ID: 59f7e827-f32d-47e7-ab0b-60245fd51e7b) from Async(default) with arguments: "south_asian_girl_child", "doing homework at a desk", "", nil
+[ActiveJob] [GenerationJob] [59f7e827-f32d-47e7-ab0b-60245fd51e7b] fal.ai attempt 1 for character=south_asian_girl_child
+[ActiveJob] [GenerationJob] [59f7e827-f32d-47e7-ab0b-60245fd51e7b] Unexpected error for south_asian_girl_child: The AWS Access Key Id you provided does not exist in our records.
+[ActiveJob] [GenerationJob] [59f7e827-f32d-47e7-ab0b-60245fd51e7b] Performed GenerationJob (Job ID: 59f7e827-f32d-47e7-ab0b-60245fd51e7b) from Async(default) in 7270.3ms
+Completed 500 Internal Server Error in 7908ms (Views: 0.2ms | GC: 34.9ms)
+
+
+[dotenv] Set [36mOPENAI_API_KEY[0m, [36mAWS_BUCKET_NAME[0m, [36mAWS_REGION[0m, [36mAWS_ACCESS_KEY_ID[0m, [36mAWS_SECRET_ACCESS_KEY[0m, [36mINBOUND_BEARER_TOKEN[0m, [36mCALLBACK_BEARER_TOKEN[0m, [36mSECRET_KEY_BASE[0m
+[dotenv] Loaded [33m.env[0m
+Started POST "/generate" for ::1 at 2026-04-02 15:46:21 -0700
+Processing by GenerationsController#create as */*
+  Parameters: {"character_id" => "south_asian_girl_child", "scenario" => "doing homework at a desk", "supporting" => "", "sync" => true, "generation" => {"character_id" => "south_asian_girl_child", "scenario" => "doing homework at a desk", "supporting" => "", "sync" => true}}
+Moderation API error: the server responded with status 429 for POST https://api.openai.com/v1/moderations
+[ActiveJob] [GenerationJob] [cf79c027-8476-4d90-8261-fe056133c6f6] Performing GenerationJob (Job ID: cf79c027-8476-4d90-8261-fe056133c6f6) from Async(default) with arguments: "south_asian_girl_child", "doing homework at a desk", "", nil
+[ActiveJob] [GenerationJob] [cf79c027-8476-4d90-8261-fe056133c6f6] fal.ai attempt 1 for character=south_asian_girl_child
+[ActiveJob] [GenerationJob] [cf79c027-8476-4d90-8261-fe056133c6f6] Unexpected error for south_asian_girl_child: The AWS Access Key Id you provided does not exist in our records.
+[ActiveJob] [GenerationJob] [cf79c027-8476-4d90-8261-fe056133c6f6] Performed GenerationJob (Job ID: cf79c027-8476-4d90-8261-fe056133c6f6) from Async(default) in 28912.36ms
+Completed 500 Internal Server Error in 29071ms (Views: 0.7ms | GC: 34.8ms)
+
+
+[dotenv] Set [36mOPENAI_API_KEY[0m, [36mAWS_BUCKET_NAME[0m, [36mAWS_REGION[0m, [36mAWS_ACCESS_KEY_ID[0m, [36mAWS_SECRET_ACCESS_KEY[0m, [36mINBOUND_BEARER_TOKEN[0m, [36mCALLBACK_BEARER_TOKEN[0m, [36mSECRET_KEY_BASE[0m
+[dotenv] Loaded [33m.env[0m
+Started POST "/generate" for ::1 at 2026-04-02 15:47:39 -0700
+Processing by GenerationsController#create as */*
+  Parameters: {"character_id" => "south_asian_girl_child", "scenario" => "doing homework at a desk", "supporting" => "", "sync" => true, "generation" => {"character_id" => "south_asian_girl_child", "scenario" => "doing homework at a desk", "supporting" => "", "sync" => true}}
+Moderation API error: the server responded with status 429 for POST https://api.openai.com/v1/moderations
+[ActiveJob] [GenerationJob] [9a46c139-12f2-4510-8d5b-d957e4d58855] Performing GenerationJob (Job ID: 9a46c139-12f2-4510-8d5b-d957e4d58855) from Async(default) with arguments: "south_asian_girl_child", "doing homework at a desk", "", nil
+[ActiveJob] [GenerationJob] [9a46c139-12f2-4510-8d5b-d957e4d58855] fal.ai attempt 1 for character=south_asian_girl_child
+[ActiveJob] [GenerationJob] [9a46c139-12f2-4510-8d5b-d957e4d58855] Unexpected error for south_asian_girl_child: The AWS Access Key Id you provided does not exist in our records.
+[ActiveJob] [GenerationJob] [9a46c139-12f2-4510-8d5b-d957e4d58855] Performed GenerationJob (Job ID: 9a46c139-12f2-4510-8d5b-d957e4d58855) from Async(default) in 13110.24ms
+Completed 500 Internal Server Error in 14136ms (Views: 0.2ms | GC: 30.5ms)
+
+
+[dotenv] Set [36mOPENAI_API_KEY[0m, [36mAWS_BUCKET_NAME[0m, [36mAWS_REGION[0m, [36mAWS_ACCESS_KEY_ID[0m, [36mAWS_SECRET_ACCESS_KEY[0m, [36mINBOUND_BEARER_TOKEN[0m, [36mCALLBACK_BEARER_TOKEN[0m, [36mSECRET_KEY_BASE[0m
+[dotenv] Loaded [33m.env[0m
+Started POST "/generate" for ::1 at 2026-04-02 15:49:04 -0700
+Processing by GenerationsController#create as */*
+  Parameters: {"character_id" => "south_asian_girl_child", "scenario" => "doing homework at a desk", "supporting" => "", "sync" => true, "generation" => {"character_id" => "south_asian_girl_child", "scenario" => "doing homework at a desk", "supporting" => "", "sync" => true}}
+Moderation API error: the server responded with status 429 for POST https://api.openai.com/v1/moderations
+[ActiveJob] [GenerationJob] [d3279efc-b97f-4341-b66c-7f90adea2abb] Performing GenerationJob (Job ID: d3279efc-b97f-4341-b66c-7f90adea2abb) from Async(default) with arguments: "south_asian_girl_child", "doing homework at a desk", "", nil
+[ActiveJob] [GenerationJob] [d3279efc-b97f-4341-b66c-7f90adea2abb] fal.ai attempt 1 for character=south_asian_girl_child
+[ActiveJob] [GenerationJob] [d3279efc-b97f-4341-b66c-7f90adea2abb] Performed GenerationJob (Job ID: d3279efc-b97f-4341-b66c-7f90adea2abb) from Async(default) in 10008.83ms
+Completed 200 OK in 10716ms (Views: 0.5ms | GC: 0.0ms)
+
+
