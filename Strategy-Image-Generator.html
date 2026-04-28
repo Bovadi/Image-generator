@@ -368,15 +368,42 @@
 
   // ── Base characters ───────────────────────────────────────────────────────
   const BASE_CHARACTERS = [
-    { id: "boy_black",        label: "Boy — Dark",    color: "#f3f0ff", refPath: "images/Boy-Black.png",        gender: "male", age: "child", skinTone: "deep" },
-    { id: "boy_light_black",  label: "Boy — Medium",  color: "#fef9ec", refPath: "images/Boy-Light-Black.png",  gender: "male", age: "child", skinTone: "medium" },
-    { id: "boy_tan",          label: "Boy — Tan",     color: "#fff4e6", refPath: "images/Boy-Tan.png",           gender: "male", age: "child", skinTone: "tan" },
-    { id: "boy_light_medium", label: "Boy — Light-Medium", color: "#fef3e2", refPath: "images/Boy-Light-Medium.png", gender: "male", age: "child", skinTone: "light-medium" },
-    { id: "boy_white",        label: "Boy — Light",   color: "#f0f8ff", refPath: "images/Boy-White.png",         gender: "male", age: "child", skinTone: "light" },
-    { id: "teen_black",       label: "Teen — Dark",   color: "#f3f0ff", refPath: "images/Teen-Black.png",        gender: "male", age: "teen",  skinTone: "deep" },
-    { id: "teen_light_black", label: "Teen — Medium", color: "#fef9ec", refPath: "images/Teen-Light-Black.png",  gender: "male", age: "teen",  skinTone: "medium" },
-    { id: "teen_tan",         label: "Teen — Tan",    color: "#fff4e6", refPath: "images/Teen-Tan.png",           gender: "male", age: "teen",  skinTone: "tan" },
-    { id: "teen_white",       label: "Teen — Light",  color: "#f0f8ff", refPath: "images/Teen-White.png",         gender: "male", age: "teen",  skinTone: "light" },
+    // Children — Boys
+    { id: "child_boy_light",        label: "Child Boy — Light",        refPath: "images/Child-Boy-Light.png",        gender: "male",   age: "child", skinTone: "light" },
+    { id: "child_boy_light_medium", label: "Child Boy — Light-Medium", refPath: "images/Child-Boy-Light-Medium.png", gender: "male",   age: "child", skinTone: "light-medium" },
+    { id: "child_boy_medium",       label: "Child Boy — Medium",       refPath: "images/Child-Boy-Medium.png",       gender: "male",   age: "child", skinTone: "medium" },
+    { id: "child_boy_tan",          label: "Child Boy — Tan",          refPath: "images/Child-Boy-Tan.png",          gender: "male",   age: "child", skinTone: "tan" },
+    { id: "child_boy_deep",         label: "Child Boy — Deep",         refPath: "images/Child-Boy-Deep.png",         gender: "male",   age: "child", skinTone: "deep" },
+    // Children — Girls
+    { id: "child_girl_light",        label: "Child Girl — Light",        refPath: "images/Child-Girl-Light.png",        gender: "female", age: "child", skinTone: "light" },
+    { id: "child_girl_light_medium", label: "Child Girl — Light-Medium", refPath: "images/Child-Girl-Light-Medium.png", gender: "female", age: "child", skinTone: "light-medium" },
+    { id: "child_girl_medium",       label: "Child Girl — Medium",       refPath: "images/Child-Girl-Medium.png",       gender: "female", age: "child", skinTone: "medium" },
+    { id: "child_girl_tan",          label: "Child Girl — Tan",          refPath: "images/Child-Girl-Tan.png",          gender: "female", age: "child", skinTone: "tan" },
+    { id: "child_girl_deep",         label: "Child Girl — Deep",         refPath: "images/Child-Girl-Deep.png",         gender: "female", age: "child", skinTone: "deep" },
+    // Teens — Boys
+    { id: "teen_boy_light",        label: "Teen Boy — Light",        refPath: "images/Teen-Boy-Light.png",        gender: "male",   age: "teen",  skinTone: "light" },
+    { id: "teen_boy_light_medium", label: "Teen Boy — Light-Medium", refPath: "images/Teen-Boy-Light-Medium.png", gender: "male",   age: "teen",  skinTone: "light-medium" },
+    { id: "teen_boy_medium",       label: "Teen Boy — Medium",       refPath: "images/Teen-Boy-Medium.png",       gender: "male",   age: "teen",  skinTone: "medium" },
+    { id: "teen_boy_tan",          label: "Teen Boy — Tan",          refPath: "images/Teen-Boy-Tan.png",          gender: "male",   age: "teen",  skinTone: "tan" },
+    { id: "teen_boy_deep",         label: "Teen Boy — Deep",         refPath: "images/Teen-Boy-Deep.png",         gender: "male",   age: "teen",  skinTone: "deep" },
+    // Teens — Girls
+    { id: "teen_girl_light",        label: "Teen Girl — Light",        refPath: "images/Teen-Girl-Light.png",        gender: "female", age: "teen",  skinTone: "light" },
+    { id: "teen_girl_light_medium", label: "Teen Girl — Light-Medium", refPath: "images/Teen-Girl-Light-Medium.png", gender: "female", age: "teen",  skinTone: "light-medium" },
+    { id: "teen_girl_medium",       label: "Teen Girl — Medium",       refPath: "images/Teen-Girl-Medium.png",       gender: "female", age: "teen",  skinTone: "medium" },
+    { id: "teen_girl_tan",          label: "Teen Girl — Tan",          refPath: "images/Teen-Girl-Tan.png",          gender: "female", age: "teen",  skinTone: "tan" },
+    { id: "teen_girl_deep",         label: "Teen Girl — Deep",         refPath: "images/Teen-Girl-Deep.png",         gender: "female", age: "teen",  skinTone: "deep" },
+    // Adults — Men
+    { id: "adult_man_light",        label: "Adult Man — Light",        refPath: "images/Adult-Men-Light.png",        gender: "male",   age: "adult", skinTone: "light" },
+    { id: "adult_man_light_medium", label: "Adult Man — Light-Medium", refPath: "images/Adult-Men-Light-Medium.png", gender: "male",   age: "adult", skinTone: "light-medium" },
+    { id: "adult_man_medium",       label: "Adult Man — Medium",       refPath: "images/Adult-Men-Medium.png",       gender: "male",   age: "adult", skinTone: "medium" },
+    { id: "adult_man_tan",          label: "Adult Man — Tan",          refPath: "images/Adult-Men-Tan.png",          gender: "male",   age: "adult", skinTone: "tan" },
+    { id: "adult_man_deep",         label: "Adult Man — Deep",         refPath: "images/Adult-Men-Deep.png",         gender: "male",   age: "adult", skinTone: "deep" },
+    // Adults — Women
+    { id: "adult_woman_light",        label: "Adult Woman — Light",        refPath: "images/Adult-Woman-Light.png",        gender: "female", age: "adult", skinTone: "light" },
+    { id: "adult_woman_light_medium", label: "Adult Woman — Light-Medium", refPath: "images/Adult-Woman-Light-Medium.png", gender: "female", age: "adult", skinTone: "light-medium" },
+    { id: "adult_woman_medium",       label: "Adult Woman — Medium",       refPath: "images/Adult-Woman-Medium.png",       gender: "female", age: "adult", skinTone: "medium" },
+    { id: "adult_woman_tan",          label: "Adult Woman — Tan",          refPath: "images/Adult-Woman-Tan.png",          gender: "female", age: "adult", skinTone: "tan" },
+    { id: "adult_woman_deep",         label: "Adult Woman — Deep",         refPath: "images/Adult-Woman-Deep.png",         gender: "female", age: "adult", skinTone: "deep" },
   ];
 
   // ── Character height defaults (injected into prompt, not shown in UI) ─────
