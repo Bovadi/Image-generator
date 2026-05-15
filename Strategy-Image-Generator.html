@@ -61,7 +61,16 @@
 
 <!-- Header -->
 <div class="shrink-0 h-16 px-8 border-b border-[#e5e7eb] flex items-center justify-between">
-  <h1 class="text-[18px] font-normal text-[#161616]">Image Generator</h1>
+  <div class="flex items-center gap-1 h-full">
+    <button id="tab-generator" onclick="switchTab('generator')" class="relative h-full px-1 mr-6 text-[15px] font-medium text-[#161616] bg-transparent border-0 cursor-pointer transition-colors duration-150 hover:text-[#161616]">
+      Image Generator
+      <span id="tab-generator-indicator" class="absolute left-0 right-0 -bottom-px h-[2px] bg-[#161616]"></span>
+    </button>
+    <button id="tab-editor" onclick="switchTab('editor')" class="relative h-full px-1 text-[15px] font-medium text-[#9ca3af] bg-transparent border-0 cursor-pointer transition-colors duration-150 hover:text-[#161616]">
+      Image Editor
+      <span id="tab-editor-indicator" class="absolute left-0 right-0 -bottom-px h-[2px] bg-[#161616] hidden"></span>
+    </button>
+  </div>
   <button class="w-8 h-8 flex items-center justify-center bg-transparent border-0 cursor-pointer text-[#9ca3af] rounded-md transition-colors duration-150 hover:text-[#161616] hover:bg-[#f3f4f6]" title="Close">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6M6 6l12 12"/></svg>
   </button>
@@ -77,7 +86,7 @@
 </div>
 
 <!-- Main layout -->
-<div class="flex-1 flex flex-col min-[901px]:flex-row overflow-hidden">
+<div id="view-generator" class="flex-1 flex flex-col min-[901px]:flex-row overflow-hidden">
 
   <!-- ── LEFT PANEL ── -->
   <div class="w-full min-[901px]:w-1/2 shrink-0 flex flex-col border-[#e5e7eb] border-b min-[901px]:border-b-0 min-[901px]:border-r overflow-hidden h-auto max-h-[60vh] min-[901px]:max-h-none min-[901px]:h-auto">
@@ -255,6 +264,77 @@
 
 </div><!-- end layout -->
 
+<!-- ── Image Editor view ── -->
+<div id="view-editor" class="flex-1 flex flex-col overflow-hidden bg-[#F8F5EF]" style="display:none">
+  <div class="flex-1 overflow-y-auto py-8 px-6 min-[901px]:px-8 flex justify-center">
+    <div class="w-full max-w-[680px] flex flex-col gap-4">
+
+      <!-- Hidden file input for "Use a different image" -->
+      <input type="file" id="editor-file-input" accept="image/*" class="hidden" onchange="editorLoadFile(event)">
+
+      <!-- Loaded state -->
+      <div id="editor-loaded" class="flex flex-col gap-5">
+
+        <!-- Image preview with loading overlay -->
+        <div class="relative w-full bg-white rounded-lg flex items-center justify-center overflow-hidden border border-[#161616]">
+          <img id="editor-image" src="" alt="Editing image" class="block max-w-full max-h-[420px] w-auto h-auto object-contain rounded-lg" />
+          <div id="editor-loading-overlay" class="absolute inset-0 bg-[rgba(248,245,239,0.88)] flex-col items-center justify-center gap-3 rounded-lg" style="display:none">
+            <div class="w-9 h-9 border-[3px] border-[#ccfbf1] border-t-[#2B9996] rounded-full anim-spin"></div>
+            <span class="text-[13px] font-semibold text-[#2B9996]">Editing…</span>
+          </div>
+        </div>
+
+        <!-- Optional: swap the working image -->
+        <div id="editor-swap-wrap" class="-mt-2 flex justify-end">
+          <button onclick="document.getElementById('editor-file-input').click()" class="inline-flex items-center gap-1.5 bg-transparent border-0 text-xs font-medium text-[#6b7280] cursor-pointer p-0 transition-colors duration-150 hover:text-[#161616]">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
+            Use a different image
+          </button>
+        </div>
+
+        <!-- Input (visible in pre-edit state) -->
+        <div id="editor-input-wrap" class="flex flex-col gap-2">
+          <label class="text-[13px] font-semibold text-[#374151]">Describe what you'd like to change.</label>
+          <textarea id="editor-prompt-input" placeholder="e.g. Add glasses, raise one hand, or hold an AAC device" class="w-full border border-[#e5e7eb] rounded-[10px] py-2.5 px-3 text-[13px] resize-y min-h-[88px] outline-none transition-colors duration-150 focus:border-[#161616] bg-white"></textarea>
+          <div id="editor-error" class="bg-[#fef2f2] border border-[#fecaca] rounded-lg py-2 px-3 text-[13px] text-[#dc2626] mt-1" style="display:none"></div>
+        </div>
+
+        <!-- Pre-edit action: Edit Image -->
+        <div id="editor-pre-edit-actions">
+          <button id="editor-submit-btn" onclick="editorSubmit()" class="w-full py-3.5 px-5 bg-[#E7F3F3] text-[#2B9996] border-0 rounded-[10px] text-[15px] font-bold cursor-pointer flex items-center justify-center gap-2 transition-colors duration-150 enabled:hover:bg-[#2B9996] enabled:hover:text-white enabled:active:scale-[0.98] disabled:bg-[#E7F3F3] disabled:text-[#a0c8c8] disabled:cursor-not-allowed">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487z"/></svg>
+            <span id="editor-submit-label">Edit Image</span>
+          </button>
+        </div>
+
+        <!-- Post-edit actions: Re-generate / Revert / Edit again -->
+        <div id="editor-post-edit-actions" class="grid grid-cols-3 gap-2" style="display:none">
+          <button onclick="editorRegenerate()" class="py-[11px] px-3 bg-white text-[#161616] border border-[#CCCAC5] rounded-[10px] text-[13px] font-semibold cursor-pointer flex items-center justify-center gap-1.5 transition-colors duration-150 hover:border-[#161616]">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+            Re-generate
+          </button>
+          <button onclick="editorRevert()" class="py-[11px] px-3 bg-white text-[#161616] border border-[#CCCAC5] rounded-[10px] text-[13px] font-semibold cursor-pointer flex items-center justify-center gap-1.5 transition-colors duration-150 hover:border-[#161616]">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3"/></svg>
+            Revert to Original
+          </button>
+          <button onclick="editorEditAgain()" class="py-[11px] px-3 bg-[#E7F3F3] text-[#2B9996] border-0 rounded-[10px] text-[13px] font-bold cursor-pointer flex items-center justify-center gap-1.5 transition-colors duration-150 hover:bg-[#2B9996] hover:text-white">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487z"/></svg>
+            Edit again
+          </button>
+        </div>
+
+        <!-- Footer note (mirrors generator) -->
+        <div class="flex items-start gap-2 bg-[#e6f4fb] border border-[#b3ddf2] rounded-lg py-2.5 px-3">
+          <svg class="shrink-0 mt-px text-[#0093D8]" width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="4.5" x2="8" y2="8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11" r="0.8" fill="currentColor"/></svg>
+          <span class="text-[12px] text-[#006a9e] leading-normal">You are responsible for the images you create. Please ensure your content aligns with ethical guidelines.</span>
+        </div>
+
+      </div><!-- end editor-loaded -->
+
+    </div>
+  </div>
+</div>
+
 </div><!-- end modal-wrapper -->
 
 <!-- ── Edit Modal ── -->
@@ -365,6 +445,244 @@
 </div>
 
 <script>
+
+  // ── Tabs ──────────────────────────────────────────────────────────────────
+  function switchTab(name) {
+    const isGen = name === 'generator';
+    document.getElementById('view-generator').style.display = isGen ? '' : 'none';
+    document.getElementById('view-editor').style.display    = isGen ? 'none' : 'flex';
+
+    const genTab = document.getElementById('tab-generator');
+    const edTab  = document.getElementById('tab-editor');
+    genTab.classList.toggle('text-[#161616]', isGen);
+    genTab.classList.toggle('text-[#9ca3af]', !isGen);
+    edTab.classList.toggle('text-[#161616]', !isGen);
+    edTab.classList.toggle('text-[#9ca3af]', isGen);
+
+    document.getElementById('tab-generator-indicator').classList.toggle('hidden', !isGen);
+    document.getElementById('tab-editor-indicator').classList.toggle('hidden', isGen);
+
+    if (!isGen) editorLoadPlaceholder();
+  }
+
+  // ── Image Editor ──────────────────────────────────────────────────────────
+  // Original = the first image loaded (Revert target). Never changes after upload.
+  // Base     = the source for the next edit. Starts = original, becomes the
+  //            current result after "Edit again" so the user can chain edits.
+  // Current  = what's actually displayed.
+  let editorOriginalBlob = null, editorOriginalUrl = null;
+  let editorBaseBlob     = null, editorBaseUrl     = null;
+  let editorCurrentBlob  = null, editorCurrentUrl  = null;
+  let editorLastPrompt   = "";
+
+  function editorLoadFile(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    editorClearError();
+    editorSetOriginal(file);
+    e.target.value = ""; // allow re-uploading the same file
+  }
+
+  // Publicly callable: set the image the editor opens with.
+  // Hook for prod: when user clicks "Edit Image" elsewhere, call this with the blob.
+  function editorSetOriginal(blob) {
+    editorRevokeAll();
+    const url = URL.createObjectURL(blob);
+    editorOriginalBlob = blob; editorOriginalUrl = url;
+    editorBaseBlob     = blob; editorBaseUrl     = url;
+    editorCurrentBlob  = blob; editorCurrentUrl  = url;
+    editorLastPrompt = "";
+    document.getElementById('editor-image').src = url;
+    document.getElementById('editor-prompt-input').value = "";
+    editorShowPreEditUI();
+  }
+
+  // Auto-load the placeholder image on first open so the editor is ready to use.
+  // In production, the entry point will call editorSetOriginal() with the actual
+  // image the user clicked "Edit Image" on, replacing this default.
+  let _editorPlaceholderLoaded = false;
+  async function editorLoadPlaceholder() {
+    if (_editorPlaceholderLoaded) return;
+    _editorPlaceholderLoaded = true;
+    try {
+      const res = await fetch("images/Editor-Placeholder.png", { cache: "reload" });
+      const blob = await res.blob();
+      editorSetOriginal(blob);
+    } catch(e) {
+      console.warn("[Editor] Could not load placeholder image", e);
+      _editorPlaceholderLoaded = false; // allow retry on next tab open
+    }
+  }
+
+  function editorRevokeAll() {
+    // Revoke any blob URLs we hold that aren't aliased to each other
+    const urls = new Set();
+    if (editorOriginalUrl) urls.add(editorOriginalUrl);
+    if (editorBaseUrl)     urls.add(editorBaseUrl);
+    if (editorCurrentUrl)  urls.add(editorCurrentUrl);
+    urls.forEach(u => URL.revokeObjectURL(u));
+    editorOriginalBlob = editorOriginalUrl = null;
+    editorBaseBlob = editorBaseUrl = null;
+    editorCurrentBlob = editorCurrentUrl = null;
+  }
+
+  function editorShowPreEditUI() {
+    document.getElementById('editor-swap-wrap').style.display         = 'flex';
+    document.getElementById('editor-input-wrap').style.display        = 'flex';
+    document.getElementById('editor-pre-edit-actions').style.display  = '';
+    document.getElementById('editor-post-edit-actions').style.display = 'none';
+  }
+
+  function editorShowPostEditUI() {
+    document.getElementById('editor-swap-wrap').style.display         = 'none';
+    document.getElementById('editor-input-wrap').style.display        = 'none';
+    document.getElementById('editor-pre-edit-actions').style.display  = 'none';
+    document.getElementById('editor-post-edit-actions').style.display = 'grid';
+  }
+
+  function editorSetLoading(on) {
+    document.getElementById('editor-loading-overlay').style.display = on ? 'flex' : 'none';
+    const btn   = document.getElementById('editor-submit-btn');
+    const label = document.getElementById('editor-submit-label');
+    if (btn)   { btn.disabled = on; }
+    if (label) { label.textContent = on ? 'Editing…' : 'Edit Image'; }
+  }
+
+  function editorShowError(msg) {
+    const el = document.getElementById('editor-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+  function editorClearError() {
+    const el = document.getElementById('editor-error');
+    if (el) el.style.display = 'none';
+  }
+
+  async function editorSubmit() {
+    if (!editorBaseBlob) { editorShowError("No image loaded."); return; }
+    const promptText = document.getElementById('editor-prompt-input').value.trim();
+    if (!promptText) { editorShowError("Please describe what you'd like to change."); return; }
+    const googleKey = document.getElementById('googleKey').value.trim();
+    if (!googleKey) { editorShowError("Enter your Google AI Studio key at the top."); return; }
+    editorClearError();
+    editorLastPrompt = promptText;
+    await editorRunEdit(editorBaseBlob, promptText, googleKey);
+  }
+
+  async function editorRegenerate() {
+    if (!editorBaseBlob || !editorLastPrompt) return;
+    const googleKey = document.getElementById('googleKey').value.trim();
+    if (!googleKey) { editorShowError("Enter your Google AI Studio key at the top."); return; }
+    editorClearError();
+    await editorRunEdit(editorBaseBlob, editorLastPrompt, googleKey);
+  }
+
+  function editorRevert() {
+    if (!editorOriginalBlob) return;
+    // Drop result + base aliases; reset both to original.
+    if (editorCurrentUrl && editorCurrentUrl !== editorOriginalUrl && editorCurrentUrl !== editorBaseUrl) {
+      URL.revokeObjectURL(editorCurrentUrl);
+    }
+    if (editorBaseUrl && editorBaseUrl !== editorOriginalUrl) {
+      URL.revokeObjectURL(editorBaseUrl);
+    }
+    editorBaseBlob    = editorOriginalBlob; editorBaseUrl    = editorOriginalUrl;
+    editorCurrentBlob = editorOriginalBlob; editorCurrentUrl = editorOriginalUrl;
+    editorLastPrompt = "";
+    document.getElementById('editor-image').src = editorOriginalUrl;
+    document.getElementById('editor-prompt-input').value = "";
+    editorShowPreEditUI();
+  }
+
+  function editorEditAgain() {
+    if (!editorCurrentBlob) return;
+    // Promote current result to base for further edits; original stays put for Revert.
+    if (editorBaseUrl && editorBaseUrl !== editorOriginalUrl && editorBaseUrl !== editorCurrentUrl) {
+      URL.revokeObjectURL(editorBaseUrl);
+    }
+    editorBaseBlob = editorCurrentBlob; editorBaseUrl = editorCurrentUrl;
+    editorLastPrompt = "";
+    document.getElementById('editor-prompt-input').value = "";
+    editorShowPreEditUI();
+    setTimeout(() => document.getElementById('editor-prompt-input').focus(), 50);
+  }
+
+  async function editorRunEdit(sourceBlob, userPrompt, googleKey) {
+    editorSetLoading(true);
+    try {
+      // Flatten transparency onto white and re-encode as JPEG so the model
+      // sees a real (non-alpha) image — fixes the "black background" output
+      // that happens when a model reads alpha=0 pixels as RGB=(0,0,0).
+      const whiteJpeg = await flattenToWhiteJpeg(sourceBlob);
+      const base64 = await blobToBase64(whiteJpeg);
+      const prompt = userPrompt + ". Flat illustration style, clean lines, solid flat colors, child-friendly cartoon.";
+
+      let res;
+      try {
+        res = await fetch(
+          "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-goog-api-key": googleKey },
+            body: JSON.stringify({
+              contents: [{ parts: [
+                { inlineData: { mimeType: "image/jpeg", data: base64 } },
+                { text: prompt }
+              ]}],
+              generationConfig: { responseModalities: ["IMAGE"] }
+            })
+          }
+        );
+      } catch(networkErr) {
+        throw friendlyErr("Could not connect to the editing service. Check your internet connection and try again.", networkErr);
+      }
+
+      if (!res.ok) {
+        const rawBody = await res.text().catch(() => "(unreadable)");
+        console.error(`[Editor] Google API ${res.status}:`, rawBody);
+        if (res.status === 401 || res.status === 403) throw friendlyErr("Your Google AI Studio key appears to be invalid. Please check and try again.");
+        if (res.status === 429) throw friendlyErr("Too many requests. Please wait a moment and try again.");
+        if (res.status >= 500) throw friendlyErr("The editing service is temporarily unavailable. Please try again shortly.");
+        throw friendlyErr("Something went wrong while editing. Please try again.");
+      }
+
+      let data;
+      try { data = await res.json(); }
+      catch(parseErr) { throw friendlyErr("Received an unexpected response from the server. Please try again.", parseErr); }
+
+      const imgPart = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+      if (!imgPart) {
+        console.error("[Editor] No image in response. Full response:", JSON.stringify(data, null, 2));
+        const finishReason = data?.candidates?.[0]?.finishReason;
+        if (finishReason === "SAFETY" || finishReason === "PROHIBITED_CONTENT") {
+          throw friendlyErr("This edit was blocked by content safety filters. Try rephrasing.");
+        }
+        throw friendlyErr("Something went wrong — no edited image was returned. Please try again.");
+      }
+
+      const resultBase64 = imgPart.inlineData.data;
+      const resultMime   = imgPart.inlineData.mimeType || "image/png";
+      const rawBlob      = await fetch(`data:${resultMime};base64,${resultBase64}`).then(r => r.blob());
+      // Strip any near-black background the model may have introduced.
+      let resultBlob;
+      try { resultBlob = await removeBlackBg(rawBlob, 30); }
+      catch(bgErr) { console.warn("[Editor] Black-bg removal failed, using raw blob", bgErr); resultBlob = rawBlob; }
+      const resultUrl = URL.createObjectURL(resultBlob);
+
+      // Replace current; keep base + original alone.
+      if (editorCurrentUrl && editorCurrentUrl !== editorBaseUrl && editorCurrentUrl !== editorOriginalUrl) {
+        URL.revokeObjectURL(editorCurrentUrl);
+      }
+      editorCurrentBlob = resultBlob; editorCurrentUrl = resultUrl;
+      document.getElementById('editor-image').src = resultUrl;
+      editorShowPostEditUI();
+    } catch(e) {
+      if (!e.friendly) console.error("[Editor] Unexpected error:", e);
+      editorShowError(e.friendly ? e.message : "Something went wrong while editing. Please try again.");
+    } finally {
+      editorSetLoading(false);
+    }
+  }
 
   // ── Base characters ───────────────────────────────────────────────────────
   const BASE_CHARACTERS = [
@@ -555,15 +873,42 @@
         </div>
       `;
       card.onclick = () => {
-        pickerTempSelected = ch.id;
+        // Click on already-selected card deselects it (back to no selection)
+        pickerTempSelected = (pickerTempSelected === ch.id) ? null : ch.id;
         renderPickerGallery();
       };
       gallery.appendChild(card);
     });
   }
 
+  // Reset a slot to its empty state (used when Save is clicked with no selection
+  // for a slot that previously held a character).
+  function clearCharacter(slotIndex) {
+    chars[slotIndex] = { charId: null, label: "", refBlob: null };
+
+    const img = document.getElementById(`slot-${slotIndex}-img`);
+    if (img) { img.src = ""; img.style.display = "none"; }
+
+    const empty = document.getElementById(`slot-${slotIndex}-empty`);
+    if (empty) empty.style.display = "flex";
+
+    const box = document.getElementById(`slot-${slotIndex}-box`);
+    if (box) { box.classList.remove("has-char"); box.classList.remove("is-editing"); }
+
+    const editBtn = document.getElementById(`slot-${slotIndex}-edit`);
+    if (editBtn) editBtn.disabled = true;
+
+    const thumbLoading = document.getElementById(`slot-${slotIndex}-thumb-loading`);
+    if (thumbLoading) thumbLoading.style.display = "none";
+  }
+
   async function savePickerSelection() {
-    if (!pickerTempSelected) { closePicker(); return; }
+    if (!pickerTempSelected) {
+      // No selection — if this slot had a character, clear it.
+      if (chars[pickerTargetSlot].charId) clearCharacter(pickerTargetSlot);
+      closePicker();
+      return;
+    }
     const ch = BASE_CHARACTERS.find(c => c.id === pickerTempSelected);
     if (ch) await selectCharacter(pickerTargetSlot, ch);
     else closePicker();
@@ -689,9 +1034,14 @@
     try {
       let refDataUrl;
       try {
+        // Flatten characters onto a white background before sending to FLUX.
+        // (chars[i].refBlob stays untouched — it's still the transparent ref
+        // used by character editing.)
+        const c1White = await flattenToWhiteJpeg(char1.refBlob);
+        const c2White = hasChar2 ? await flattenToWhiteJpeg(char2.refBlob) : null;
         refDataUrl = hasChar2
-          ? await stitchImages(char1.refBlob, char2.refBlob)
-          : await blobToDataUrl(char1.refBlob);
+          ? await stitchImages(c1White, c2White)
+          : await blobToDataUrl(c1White);
       } catch(prepErr) {
         throw friendlyErr("Could not prepare the character image. Please try again.", prepErr);
       }
@@ -822,6 +1172,81 @@
       r.onload  = () => resolve(r.result.split(",")[1]);
       r.onerror = reject;
       r.readAsDataURL(blob);
+    });
+  }
+
+  // Composite an image blob onto a white canvas and export as JPEG.
+  // JPEG has no alpha channel — transparent regions become solid white. This
+  // is the cleanest way to give an image model a "real" RGB image so it
+  // doesn't read alpha=0 pixels as RGB=(0,0,0) black.
+  function flattenToWhiteJpeg(blob, quality = 0.92) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("flattenToWhiteJpeg: image load failed")); };
+      img.onload = () => {
+        const w = img.naturalWidth, h = img.naturalHeight;
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        const ctx = c.getContext("2d");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
+        c.toBlob(b => b ? resolve(b) : reject(new Error("flattenToWhiteJpeg: toBlob failed")), "image/jpeg", quality);
+      };
+      img.src = url;
+    });
+  }
+
+  // Binary near-black flood-fill from edges. Pixels with R,G,B all ≤ threshold
+  // (and not already mostly transparent) get alpha=0. Only edge-connected
+  // regions are affected, so dark artwork in the middle of the image stays.
+  function removeBlackBg(blob, threshold = 30) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("removeBlackBg: image load failed")); };
+      img.onload = () => {
+        const w = img.naturalWidth, h = img.naturalHeight;
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
+
+        const imageData = ctx.getImageData(0, 0, w, h);
+        const d = imageData.data;
+        const visited = new Uint8Array(w * h);
+        const queue = [];
+
+        const seed = (x, y) => {
+          const i = y * w + x;
+          if (!visited[i]) { visited[i] = 1; queue.push(i); }
+        };
+
+        for (let x = 0; x < w; x++) { seed(x, 0); seed(x, h - 1); }
+        for (let y = 1; y < h - 1; y++) { seed(0, y); seed(w - 1, y); }
+
+        let qi = 0;
+        while (qi < queue.length) {
+          const i = queue[qi++];
+          const pi = i * 4;
+          const r = d[pi], g = d[pi+1], b = d[pi+2], a = d[pi+3];
+          if (a > 200 && r <= threshold && g <= threshold && b <= threshold) {
+            d[pi + 3] = 0;
+            const x = i % w, y = (i / w) | 0;
+            if (x > 0     && !visited[i - 1]) { visited[i - 1] = 1; queue.push(i - 1); }
+            if (x < w - 1 && !visited[i + 1]) { visited[i + 1] = 1; queue.push(i + 1); }
+            if (y > 0     && !visited[i - w]) { visited[i - w] = 1; queue.push(i - w); }
+            if (y < h - 1 && !visited[i + w]) { visited[i + w] = 1; queue.push(i + w); }
+          }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+        canvas.toBlob(b => b ? resolve(b) : reject(new Error("removeBlackBg: toBlob failed")), "image/png");
+      };
+      img.src = url;
     });
   }
 
@@ -1063,7 +1488,11 @@
         if (ch) try { slot.refBlob = await imgToBlob(ch.refPath); } catch(e) { console.warn("[EditGen] Could not reload character image", e); }
       }
       if (!slot.refBlob) { showEditError("Character image not available."); return; }
-      imageBlob = slot.refBlob;
+      // Flatten the transparent character onto white before sending so the model
+      // sees a real RGB image (not alpha=0 read as black). chars[i].refBlob
+      // stays untouched — only this local imageBlob gets flattened for the API.
+      try { imageBlob = await flattenToWhiteJpeg(slot.refBlob); }
+      catch(flatErr) { console.warn("[EditGen] White-flatten failed, sending raw blob", flatErr); imageBlob = slot.refBlob; }
       prompt = `Edit only this character's appearance: ${userPrompt}. Do not change the background, scene, or any other element. Keep everything else about the character identical — same pose, same proportions, same style. Flat illustration style, clean lines, solid flat colors.`;
     } else {
       // Get current generated image as blob
@@ -1088,7 +1517,7 @@
       let res;
       try {
         res = await fetch(
-          "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent",
+          "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent",
           {
             method: "POST",
             headers: { "Content-Type": "application/json", "x-goog-api-key": googleKey },
@@ -1123,11 +1552,21 @@
 
       const imgPart = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
       if (!imgPart) {
-        console.error("[EditGen] No image in response:", data);
+        console.error("[EditGen] No image in response. Full response:", JSON.stringify(data, null, 2));
+        const finishReason = data?.candidates?.[0]?.finishReason;
+        const textPart = data?.candidates?.[0]?.content?.parts?.find(p => p.text)?.text;
+        if (finishReason === "SAFETY" || finishReason === "PROHIBITED_CONTENT") {
+          throw friendlyErr("This edit was blocked by content safety filters. Try rephrasing.");
+        }
+        if (textPart) {
+          console.error("[EditGen] Model returned text:", textPart);
+          throw friendlyErr("The model returned text instead of an image. See console for details.");
+        }
         throw friendlyErr("Something went wrong — no edited image was returned. Please try again.");
       }
 
-      // Convert base64 result to blob; strip white background only for characters
+      // Convert base64 result to blob; for character edits, strip the white
+      // background the model adds so the character ends up transparent.
       const resultBase64 = imgPart.inlineData.data;
       const resultMime   = imgPart.inlineData.mimeType || "image/png";
       const rawBlob      = await fetch(`data:${resultMime};base64,${resultBase64}`).then(r => r.blob());
@@ -1138,7 +1577,7 @@
       } else {
         resultBlob = rawBlob;
       }
-      const resultUrl    = URL.createObjectURL(resultBlob);
+      const resultUrl = URL.createObjectURL(resultBlob);
 
       if (target.type === 'character') {
         // Replace character reference blob + thumbnail; store latest URL for modal reopen
