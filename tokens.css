@@ -1,0 +1,864 @@
+/**
+ * BIP Visualized — Design Tokens & Component CSS
+ *
+ * Drop-in stylesheet that implements the BIP Visualized style library.
+ * Pair with STYLE.md (reference) and style-reference.html (visual).
+ *
+ * Link this file BEFORE Tailwind so Tailwind utilities can override
+ * where needed:
+ *
+ *   <link rel="stylesheet" href="tokens.css" />
+ *   <script src="https://cdn.tailwindcss.com?plugins=forms,typography&ver=3.4"></script>
+ *
+ * Sections:
+ *   1.  CSS custom properties (tokens)
+ *   2.  Global element styles
+ *   3.  Utility classes
+ *   4.  Component: Checkbox (.cb-row)
+ *   5.  Component: Tooltips (.sidebar-tooltip, #nav-tooltip)
+ *   6.  Component: Spinner (grid-spinner, anim-spin)
+ *   7.  Component: Modal
+ *   8.  Component: Nav rail
+ *   9.  Component: Selectable card (picker-card)
+ *   10. Component: Filter button / popover
+ *   11. Component: Sort menu
+ *   12. Animations & keyframes
+ *   13. Form input defaults
+ *   14. Print styles
+ *   15. Accessibility — reduced motion
+ */
+
+
+/* ============================================================
+   1. CSS CUSTOM PROPERTIES (TOKENS)
+   ============================================================ */
+
+:root {
+  /* ── Colors — brand ──────────────────────────────────────── */
+  --color-brand-teal-50:  #f0fafa;
+  --color-brand-teal-100: #dff5f4;
+  --color-brand-teal-200: #b1e3e2;
+  --color-brand-teal-300: #86d1d0;
+  --color-brand-teal-400: #43b0ae;
+  --color-brand-teal-500: #108c89;  /* ★ brand */
+  --color-brand-teal-600: #0d8078;
+  --color-brand-teal-700: #006360;
+  --color-brand-teal-800: #065443;
+  --color-brand-teal-900: #03402f;
+  --color-brand-teal-950: #01291a;
+
+  --color-brand-coral-50:  #FCDDD4;
+  --color-brand-coral-100: #fecaca;
+  --color-brand-coral-400: #F0542A;
+  --color-brand-coral-500: #CC3F19;  /* ★ brand */
+  --color-brand-coral-600: #dc2626;
+  --color-brand-coral-700: #922D11;
+
+  --color-brand-navy-50:  #f0f3f5;
+  --color-brand-navy-100: #EBEEF2;
+  --color-brand-navy-200: #D0D5DC;
+  --color-brand-navy-300: #9ba5b3;
+  --color-brand-navy-400: #878990;
+  --color-brand-navy-500: #282b3c;  /* ★ brand */
+  --color-brand-navy-600: #222538;
+  --color-brand-navy-700: #171a2e;
+  --color-brand-navy-800: #0e1124;
+  --color-brand-navy-900: #080b1c;
+  --color-brand-navy-950: #030512;
+
+  --color-brand-black: #161616;
+  --color-brand-black-hover: #2d2d2d;
+  --color-text-primary: #343434;    /* default body text — warm near-black */
+  --color-text-muted: #8A857D;      /* inactive/placeholder text — warm muted */
+  --color-beige: #F8F5EF;
+  --color-beige-hover: #F1EDE5;     /* hover bg on beige/white surfaces */
+
+  /* ── Colors — semantic ───────────────────────────────────── */
+  --color-success-50:  #ecfdf5;
+  --color-success-100: #d1fae5;
+  --color-success-500: #10b981;
+  --color-success-600: #059669;
+  --color-success-700: #047857;
+
+  --color-warning-50:  #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-500: #f59e0b;
+  --color-warning-700: #b45309;
+
+  /* Error — bip-red expanded scale */
+  --color-error-50:  #FCDDD4;
+  --color-error-100: #fecaca;
+  --color-error-400: #F0542A;
+  --color-error-500: #CC3F19;
+  --color-error-600: #dc2626;
+  --color-error-700: #922D11;
+
+  /* Info — bip-blue expanded scale */
+  --color-info-50:  #e6f4fb;
+  --color-info-100: #CCE9F7;
+  --color-info-200: #b3ddf2;  /* ★ preferred border */
+  --color-info-500: #0093D8;
+  --color-info-700: #006a9e;
+
+  /* ── Colors — neutrals (Tailwind defaults) ───────────────── */
+  --color-gray-50:  #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+
+  /* ── Colors — structural borders ─────────────────────────── */
+  --color-structural-border: #CCCAC5;
+  --color-structural-border-hover: #ADADAD;
+  --color-structural-bg-hover: #E0E0E0;
+
+  /* ── Colors — standalone ─────────────────────────────────── */
+  --color-spinner-dot: #b0a892;
+
+  /* ── Colors — overlays ───────────────────────────────────── */
+  --overlay-scrim-modal: rgba(0, 0, 0, 0.45);
+  --overlay-scrim-picker: rgba(0, 0, 0, 0.40);
+  --overlay-hover-image: rgba(22, 22, 22, 0.55);
+  --overlay-loading-beige: rgba(248, 245, 239, 0.88);
+
+  /* ── Typography ──────────────────────────────────────────── */
+  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                      'Roboto', 'Helvetica Neue', sans-serif;
+
+  /* Semantic typography tokens */
+  --font-size-page-card:     0.5rem;    /* 8px  */
+  --font-size-page-label:    0.625rem;  /* 10px */
+  --font-size-modal-card:    1rem;      /* 16px */
+  --font-size-modal-header:  1.25rem;   /* 20px */
+  --line-height-card:        120%;
+
+  /* Letter spacing */
+  --tracking-normal: 0;
+  --tracking-wide:   0.05em;
+  --tracking-wider:  0.08em;
+  --tracking-widest: 0.10em;
+
+  /* ── Icon sizes ──────────────────────────────────────────── */
+  --icon-size-placeholder: 1.5rem;  /* 24px */
+  --icon-size-modal:       3rem;    /* 48px */
+
+  /* ── Border radius ───────────────────────────────────────── */
+  --radius-sm:   4px;
+  --radius-md:   6px;
+  --radius-lg:   8px;
+  --radius-xl:   10px;
+  --radius-2xl:  12px;
+  --radius-3xl:  14px;
+  --radius-4xl:  16px;
+  --radius-5xl:  20px;
+  --radius-full: 9999px;
+
+  /* ── Shadows / elevation ─────────────────────────────────── */
+  --shadow-sm:          0 1px 1px rgba(0, 0, 0, 0.25);
+  --shadow-md:          0 2px 8px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  --shadow-lg:          0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --shadow-xl:          0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-2xl:         0 24px 64px rgba(0, 0, 0, 0.18);
+  --shadow-3xl:         0 24px 64px rgba(0, 0, 0, 0.25);
+  --shadow-hover-card:  0 2px 8px rgba(0, 0, 0, 0.07);
+
+  /* ── Z-index scale ───────────────────────────────────────── */
+  --z-base:           0;
+  --z-dropdown:       10;
+  --z-sticky:         20;
+  --z-nav:            30;
+  --z-modal-overlay:  100;
+  --z-modal:          1001;
+  --z-tooltip:        9999;
+
+  /* ── Motion ──────────────────────────────────────────────── */
+  --duration-instant: 80ms;
+  --duration-fast:    120ms;
+  --duration-default: 150ms;
+  --duration-medium:  180ms;
+  --duration-slow:    220ms;
+  --duration-rail:    240ms;
+
+  --easing-default:  ease;
+  --easing-out:      ease-out;
+  --easing-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+
+/* ============================================================
+   2. GLOBAL ELEMENT STYLES
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  font-family: var(--font-family-sans);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Global H2 override (matches production convention) */
+h2 {
+  font-size: 14px !important;
+  font-weight: 400 !important;
+}
+
+/* App shell — fixed viewport, never scrolls the page */
+#app {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+
+/* ============================================================
+   3. UTILITY CLASSES
+   ============================================================ */
+
+/* ── Typography utilities ────────────────────────────────── */
+.text-page-card          { font-size: var(--font-size-page-card); }
+.text-page-label         { font-size: var(--font-size-page-label); }
+.text-modal-card         { font-size: var(--font-size-modal-card); }
+.leading-card            { line-height: var(--line-height-card); }
+.text-page-card-default  { font-size: var(--font-size-page-card); line-height: var(--line-height-card); }
+.text-modal-card-default { font-size: var(--font-size-modal-card); line-height: var(--line-height-card); }
+
+/* ── Brand color utilities ───────────────────────────────── */
+.text-brand-black   { color: var(--color-brand-black); }
+.bg-brand-black     { background-color: var(--color-brand-black); }
+.border-brand-black { border-color: var(--color-brand-black); }
+
+.hover\:text-brand-black:hover   { color: var(--color-brand-black); }
+.hover\:bg-brand-black:hover     { background-color: var(--color-brand-black); }
+.hover\:border-brand-black:hover { border-color: var(--color-brand-black); }
+
+/* 60% opacity variant — for H2 underline and similar dividers */
+.border-brand-black-60 { border-color: rgba(22, 22, 22, 0.6); }
+
+/* ── Text color utilities (warm near-blacks) ─────────────── */
+.text-text-primary { color: var(--color-text-primary); }
+.text-text-muted   { color: var(--color-text-muted); }
+
+/* ── Surface utilities (beige variants) ──────────────────── */
+.bg-beige       { background-color: var(--color-beige); }
+.bg-beige-hover { background-color: var(--color-beige-hover); }
+.hover\:bg-beige-hover:hover { background-color: var(--color-beige-hover); }
+
+/* ── Icon size utilities ─────────────────────────────────── */
+.icon-placeholder {
+  width: var(--icon-size-placeholder);
+  height: var(--icon-size-placeholder);
+  color: var(--color-gray-300);
+  transition: color var(--duration-default) var(--easing-out);
+}
+
+#edit-modal .group:hover .icon-placeholder,
+.placeholder-resource-card .group\/card:hover svg {
+  color: var(--color-brand-black);
+}
+
+.icon-modal {
+  width: var(--icon-size-modal);
+  height: var(--icon-size-modal);
+}
+
+/* ── Modal section header ────────────────────────────────── */
+.modal-section-header {
+  font-size: var(--font-size-modal-header);
+  font-weight: 400;
+  color: #000;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--color-brand-black);
+  padding-bottom: 0.5rem;
+}
+
+.modal-section-header.with-icon {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ── Line clamp polyfill ─────────────────────────────────── */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+
+/* ============================================================
+   4. COMPONENT: CHECKBOX (.cb-row)
+   ============================================================ */
+
+.cb-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: background var(--duration-default) var(--easing-default);
+  user-select: none;
+}
+
+.cb-row:hover { background: var(--color-gray-200); }
+.cb-row:hover .cb-box::before { border-color: var(--color-gray-400); }
+
+.cb-input {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.cb-box {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.cb-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-gray-300);
+  background: #fff;
+  transition: background var(--duration-fast) var(--easing-default),
+              border-color var(--duration-fast) var(--easing-default);
+}
+
+.cb-box::after {
+  content: '';
+  position: absolute;
+  display: none;
+  width: 10px;
+  height: 10px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1.5 5l2.5 2.5 4.5-5' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.cb-input:checked + .cb-box::before {
+  background: var(--color-brand-black);
+  border-color: var(--color-brand-black);
+}
+
+.cb-input:checked + .cb-box::after { display: block; }
+
+.cb-row:hover .cb-input:checked + .cb-box::before {
+  background: var(--color-brand-black-hover);
+  border-color: var(--color-brand-black-hover);
+}
+
+.cb-input:indeterminate + .cb-box::before {
+  background: var(--color-brand-black);
+  border-color: var(--color-brand-black);
+}
+
+.cb-input:indeterminate + .cb-box::after {
+  display: block;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M2 5h6' stroke='white' stroke-width='1.5' stroke-linecap='round' fill='none'/%3E%3C/svg%3E");
+}
+
+.cb-input:focus-visible + .cb-box::before {
+  outline: 2.5px solid var(--color-brand-black);
+  outline-offset: 2px;
+}
+
+.cb-input:disabled + .cb-box { cursor: not-allowed; }
+.cb-input:disabled + .cb-box::before {
+  background: var(--color-gray-100);
+  border-color: var(--color-gray-200);
+}
+
+.cb-row:has(.cb-input:disabled) { cursor: not-allowed; }
+.cb-row:has(.cb-input:disabled):hover { background: transparent; }
+
+.cb-label {
+  font-size: 14px;
+  color: #343434;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.cb-input:disabled ~ .cb-label { color: var(--color-gray-400); }
+
+/* "Show all" sticky variant */
+.cb-show-all-sticky {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-dropdown);
+  background: #fff;
+  padding-top: 2px;
+}
+.cb-row--show-all { margin-bottom: 2px; }
+.cb-label--show-all { font-weight: 600; color: var(--color-brand-black); }
+.cb-show-all-divider {
+  height: 1px;
+  background: var(--color-gray-200);
+  margin: 6px 16px 8px;
+}
+
+/* Groups */
+.cb-group { margin-bottom: 20px; }
+.cb-group:last-child { margin-bottom: 0; }
+
+.cb-group-header {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-gray-500);
+  padding: 0 16px 4px;
+  margin-top: 16px;
+}
+
+.cb-group:first-child .cb-group-header { margin-top: 4px; }
+
+
+/* ============================================================
+   5. COMPONENT: TOOLTIPS
+   ============================================================ */
+
+/* Sidebar tooltip — appended to <body> so parent overflow:hidden doesn't clip */
+.sidebar-tooltip {
+  position: fixed;
+  z-index: var(--z-tooltip);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--duration-default) var(--easing-default),
+              visibility var(--duration-default) var(--easing-default);
+  white-space: nowrap;
+}
+
+.sidebar-tooltip.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sidebar-tooltip-inner {
+  background: #fff;
+  color: var(--color-gray-900);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+
+.sidebar-tooltip-arrow {
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* Nav tooltip — for nav rail items */
+#nav-tooltip {
+  display: none;
+  position: fixed;
+  z-index: var(--z-tooltip);
+  pointer-events: none;
+  background: #fff;
+  color: #111;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  padding: 5px 10px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--easing-default);
+}
+
+#nav-tooltip.nav-tooltip--visible { display: block; opacity: 1; }
+
+#nav-tooltip::before {
+  content: '';
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 6px solid transparent;
+  border-right-color: rgba(0, 0, 0, 0.08);
+  margin-right: 1px;
+}
+
+#nav-tooltip::after {
+  content: '';
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 6px solid transparent;
+  border-right-color: #fff;
+}
+
+
+/* ============================================================
+   6. COMPONENT: SPINNER (3-dot grid spinner — canonical)
+   ============================================================ */
+
+.grid-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  width: 100%;
+  grid-column: 1 / -1;
+}
+
+.grid-spinner-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-spinner-dot);
+  margin: 0 4px;
+  animation: spinnerBounce 1.2s ease-in-out infinite;
+}
+
+.grid-spinner-dot:nth-child(2) { animation-delay: 0.15s; }
+.grid-spinner-dot:nth-child(3) { animation-delay: 0.30s; }
+
+@keyframes spinnerBounce {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40%           { opacity: 1;   transform: scale(1); }
+}
+
+/* Inline ring spinner — for buttons, image overlays */
+.anim-spin { animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+
+/* ============================================================
+   7. COMPONENT: MODAL
+   ============================================================ */
+
+#modal-container {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-medium) var(--easing-default);
+}
+
+#modal-container.modal-is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#modal-container .modal-panel {
+  transform: scale(0.97) translateY(6px);
+  transition: transform var(--duration-medium) var(--easing-entrance),
+              opacity var(--duration-medium) var(--easing-default);
+  opacity: 0;
+}
+
+#modal-container.modal-is-open .modal-panel {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+/* Standalone overlay animation (used by inline modals like the Image Generator) */
+.overlay-anim         { animation: modal-backdrop-in var(--duration-medium) var(--easing-default) forwards; }
+.overlay-anim > div   { animation: modal-panel-in    var(--duration-medium) var(--easing-entrance) forwards; }
+
+@keyframes modal-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modal-panel-in {
+  from { opacity: 0; transform: scale(0.97) translateY(6px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+@keyframes modal-backdrop-out {
+  from { opacity: 1; } to { opacity: 0; }
+}
+
+@keyframes modal-panel-out {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to   { opacity: 0; transform: scale(0.97) translateY(6px); }
+}
+
+.modal-leaving       { animation: modal-backdrop-out var(--duration-fast) var(--easing-default) forwards; }
+.modal-leaving > *   { animation: modal-panel-out    var(--duration-fast) var(--easing-default) forwards; }
+
+
+/* ============================================================
+   8. COMPONENT: NAV RAIL
+   ============================================================ */
+
+#nav-rail-container {
+  position: relative;
+  z-index: var(--z-sticky);
+}
+
+#nav-rail {
+  width: 56px;
+  transition: width var(--duration-rail) var(--easing-out);
+}
+
+#nav-rail.is-expanded { width: 220px; }
+
+#nav-rail-items {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.nav-rail-item {
+  gap: 12px;
+  width: 100%;
+  align-self: stretch;
+}
+
+/* Labels — invisible & zero-width when collapsed */
+#nav-rail .nav-label {
+  opacity: 0;
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transform: translateX(-8px);
+  transition: opacity 140ms ease-out,
+              transform var(--duration-medium) ease-out,
+              max-width var(--duration-rail) ease-out;
+}
+
+#nav-rail.is-expanded .nav-label {
+  opacity: 1;
+  max-width: 180px;
+  transform: translateX(0);
+  transition: opacity 140ms ease-out 160ms,
+              transform var(--duration-medium) ease-out 140ms,
+              max-width var(--duration-rail) ease-out;
+}
+
+/* Settings panel — anchored at bottom, expands upward */
+.settings-wrapper {
+  max-height: 57px;
+  transition: max-height 280ms ease-in-out;
+}
+
+.settings-wrapper.settings-open {
+  max-height: 320px;
+  min-width: 220px;
+}
+
+/* Logo mark — always anchored at fixed left, no horizontal jump on expand */
+.nav-logo-mark {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  height: 21.6px;
+  width: auto;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.nav-logo-suffix {
+  position: absolute;
+  left: 50px;
+  top: 50%;
+  height: 24px;
+  width: auto;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-6px, calc(-50% - 2px));
+  transition: opacity 200ms ease-out,
+              transform var(--duration-rail) ease-out;
+}
+
+#nav-rail.is-expanded .nav-logo-suffix {
+  opacity: 1;
+  transform: translate(0, calc(-50% - 2px));
+  transition: opacity 200ms ease-out 100ms,
+              transform var(--duration-rail) ease-out 80ms;
+}
+
+/* Nav arrow press feedback */
+.nav-arrow:not([disabled]):active {
+  transform: scale(0.9);
+  transition: transform var(--duration-instant) var(--easing-default);
+}
+
+
+/* ============================================================
+   9. COMPONENT: SELECTABLE CARD (picker-card)
+   ============================================================ */
+
+.picker-card.selected {
+  border: 1.5px solid var(--color-brand-black) !important;
+}
+
+.picker-card.selected .picker-check {
+  display: flex !important;
+}
+
+
+/* ============================================================
+   10. COMPONENT: FILTER BUTTON / POPOVER
+   ============================================================ */
+
+.picker-filter-btn.open {
+  border-color: var(--color-brand-black) !important;
+  color: var(--color-brand-black) !important;
+}
+
+
+/* ============================================================
+   11. COMPONENT: SORT MENU
+   ============================================================ */
+
+.sort-menu-item .sort-menu-check {
+  opacity: 0;
+  transition: opacity var(--duration-default) var(--easing-default);
+}
+
+.sort-menu-item[aria-checked="true"] .sort-menu-check { opacity: 1; }
+.sort-menu-item[aria-checked="true"] { font-weight: 500; }
+
+.sort-menu-item:focus-visible {
+  outline: 2px solid var(--color-brand-teal-500);
+  outline-offset: -2px;
+}
+
+
+/* ============================================================
+   12. ANIMATIONS & KEYFRAMES (shared)
+   ============================================================ */
+
+/* Card fade-in — uniform, single keyframe */
+.card-fade-in {
+  opacity: 0;
+  transform: translateY(6px);
+  animation: cardAppear 0.3s ease-out forwards;
+}
+
+@keyframes cardAppear {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Grid content exit transition */
+.grid-content-exit {
+  opacity: 0;
+  transition: opacity var(--duration-default) ease-out;
+}
+
+/* Page viewer transition */
+@keyframes page-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.page-viewer-transitioning { pointer-events: none; }
+
+.page-viewer-content-enter {
+  animation: page-fade-in 200ms var(--easing-entrance) forwards;
+}
+
+
+/* ============================================================
+   13. FORM INPUT DEFAULTS
+   ============================================================ */
+
+/* Suppress browser autofill blue/yellow bg */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #fff inset;
+          box-shadow: 0 0 0 1000px #fff inset;
+  -webkit-text-fill-color: var(--color-gray-700);
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Common state classes — JS-toggled */
+.loading.visible    { display: flex !important; }
+.error-msg.visible  { display: flex !important; }
+
+
+/* ============================================================
+   14. SIDEBAR HEIGHT-RESPONSIVE BEHAVIOR
+   ============================================================ */
+
+#sidebar nav > ul { max-height: 100%; }
+
+@media (max-height: 640px) {
+  #sidebar > div {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  #sidebar > div > button:first-child {
+    margin-bottom: 1rem;
+  }
+}
+
+
+/* ============================================================
+   15. PRINT STYLES (8.5 × 11" page export)
+   ============================================================ */
+
+@media print {
+  .scalable-content {
+    transform: none !important;
+    width: 8.5in !important;
+    height: 11in !important;
+  }
+
+  .page-container {
+    width: 8.5in !important;
+    height: 11in !important;
+    max-width: none !important;
+    max-height: none !important;
+    box-shadow: none !important;
+  }
+
+  .page-content-scalable {
+    width: 8.5in !important;
+    height: 11in !important;
+    overflow: visible !important;
+  }
+}
+
+
+/* ============================================================
+   16. ACCESSIBILITY — REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

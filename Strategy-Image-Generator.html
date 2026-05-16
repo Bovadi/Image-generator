@@ -7,52 +7,64 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // BIP Visualized Tailwind config — mirrors STYLE.md §13. Set after the CDN
+    // script loads so `tailwind` is defined; the JIT picks this up before
+    // scanning class names.
+    tailwind.config = {
+      theme: {
+        screens: { xs: "475px", sm: "640px", md: "768px", lg: "1024px", xl: "1280px", "2xl": "1536px" },
+        extend: {
+          colors: {
+            primary: {
+              50: "#f0fafa", 100: "#dff5f4", 200: "#b1e3e2", 300: "#86d1d0",
+              400: "#43b0ae", 500: "#108c89", 600: "#0d8078", 700: "#006360",
+              800: "#065443", 900: "#03402f", 950: "#01291a",
+            },
+            "bip-blue":  { 50: "#e6f4fb", 100: "#CCE9F7", 200: "#b3ddf2", 500: "#0093D8", 700: "#006a9e" },
+            "bip-green": { 50: "#DBEEED", 100: "#108C89" },
+            "bip-red":   { 50: "#FCDDD4", 100: "#fecaca", 400: "#F0542A", 500: "#CC3F19", 600: "#dc2626", 700: "#922D11" },
+            beige: "#F8F5EF",
+            "beige-hover": "#F1EDE5",
+            "brand-black": "#161616",
+            "text-primary": "#343434",
+            "text-muted": "#8A857D",
+          },
+          fontFamily: { sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"] },
+          fontSize: {
+            "3xs": ["0.5rem",   { lineHeight: "0.75rem" }],
+            "2xs": ["0.625rem", { lineHeight: "0.75rem" }],
+          },
+          borderRadius: {
+            // Mirror STYLE.md §5.2: xl=10, 2xl=12, 3xl=14, 4xl=16, 5xl=20
+            xl: "10px",
+            "2xl": "12px",
+            "3xl": "14px",
+            "4xl": "16px",
+            "5xl": "20px",
+          },
+          boxShadow: {
+            xl:  "0 8px 24px rgba(0,0,0,0.12)",
+            "2xl": "0 24px 64px rgba(0,0,0,0.18)",
+            "3xl": "0 24px 64px rgba(0,0,0,0.25)",
+            "hover-card": "0 2px 8px rgba(0,0,0,0.07)",
+          },
+        },
+      },
+    };
+  </script>
   <style>
-    * { font-family: 'Inter', sans-serif; }
-
-    /* ── Animations ── */
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes modal-backdrop-in {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-    @keyframes modal-panel-in {
-      from { opacity: 0; transform: scale(0.97) translateY(6px); }
-      to   { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    .anim-spin { animation: spin 0.7s linear infinite; }
-    .overlay-anim { animation: modal-backdrop-in 180ms ease forwards; }
-    .overlay-anim > div { animation: modal-panel-in 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-    /* ── Suppress browser autofill blue/yellow background ── */
-    input:-webkit-autofill,
-    input:-webkit-autofill:hover,
-    input:-webkit-autofill:focus,
-    textarea:-webkit-autofill,
-    textarea:-webkit-autofill:hover,
-    textarea:-webkit-autofill:focus {
-      -webkit-box-shadow: 0 0 0px 1000px #fff inset;
-      box-shadow: 0 0 0px 1000px #fff inset;
-      -webkit-text-fill-color: #374151;
-      transition: background-color 5000s ease-in-out 0s;
-    }
-
-    /* ── JS-toggled state classes (preserve original behavior) ── */
-    .loading.visible { display: flex !important; }
-    .error-msg.visible { display: flex !important; }
+    /* Prototype-specific behavior rules not yet generalized in tokens.css. */
     #picker-overlay.visible { display: flex !important; }
-    #crop-tool.visible { display: block !important; }
+    #crop-tool.visible      { display: block !important; }
 
-    /* ── Complex parent → child / state selectors ── */
-    .char-image-box.has-char:hover { background-color: #F8F5EF; }
+    .char-image-box.has-char:hover { background-color: var(--color-beige); }
     .char-image-box.has-char:not(.is-editing):hover .char-change-overlay {
       opacity: 1;
       pointer-events: auto;
     }
-    .picker-card.selected { border: 1.5px solid #161616 !important; }
-    .picker-card.selected .picker-check { display: flex !important; }
-    .picker-filter-btn.open { border-color: #161616 !important; color: #161616 !important; }
   </style>
 </head>
 <body class="h-full overflow-hidden bg-white">
@@ -60,55 +72,55 @@
 <div class="w-screen h-[100dvh] bg-white flex flex-col overflow-hidden">
 
 <!-- Header -->
-<div class="shrink-0 h-16 px-8 border-b border-[#e5e7eb] flex items-center justify-between">
+<div class="shrink-0 h-16 px-8 border-b border-gray-200 flex items-center justify-between">
   <div class="flex items-center gap-1 h-full">
-    <button id="tab-generator" onclick="switchTab('generator')" class="relative h-full px-1 mr-6 text-[15px] font-medium text-[#161616] bg-transparent border-0 cursor-pointer transition-colors duration-150 hover:text-[#161616]">
+    <button id="tab-generator" onclick="switchTab('generator')" class="relative h-full px-1 mr-6 text-[15px] font-medium text-brand-black bg-transparent border-0 cursor-pointer transition-colors duration-150 hover:text-brand-black">
       Image Generator
-      <span id="tab-generator-indicator" class="absolute left-0 right-0 -bottom-px h-[2px] bg-[#161616]"></span>
+      <span id="tab-generator-indicator" class="absolute left-0 right-0 -bottom-px h-[2px] bg-brand-black"></span>
     </button>
-    <button id="tab-editor" onclick="switchTab('editor')" class="relative h-full px-1 text-[15px] font-medium text-[#9ca3af] bg-transparent border-0 cursor-pointer transition-colors duration-150 hover:text-[#161616]">
+    <button id="tab-editor" onclick="switchTab('editor')" class="relative h-full px-1 text-[15px] font-medium text-gray-400 bg-transparent border-0 cursor-pointer transition-colors duration-150 hover:text-brand-black">
       Image Editor
-      <span id="tab-editor-indicator" class="absolute left-0 right-0 -bottom-px h-[2px] bg-[#161616] hidden"></span>
+      <span id="tab-editor-indicator" class="absolute left-0 right-0 -bottom-px h-[2px] bg-brand-black hidden"></span>
     </button>
   </div>
-  <button class="w-8 h-8 flex items-center justify-center bg-transparent border-0 cursor-pointer text-[#9ca3af] rounded-md transition-colors duration-150 hover:text-[#161616] hover:bg-[#f3f4f6]" title="Close">
+  <button class="w-8 h-8 flex items-center justify-center bg-transparent border-0 cursor-pointer text-gray-400 rounded-md transition-colors duration-150 hover:text-brand-black hover:bg-gray-100" title="Close">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6M6 6l12 12"/></svg>
   </button>
 </div>
 
 <!-- Key bar -->
-<div class="shrink-0 bg-[#f9fafb] border-b border-[#e5e7eb] px-8 h-12 flex items-center gap-2">
-  <label class="text-[11px] font-bold tracking-[0.05em] text-[#9ca3af] whitespace-nowrap">FAL KEY</label>
-  <input type="password" id="falKey" placeholder="paste your fal.ai key" class="w-[260px] border border-[#e5e7eb] rounded-md py-1 px-2.5 text-xs font-mono text-[#374151] outline-none bg-white transition-colors duration-150 focus:border-[#161616]" />
-  <div class="w-px h-6 bg-[#e5e7eb] mx-2"></div>
-  <label class="text-[11px] font-bold tracking-[0.05em] text-[#9ca3af] whitespace-nowrap">GOOGLE KEY</label>
-  <input type="password" id="googleKey" placeholder="paste your Google AI Studio key" class="w-[260px] border border-[#e5e7eb] rounded-md py-1 px-2.5 text-xs font-mono text-[#374151] outline-none bg-white transition-colors duration-150 focus:border-[#161616]" />
+<div class="shrink-0 bg-gray-50 border-b border-gray-200 px-8 h-12 flex items-center gap-2">
+  <label class="text-2xs font-bold tracking-wide text-gray-400 whitespace-nowrap">FAL KEY</label>
+  <input type="password" id="falKey" placeholder="paste your fal.ai key" class="w-[260px] border border-gray-200 rounded-md py-1 px-2.5 text-xs font-mono text-gray-700 outline-none bg-white transition-colors duration-150 focus:border-brand-black" />
+  <div class="w-px h-6 bg-gray-200 mx-2"></div>
+  <label class="text-2xs font-bold tracking-wide text-gray-400 whitespace-nowrap">GOOGLE KEY</label>
+  <input type="password" id="googleKey" placeholder="paste your Google AI Studio key" class="w-[260px] border border-gray-200 rounded-md py-1 px-2.5 text-xs font-mono text-gray-700 outline-none bg-white transition-colors duration-150 focus:border-brand-black" />
 </div>
 
 <!-- Main layout -->
 <div id="view-generator" class="flex-1 flex flex-col min-[901px]:flex-row overflow-hidden">
 
   <!-- ── LEFT PANEL ── -->
-  <div class="w-full min-[901px]:w-1/2 shrink-0 flex flex-col border-[#e5e7eb] border-b min-[901px]:border-b-0 min-[901px]:border-r overflow-hidden h-auto max-h-[60vh] min-[901px]:max-h-none min-[901px]:h-auto">
+  <div class="w-full min-[901px]:w-1/2 shrink-0 flex flex-col border-gray-200 border-b min-[901px]:border-b-0 min-[901px]:border-r overflow-hidden h-auto max-h-[60vh] min-[901px]:max-h-none min-[901px]:h-auto">
     <div class="flex-1 overflow-y-auto pt-8 px-8 pb-6 flex flex-col gap-6">
 
       <!-- Characters -->
       <div>
-        <div class="text-[11px] font-bold tracking-[0.08em] text-[#9ca3af] uppercase mb-4">Characters</div>
+        <div class="text-xs font-bold tracking-wider text-gray-400 uppercase mb-4">Characters</div>
 
         <!-- Character 1 -->
         <div class="char-slot flex gap-4 items-stretch mb-6">
           <div class="shrink-0 flex flex-col justify-between gap-4">
-            <div class="char-image-box w-[120px] h-[160px] bg-[#F8F5EF] rounded-xl flex flex-col items-center justify-center cursor-pointer overflow-hidden border border-[#CCCAC5] transition-colors duration-150 relative hover:border-[#ADADAD] hover:bg-[#E0E0E0]" id="slot-0-box" onclick="openPicker(0)">
+            <div class="char-image-box w-[120px] h-[160px] bg-beige rounded-2xl flex flex-col items-center justify-center cursor-pointer overflow-hidden border border-[#CCCAC5] transition-colors duration-150 relative hover:border-[#ADADAD] hover:bg-[#E0E0E0]" id="slot-0-box" onclick="openPicker(0)">
               <img id="slot-0-img" style="display:none" class="w-full h-full object-contain" alt="" />
-              <div class="char-change-overlay absolute inset-0 bg-[rgba(22,22,22,0.55)] flex items-center justify-center rounded-xl opacity-0 transition-opacity duration-[180ms] pointer-events-none"><span class="text-[11px] font-bold text-white text-center leading-[1.4] tracking-[0.01em] px-2">Change<br>Character</span></div>
-              <div id="slot-0-thumb-loading" class="absolute inset-0 bg-[rgba(248,245,239,0.88)] flex-col items-center justify-center gap-2" style="display:none"><div class="w-[22px] h-[22px] border-[2.5px] border-[#ccfbf1] border-t-[#2B9996] rounded-full anim-spin"></div><span class="text-[10px] font-semibold text-[#2B9996] text-center leading-[1.3]">Editing…</span></div>
+              <div class="char-change-overlay absolute inset-0 bg-[rgba(22,22,22,0.55)] flex items-center justify-center rounded-2xl opacity-0 transition-opacity duration-[180ms] pointer-events-none"><span class="text-xs font-bold text-white text-center leading-[1.4] tracking-normal px-2">Change<br>Character</span></div>
+              <div id="slot-0-thumb-loading" class="absolute inset-0 bg-[rgba(248,245,239,0.88)] flex-col items-center justify-center gap-2" style="display:none"><div class="w-[22px] h-[22px] border-[2.5px] border-primary-100 border-t-primary-500 rounded-full anim-spin"></div><span class="text-2xs font-semibold text-primary-500 text-center leading-[1.3]">Editing…</span></div>
               <span id="slot-0-empty" class="flex flex-col items-center gap-2">
-                <span class="text-[13px] font-medium text-[#6b7280]">Add Character</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                <span class="text-[13px] font-medium text-gray-500">Add Character</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>
               </span>
             </div>
-            <button id="slot-0-edit" class="w-[120px] py-2 px-3 bg-white text-[#161616] border border-[#e5e7eb] rounded-lg text-xs font-semibold cursor-pointer flex items-center justify-center gap-[5px] transition-colors duration-150 enabled:hover:border-[#161616] enabled:hover:bg-[#f9fafb] disabled:text-[#9ca3af] disabled:border-[#e5e7eb] disabled:cursor-not-allowed" disabled onclick="openEditModal('character', 0)">
+            <button id="slot-0-edit" class="w-[120px] py-2 px-3 bg-white text-brand-black border border-[#CCCAC5] rounded-lg text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5 transition-colors duration-150 enabled:hover:border-brand-black enabled:hover:bg-gray-50 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed" disabled onclick="openEditModal('character', 0)">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487z"/></svg>
               Edit
             </button>
@@ -116,31 +128,31 @@
           <div class="flex-1 flex flex-col gap-4 min-w-0">
             <div class="flex flex-col gap-2">
               <div class="flex items-center gap-2">
-                <span class="text-[13px] font-semibold text-[#374151]">Main Character</span>
+                <span class="text-[13px] font-semibold text-gray-700">Main Character</span>
               </div>
-              <p class="text-[13px] text-[#6b7280] leading-normal">First, select a character. Then, describe what they're doing below.</p>
+              <p class="text-[13px] text-gray-500 leading-normal">First, select a character. Then, describe what they're doing below.</p>
             </div>
-            <div class="flex items-start gap-2 bg-[#E7F3F3] rounded-lg py-3 px-4">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-[#2B9996] shrink-0 mt-px"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
-              <span class="text-xs text-[#2B9996] leading-normal">Be specific and literal in your description.</span>
+            <div class="flex items-start gap-2 bg-bip-green-50 rounded-lg py-3 px-4">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-primary-500 shrink-0 mt-px"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
+              <span class="text-xs text-primary-500 leading-normal">Be specific and literal in your description.</span>
             </div>
-            <textarea class="w-full border border-[#e5e7eb] rounded-lg py-2.5 px-3 text-[13px] text-[#161616] bg-white outline-none resize-y min-h-[64px] transition-colors duration-150 leading-normal placeholder:text-[#d1d5db] focus:border-[#161616]" id="slot-0-action" placeholder="e.g. Sitting on a bean bag chair watching videos on an iPad"></textarea>
+            <textarea class="w-full border border-gray-200 rounded-lg py-2.5 px-3 text-[13px] text-brand-black bg-white outline-none resize-y min-h-[64px] transition-colors duration-150 leading-normal placeholder:text-gray-300 focus:border-brand-black" id="slot-0-action" placeholder="e.g. Sitting on a bean bag chair watching videos on an iPad"></textarea>
           </div>
         </div>
 
         <!-- Character 2 -->
         <div class="char-slot flex gap-4 items-stretch">
           <div class="shrink-0 flex flex-col justify-between gap-4">
-            <div class="char-image-box w-[120px] h-[160px] bg-[#F8F5EF] rounded-xl flex flex-col items-center justify-center cursor-pointer overflow-hidden border border-[#CCCAC5] transition-colors duration-150 relative hover:border-[#ADADAD] hover:bg-[#E0E0E0]" id="slot-1-box" onclick="openPicker(1)">
+            <div class="char-image-box w-[120px] h-[160px] bg-beige rounded-2xl flex flex-col items-center justify-center cursor-pointer overflow-hidden border border-[#CCCAC5] transition-colors duration-150 relative hover:border-[#ADADAD] hover:bg-[#E0E0E0]" id="slot-1-box" onclick="openPicker(1)">
               <img id="slot-1-img" style="display:none" class="w-full h-full object-contain" alt="" />
-              <div class="char-change-overlay absolute inset-0 bg-[rgba(22,22,22,0.55)] flex items-center justify-center rounded-xl opacity-0 transition-opacity duration-[180ms] pointer-events-none"><span class="text-[11px] font-bold text-white text-center leading-[1.4] tracking-[0.01em] px-2">Change<br>Character</span></div>
-              <div id="slot-1-thumb-loading" class="absolute inset-0 bg-[rgba(248,245,239,0.88)] flex-col items-center justify-center gap-2" style="display:none"><div class="w-[22px] h-[22px] border-[2.5px] border-[#ccfbf1] border-t-[#2B9996] rounded-full anim-spin"></div><span class="text-[10px] font-semibold text-[#2B9996] text-center leading-[1.3]">Editing…</span></div>
+              <div class="char-change-overlay absolute inset-0 bg-[rgba(22,22,22,0.55)] flex items-center justify-center rounded-2xl opacity-0 transition-opacity duration-[180ms] pointer-events-none"><span class="text-xs font-bold text-white text-center leading-[1.4] tracking-normal px-2">Change<br>Character</span></div>
+              <div id="slot-1-thumb-loading" class="absolute inset-0 bg-[rgba(248,245,239,0.88)] flex-col items-center justify-center gap-2" style="display:none"><div class="w-[22px] h-[22px] border-[2.5px] border-primary-100 border-t-primary-500 rounded-full anim-spin"></div><span class="text-2xs font-semibold text-primary-500 text-center leading-[1.3]">Editing…</span></div>
               <span id="slot-1-empty" class="flex flex-col items-center gap-2">
-                <span class="text-[13px] font-medium text-[#6b7280]">Add Character</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                <span class="text-[13px] font-medium text-gray-500">Add Character</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>
               </span>
             </div>
-            <button id="slot-1-edit" class="w-[120px] py-2 px-3 bg-white text-[#161616] border border-[#e5e7eb] rounded-lg text-xs font-semibold cursor-pointer flex items-center justify-center gap-[5px] transition-colors duration-150 enabled:hover:border-[#161616] enabled:hover:bg-[#f9fafb] disabled:text-[#9ca3af] disabled:border-[#e5e7eb] disabled:cursor-not-allowed" disabled onclick="openEditModal('character', 1)">
+            <button id="slot-1-edit" class="w-[120px] py-2 px-3 bg-white text-brand-black border border-[#CCCAC5] rounded-lg text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5 transition-colors duration-150 enabled:hover:border-brand-black enabled:hover:bg-gray-50 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed" disabled onclick="openEditModal('character', 1)">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487z"/></svg>
               Edit
             </button>
@@ -148,60 +160,60 @@
           <div class="flex-1 flex flex-col gap-4 min-w-0">
             <div class="flex flex-col gap-2">
               <div class="flex items-center gap-2">
-                <span class="text-[13px] font-semibold text-[#374151]">Additional Character</span>
-                <span class="inline-flex items-center py-0.5 px-2 bg-[#F8F5EF] border border-[#CCCAC5] rounded-full text-[11px] font-semibold text-[#6b7280]">Optional</span>
+                <span class="text-[13px] font-semibold text-gray-700">Additional Character</span>
+                <span class="inline-flex items-center py-0.5 px-2 bg-beige border border-[#CCCAC5] rounded-full text-xs font-semibold text-gray-500">Optional</span>
               </div>
-              <p class="text-[13px] text-[#6b7280] leading-normal">Add a second character to the scene</p>
+              <p class="text-[13px] text-gray-500 leading-normal">Add a second character to the scene</p>
             </div>
-            <div class="flex items-start gap-2 bg-[#E7F3F3] rounded-lg py-3 px-4">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-[#2B9996] shrink-0 mt-px"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
-              <span class="text-xs text-[#2B9996] leading-normal">Leave blank to generate a single-character scene.</span>
+            <div class="flex items-start gap-2 bg-bip-green-50 rounded-lg py-3 px-4">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-primary-500 shrink-0 mt-px"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
+              <span class="text-xs text-primary-500 leading-normal">Leave blank to generate a single-character scene.</span>
             </div>
-            <textarea class="w-full border border-[#e5e7eb] rounded-lg py-2.5 px-3 text-[13px] text-[#161616] bg-white outline-none resize-y min-h-[64px] transition-colors duration-150 leading-normal placeholder:text-[#d1d5db] focus:border-[#161616]" id="slot-1-action" placeholder="e.g. Standing next to the child pointing at the iPad"></textarea>
+            <textarea class="w-full border border-gray-200 rounded-lg py-2.5 px-3 text-[13px] text-brand-black bg-white outline-none resize-y min-h-[64px] transition-colors duration-150 leading-normal placeholder:text-gray-300 focus:border-brand-black" id="slot-1-action" placeholder="e.g. Standing next to the child pointing at the iPad"></textarea>
           </div>
         </div>
       </div>
 
-      <div class="h-px bg-[#e5e7eb] my-2"></div>
+      <div class="h-px bg-gray-200 my-2"></div>
 
       <!-- Scene -->
       <div class="flex flex-col gap-4">
-        <div class="text-[11px] font-bold tracking-[0.08em] text-[#9ca3af] uppercase">Scene</div>
+        <div class="text-xs font-bold tracking-wider text-gray-400 uppercase">Scene</div>
 
         <div class="flex flex-col gap-4">
           <div class="flex flex-col gap-2">
-            <div class="flex items-center gap-1.5 text-[13px] font-semibold text-[#374151]">Location</div>
-            <p class="text-[13px] text-[#6b7280] leading-normal">Where does this scene take place?</p>
+            <div class="flex items-center gap-1.5 text-[13px] font-semibold text-gray-700">Location</div>
+            <p class="text-[13px] text-gray-500 leading-normal">Where does this scene take place?</p>
           </div>
-          <input type="text" id="gen-location" placeholder="e.g. A classroom with a large front board, desks, and chairs" class="w-full border border-[#e5e7eb] rounded-lg py-[9px] px-3 text-[13px] text-[#161616] outline-none bg-white transition-colors duration-150 placeholder:text-[#d1d5db] focus:border-[#161616]" />
+          <input type="text" id="gen-location" placeholder="e.g. A classroom with a large front board, desks, and chairs" class="w-full border border-gray-200 rounded-lg py-[9px] px-3 text-[13px] text-brand-black outline-none bg-white transition-colors duration-150 placeholder:text-gray-300 focus:border-brand-black" />
         </div>
 
         <div class="flex flex-col gap-4">
           <div class="flex flex-col gap-2">
-            <div class="flex items-center gap-1.5 text-[13px] font-semibold text-[#374151]">Objects <span class="inline-flex items-center py-0.5 px-2 bg-[#F8F5EF] border border-[#CCCAC5] rounded-full text-[11px] font-semibold text-[#6b7280]">Optional</span></div>
-            <p class="text-[13px] text-[#6b7280] leading-normal">Any specific items that should be included.</p>
+            <div class="flex items-center gap-1.5 text-[13px] font-semibold text-gray-700">Objects <span class="inline-flex items-center py-0.5 px-2 bg-beige border border-[#CCCAC5] rounded-full text-xs font-semibold text-gray-500">Optional</span></div>
+            <p class="text-[13px] text-gray-500 leading-normal">Any specific items that should be included.</p>
           </div>
-          <input type="text" id="gen-objects" placeholder="e.g. open books on the desks, teacher holding a sandtimer, etc." class="w-full border border-[#e5e7eb] rounded-lg py-[9px] px-3 text-[13px] text-[#161616] outline-none bg-white transition-colors duration-150 placeholder:text-[#d1d5db] focus:border-[#161616]" />
+          <input type="text" id="gen-objects" placeholder="e.g. open books on the desks, teacher holding a sandtimer, etc." class="w-full border border-gray-200 rounded-lg py-[9px] px-3 text-[13px] text-brand-black outline-none bg-white transition-colors duration-150 placeholder:text-gray-300 focus:border-brand-black" />
         </div>
 
         <div class="flex flex-col gap-4">
           <div class="flex flex-col gap-2">
-            <div class="flex items-center gap-1.5 text-[13px] font-semibold text-[#374151]">Additional notes <span class="inline-flex items-center py-0.5 px-2 bg-[#F8F5EF] border border-[#CCCAC5] rounded-full text-[11px] font-semibold text-[#6b7280]">Optional</span></div>
-            <p class="text-[13px] text-[#6b7280] leading-normal">Character mood, time of day, or any other relevant details.</p>
+            <div class="flex items-center gap-1.5 text-[13px] font-semibold text-gray-700">Additional notes <span class="inline-flex items-center py-0.5 px-2 bg-beige border border-[#CCCAC5] rounded-full text-xs font-semibold text-gray-500">Optional</span></div>
+            <p class="text-[13px] text-gray-500 leading-normal">Character mood, time of day, or any other relevant details.</p>
           </div>
-          <input type="text" id="gen-details" placeholder="e.g. Child is crying with tears on his face" class="w-full border border-[#e5e7eb] rounded-lg py-[9px] px-3 text-[13px] text-[#161616] outline-none bg-white transition-colors duration-150 placeholder:text-[#d1d5db] focus:border-[#161616]" />
+          <input type="text" id="gen-details" placeholder="e.g. Child is crying with tears on his face" class="w-full border border-gray-200 rounded-lg py-[9px] px-3 text-[13px] text-brand-black outline-none bg-white transition-colors duration-150 placeholder:text-gray-300 focus:border-brand-black" />
         </div>
       </div>
 
     </div><!-- end left-scroll -->
 
     <!-- Sticky generate footer -->
-    <div class="shrink-0 py-4 px-8 bg-white border-t border-[#e5e7eb]">
-      <div class="flex items-start gap-2 bg-[#e6f4fb] border border-[#b3ddf2] rounded-lg py-2.5 px-3 mb-3">
-        <svg class="shrink-0 mt-px text-[#0093D8]" width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="4.5" x2="8" y2="8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11" r="0.8" fill="currentColor"/></svg>
-        <span class="text-[12px] text-[#006a9e] leading-normal">You are responsible for the images you create. Please ensure your content aligns with ethical guidelines.</span>
+    <div class="shrink-0 py-4 px-8 bg-white border-t border-gray-200">
+      <div class="flex items-start gap-2 bg-bip-blue-50 border border-bip-blue-200 rounded-lg py-2.5 px-3 mb-3">
+        <svg class="shrink-0 mt-px text-bip-blue-500" width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="4.5" x2="8" y2="8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11" r="0.8" fill="currentColor"/></svg>
+        <span class="text-[12px] text-bip-blue-700 leading-normal">You are responsible for the images you create. Please ensure your content aligns with ethical guidelines.</span>
       </div>
-      <button class="w-full py-3.5 px-5 bg-[#E7F3F3] text-[#2B9996] border-0 rounded-[10px] text-[15px] font-bold cursor-pointer flex items-center justify-center gap-2 transition-colors duration-150 enabled:hover:bg-[#2B9996] enabled:hover:text-white enabled:active:scale-[0.98] disabled:bg-[#E7F3F3] disabled:text-[#a0c8c8] disabled:cursor-not-allowed" id="gen-btn" onclick="generateImage()">
+      <button class="w-full py-3.5 px-5 bg-primary-500 text-white border-0 rounded-xl text-[15px] font-bold cursor-pointer flex items-center justify-center gap-2 transition-colors duration-150 enabled:hover:bg-primary-600 enabled:active:scale-[0.98] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed" id="gen-btn" onclick="generateImage()">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/>
           <path d="M17.8 11.8L19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2L19 5"/>
@@ -210,53 +222,53 @@
         Generate Image
       </button>
       <div class="loading hidden items-center gap-2 mt-2" id="gen-loading">
-        <div class="w-4 h-4 border-2 border-[#ccfbf1] border-t-[#0d9488] rounded-full anim-spin shrink-0"></div>
-        <span id="gen-loading-msg" class="text-[13px] text-[#0f766e] font-semibold">Generating — ~15–30 seconds</span>
+        <div class="w-4 h-4 border-2 border-primary-100 border-t-primary-600 rounded-full anim-spin shrink-0"></div>
+        <span id="gen-loading-msg" class="text-[13px] text-primary-700 font-semibold">Generating — ~15–30 seconds</span>
       </div>
-      <div class="error-msg hidden bg-[#fef2f2] border border-[#fecaca] rounded-lg py-2.5 px-4 text-[13px] text-[#dc2626] mt-2 items-start gap-2.5" id="gen-error"></div>
+      <div class="error-msg hidden bg-bip-red-50 border border-bip-red-100 rounded-lg py-2.5 px-4 text-[13px] text-bip-red-600 mt-2 items-start gap-2.5" id="gen-error"></div>
     </div>
 
   </div><!-- end left-panel -->
 
   <!-- ── RIGHT PANEL ── -->
-  <div class="flex-1 overflow-y-auto p-6 min-[901px]:p-8 flex flex-col gap-4 bg-[#F8F5EF]">
+  <div class="flex-1 overflow-y-auto p-6 min-[901px]:p-8 flex flex-col gap-4 bg-beige">
 
     <div class="flex gap-4">
-      <button class="flex-1 py-[11px] px-4 bg-white text-[#161616] border border-[#CCCAC5] rounded-[10px] text-[13px] font-semibold cursor-pointer flex items-center justify-center gap-2 transition-colors duration-150 enabled:hover:border-[#161616] disabled:text-[#9ca3af] disabled:border-[#e5e7eb] disabled:cursor-not-allowed" id="regen-btn" disabled onclick="generateImage()">
+      <button class="flex-1 py-[11px] px-4 bg-white text-brand-black border border-[#CCCAC5] rounded-xl text-[13px] font-semibold cursor-pointer flex items-center justify-center gap-2 transition-colors duration-150 enabled:hover:border-brand-black disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed" id="regen-btn" disabled onclick="generateImage()">
         <span id="regen-btn-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg></span>
         <span id="regen-btn-label">Re-generate</span>
       </button>
-      <button class="flex-1 py-[11px] px-4 bg-white text-[#161616] border border-[#CCCAC5] rounded-[10px] text-[13px] font-semibold cursor-pointer flex items-center justify-center gap-2 transition-colors duration-150 enabled:hover:border-[#161616] disabled:text-[#9ca3af] disabled:border-[#e5e7eb] disabled:cursor-not-allowed" id="edit-image-btn" disabled onclick="openEditModal('image')">
+      <button class="flex-1 py-[11px] px-4 bg-white text-brand-black border border-[#CCCAC5] rounded-xl text-[13px] font-semibold cursor-pointer flex items-center justify-center gap-2 transition-colors duration-150 enabled:hover:border-brand-black disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed" id="edit-image-btn" disabled onclick="openEditModal('image')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487z"/></svg>
         Edit Image
       </button>
     </div>
 
     <div class="flex items-center justify-center w-full" id="result-area">
-      <div class="text-center text-[#d1d5db] p-12" id="result-placeholder">
+      <div class="text-center text-gray-300 p-12" id="result-placeholder">
         <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
-        <p class="text-sm text-[#9ca3af] mt-3 font-medium">Your generated image will appear here</p>
+        <p class="text-sm text-gray-400 mt-3 font-medium">Your generated image will appear here</p>
       </div>
       <div id="gen-img-wrap" class="relative leading-[0]" style="display:none">
-        <img id="gen-result-img" src="" alt="Generated image" class="max-w-full max-h-[480px] w-auto h-auto block object-contain rounded-lg border border-[#161616]" />
+        <img id="gen-result-img" src="" alt="Generated image" class="max-w-full max-h-[480px] w-auto h-auto block object-contain rounded-lg border border-brand-black" />
         <div id="gen-img-editing-overlay" class="absolute inset-0 bg-[rgba(248,245,239,0.88)] flex-col items-center justify-center gap-3 rounded-lg" style="display:none">
-          <div class="w-9 h-9 border-[3px] border-[#ccfbf1] border-t-[#2B9996] rounded-full anim-spin"></div>
-          <span id="gen-img-overlay-text" class="text-[13px] font-semibold text-[#2B9996]">Editing…</span>
+          <div class="w-9 h-9 border-[3px] border-primary-100 border-t-primary-500 rounded-full anim-spin"></div>
+          <span id="gen-img-overlay-text" class="text-[13px] font-semibold text-primary-500">Editing…</span>
         </div>
       </div>
     </div>
 
     <!-- Crop tool -->
     <div id="crop-tool" class="hidden">
-      <p class="text-xs text-[#6b7280] mb-2">Drag to pan · scroll or use buttons to zoom · then Crop</p>
-      <div id="crop-frame" class="relative w-full overflow-hidden rounded-[10px] border-[2.5px] border-[#0d9488] cursor-grab touch-none bg-[#e5e7eb]">
+      <p class="text-xs text-gray-500 mb-2">Drag to pan · scroll or use buttons to zoom · then Crop</p>
+      <div id="crop-frame" class="relative w-full overflow-hidden rounded-xl border-[2.5px] border-primary-600 cursor-grab touch-none bg-gray-200">
         <div style="padding-top:48.46%;"></div>
         <img id="crop-img" class="absolute top-0 left-0 max-w-none origin-top-left will-change-transform select-none pointer-events-none" />
       </div>
       <div class="flex gap-2 mt-2">
-        <button class="flex-1 p-2.5 border-[1.5px] border-[#e5e7eb] rounded-lg bg-white text-[13px] font-semibold text-[#2d2d2d] cursor-pointer transition-colors duration-150 hover:border-[#6b7280]" onclick="zoomCrop(-0.1)">− Zoom Out</button>
-        <button class="flex-1 p-2.5 border-[1.5px] border-[#e5e7eb] rounded-lg bg-white text-[13px] font-semibold text-[#2d2d2d] cursor-pointer transition-colors duration-150 hover:border-[#6b7280]" onclick="zoomCrop(0.1)">+ Zoom In</button>
-        <button class="flex-[2] p-2.5 bg-[#E7F3F3] text-[#2B9996] border-0 rounded-lg text-sm font-bold cursor-pointer transition-colors duration-150 hover:bg-[#2B9996] hover:text-white" onclick="applyCrop()">Implement</button>
+        <button class="flex-1 p-2.5 border-[1.5px] border-gray-200 rounded-lg bg-white text-[13px] font-semibold text-brand-black cursor-pointer transition-colors duration-150 hover:border-gray-500" onclick="zoomCrop(-0.1)">− Zoom Out</button>
+        <button class="flex-1 p-2.5 border-[1.5px] border-gray-200 rounded-lg bg-white text-[13px] font-semibold text-brand-black cursor-pointer transition-colors duration-150 hover:border-gray-500" onclick="zoomCrop(0.1)">+ Zoom In</button>
+        <button class="flex-[2] p-2.5 bg-primary-500 text-white border-0 rounded-lg text-sm font-bold cursor-pointer transition-colors duration-150 hover:bg-primary-600" onclick="applyCrop()">Implement</button>
       </div>
     </div>
 
@@ -265,7 +277,7 @@
 </div><!-- end layout -->
 
 <!-- ── Image Editor view ── -->
-<div id="view-editor" class="flex-1 flex flex-col overflow-hidden bg-[#F8F5EF]" style="display:none">
+<div id="view-editor" class="flex-1 flex flex-col overflow-hidden bg-beige" style="display:none">
   <div class="flex-1 overflow-y-auto py-8 px-6 min-[901px]:px-8 flex justify-center">
     <div class="w-full max-w-[680px] flex flex-col gap-4">
 
@@ -276,17 +288,17 @@
       <div id="editor-loaded" class="flex flex-col gap-5">
 
         <!-- Image preview with loading overlay -->
-        <div class="relative w-full bg-white rounded-lg flex items-center justify-center overflow-hidden border border-[#161616]">
+        <div class="relative w-full bg-white rounded-lg flex items-center justify-center overflow-hidden border border-brand-black">
           <img id="editor-image" src="" alt="Editing image" class="block max-w-full max-h-[420px] w-auto h-auto object-contain rounded-lg" />
           <div id="editor-loading-overlay" class="absolute inset-0 bg-[rgba(248,245,239,0.88)] flex-col items-center justify-center gap-3 rounded-lg" style="display:none">
-            <div class="w-9 h-9 border-[3px] border-[#ccfbf1] border-t-[#2B9996] rounded-full anim-spin"></div>
-            <span class="text-[13px] font-semibold text-[#2B9996]">Editing…</span>
+            <div class="w-9 h-9 border-[3px] border-primary-100 border-t-primary-500 rounded-full anim-spin"></div>
+            <span class="text-[13px] font-semibold text-primary-500">Editing…</span>
           </div>
         </div>
 
         <!-- Optional: swap the working image -->
         <div id="editor-swap-wrap" class="-mt-2 flex justify-end">
-          <button onclick="document.getElementById('editor-file-input').click()" class="inline-flex items-center gap-1.5 bg-transparent border-0 text-xs font-medium text-[#6b7280] cursor-pointer p-0 transition-colors duration-150 hover:text-[#161616]">
+          <button onclick="document.getElementById('editor-file-input').click()" class="inline-flex items-center gap-1.5 bg-transparent border-0 text-xs font-medium text-gray-500 cursor-pointer p-0 transition-colors duration-150 hover:text-brand-black">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
             Use a different image
           </button>
@@ -294,14 +306,14 @@
 
         <!-- Input (visible in pre-edit state) -->
         <div id="editor-input-wrap" class="flex flex-col gap-2">
-          <label class="text-[13px] font-semibold text-[#374151]">Describe what you'd like to change.</label>
-          <textarea id="editor-prompt-input" placeholder="e.g. Add glasses, raise one hand, or hold an AAC device" class="w-full border border-[#e5e7eb] rounded-[10px] py-2.5 px-3 text-[13px] resize-y min-h-[88px] outline-none transition-colors duration-150 focus:border-[#161616] bg-white"></textarea>
-          <div id="editor-error" class="bg-[#fef2f2] border border-[#fecaca] rounded-lg py-2 px-3 text-[13px] text-[#dc2626] mt-1" style="display:none"></div>
+          <label class="text-[13px] font-semibold text-gray-700">Describe what you'd like to change.</label>
+          <textarea id="editor-prompt-input" placeholder="e.g. Add glasses, raise one hand, or hold an AAC device" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-[13px] resize-y min-h-[88px] outline-none transition-colors duration-150 focus:border-brand-black bg-white"></textarea>
+          <div id="editor-error" class="bg-bip-red-50 border border-bip-red-100 rounded-lg py-2 px-3 text-[13px] text-bip-red-600 mt-1" style="display:none"></div>
         </div>
 
         <!-- Pre-edit action: Edit Image -->
         <div id="editor-pre-edit-actions">
-          <button id="editor-submit-btn" onclick="editorSubmit()" class="w-full py-3.5 px-5 bg-[#E7F3F3] text-[#2B9996] border-0 rounded-[10px] text-[15px] font-bold cursor-pointer flex items-center justify-center gap-2 transition-colors duration-150 enabled:hover:bg-[#2B9996] enabled:hover:text-white enabled:active:scale-[0.98] disabled:bg-[#E7F3F3] disabled:text-[#a0c8c8] disabled:cursor-not-allowed">
+          <button id="editor-submit-btn" onclick="editorSubmit()" class="w-full py-3.5 px-5 bg-primary-500 text-white border-0 rounded-xl text-[15px] font-bold cursor-pointer flex items-center justify-center gap-2 transition-colors duration-150 enabled:hover:bg-primary-600 enabled:active:scale-[0.98] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487z"/></svg>
             <span id="editor-submit-label">Edit Image</span>
           </button>
@@ -309,24 +321,24 @@
 
         <!-- Post-edit actions: Re-generate / Revert / Edit again -->
         <div id="editor-post-edit-actions" class="grid grid-cols-3 gap-2" style="display:none">
-          <button onclick="editorRegenerate()" class="py-[11px] px-3 bg-white text-[#161616] border border-[#CCCAC5] rounded-[10px] text-[13px] font-semibold cursor-pointer flex items-center justify-center gap-1.5 transition-colors duration-150 hover:border-[#161616]">
+          <button onclick="editorRegenerate()" class="py-[11px] px-3 bg-white text-brand-black border border-[#CCCAC5] rounded-xl text-[13px] font-semibold cursor-pointer flex items-center justify-center gap-1.5 transition-colors duration-150 hover:border-brand-black">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
             Re-generate
           </button>
-          <button onclick="editorRevert()" class="py-[11px] px-3 bg-white text-[#161616] border border-[#CCCAC5] rounded-[10px] text-[13px] font-semibold cursor-pointer flex items-center justify-center gap-1.5 transition-colors duration-150 hover:border-[#161616]">
+          <button onclick="editorRevert()" class="py-[11px] px-3 bg-white text-brand-black border border-[#CCCAC5] rounded-xl text-[13px] font-semibold cursor-pointer flex items-center justify-center gap-1.5 transition-colors duration-150 hover:border-brand-black">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3"/></svg>
             Revert to Original
           </button>
-          <button onclick="editorEditAgain()" class="py-[11px] px-3 bg-[#E7F3F3] text-[#2B9996] border-0 rounded-[10px] text-[13px] font-bold cursor-pointer flex items-center justify-center gap-1.5 transition-colors duration-150 hover:bg-[#2B9996] hover:text-white">
+          <button onclick="editorEditAgain()" class="py-[11px] px-3 bg-primary-500 text-white border-0 rounded-xl text-[13px] font-bold cursor-pointer flex items-center justify-center gap-1.5 transition-colors duration-150 hover:bg-primary-600">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487z"/></svg>
             Edit again
           </button>
         </div>
 
         <!-- Footer note (mirrors generator) -->
-        <div class="flex items-start gap-2 bg-[#e6f4fb] border border-[#b3ddf2] rounded-lg py-2.5 px-3">
-          <svg class="shrink-0 mt-px text-[#0093D8]" width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="4.5" x2="8" y2="8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11" r="0.8" fill="currentColor"/></svg>
-          <span class="text-[12px] text-[#006a9e] leading-normal">You are responsible for the images you create. Please ensure your content aligns with ethical guidelines.</span>
+        <div class="flex items-start gap-2 bg-bip-blue-50 border border-bip-blue-200 rounded-lg py-2.5 px-3">
+          <svg class="shrink-0 mt-px text-bip-blue-500" width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="4.5" x2="8" y2="8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11" r="0.8" fill="currentColor"/></svg>
+          <span class="text-[12px] text-bip-blue-700 leading-normal">You are responsible for the images you create. Please ensure your content aligns with ethical guidelines.</span>
         </div>
 
       </div><!-- end editor-loaded -->
@@ -339,43 +351,43 @@
 
 <!-- ── Edit Modal ── -->
 <div id="edit-overlay" onclick="editOverlayClick(event)" class="overlay-anim fixed inset-0 bg-black/45 z-[1001] items-center justify-center" style="display:none">
-  <div class="bg-white rounded-2xl w-[520px] max-w-[95vw] max-h-[90vh] overflow-y-auto shadow-[0_24px_64px_rgba(0,0,0,0.25)]">
+  <div class="bg-white rounded-2xl w-[520px] max-w-[95vw] max-h-[90vh] overflow-y-auto shadow-3xl">
 
     <!-- Header -->
     <div class="flex items-center justify-between pt-7 px-8 pb-6">
-      <span id="edit-modal-title" class="text-[22px] font-normal text-[#161616]"></span>
-      <button onclick="closeEditModal()" class="w-8 h-8 flex items-center justify-center bg-transparent border-0 cursor-pointer text-[#9ca3af] rounded-lg shrink-0 transition-colors duration-150 hover:bg-[#f3f4f6] hover:text-[#161616]">
+      <span id="edit-modal-title" class="text-[22px] font-normal text-brand-black"></span>
+      <button onclick="closeEditModal()" class="w-8 h-8 flex items-center justify-center bg-transparent border-0 cursor-pointer text-gray-400 rounded-lg shrink-0 transition-colors duration-150 hover:bg-gray-100 hover:text-brand-black">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
-    <div class="h-px bg-[#e5e7eb]"></div>
+    <div class="h-px bg-gray-200"></div>
 
     <!-- Image preview with loading overlay -->
     <div class="pt-6 px-8">
-      <div id="edit-preview-wrap" class="relative bg-[#F8F5EF] rounded-xl overflow-hidden min-h-[200px] flex items-center justify-center">
+      <div id="edit-preview-wrap" class="relative bg-beige rounded-xl overflow-hidden min-h-[200px] flex items-center justify-center">
         <img id="edit-modal-preview" src="" alt="" class="max-w-full max-h-[340px] object-contain rounded-xl" style="display:none" />
         <!-- Loading overlay on image -->
-        <div id="edit-img-loading" class="absolute inset-0 bg-[rgba(248,245,239,0.85)] rounded-xl flex-col items-center justify-center gap-3 transition-opacity duration-200" style="display:none">
-          <div class="w-8 h-8 border-[3px] border-[#ccfbf1] border-t-[#2B9996] rounded-full anim-spin"></div>
-          <span class="text-[13px] font-semibold text-[#2B9996] text-center px-4">Working on your edit…<br><span class="font-normal text-[#6b7280]">Feel free to close this window</span></span>
+        <div id="edit-img-loading" class="absolute inset-0 bg-[rgba(248,245,239,0.88)] rounded-xl flex-col items-center justify-center gap-3 transition-opacity duration-200" style="display:none">
+          <div class="w-8 h-8 border-[3px] border-primary-100 border-t-primary-500 rounded-full anim-spin"></div>
+          <span class="text-[13px] font-semibold text-primary-500 text-center px-4">Working on your edit…<br><span class="font-normal text-gray-500">Feel free to close this window</span></span>
         </div>
       </div>
     </div>
 
     <!-- Prompt -->
     <div class="pt-4 px-8">
-      <label class="text-[13px] font-semibold text-[#374151] block mb-2">Describe what you'd like to change.</label>
-      <textarea id="edit-prompt-input" placeholder="e.g. Add glasses, raise one hand, or hold an AAC device" class="w-full border border-[#e5e7eb] rounded-[10px] py-2.5 px-3 text-[13px] resize-y min-h-[88px] outline-none transition-colors duration-150 focus:border-[#161616]"></textarea>
-      <div id="edit-error" class="bg-[#fef2f2] border border-[#fecaca] rounded-lg py-2 px-3 text-[13px] text-[#dc2626] mt-2" style="display:none"></div>
+      <label class="text-[13px] font-semibold text-gray-700 block mb-2">Describe what you'd like to change.</label>
+      <textarea id="edit-prompt-input" placeholder="e.g. Add glasses, raise one hand, or hold an AAC device" class="w-full border border-gray-200 rounded-xl py-2.5 px-3 text-[13px] resize-y min-h-[88px] outline-none transition-colors duration-150 focus:border-brand-black"></textarea>
+      <div id="edit-error" class="bg-bip-red-50 border border-bip-red-100 rounded-lg py-2 px-3 text-[13px] text-bip-red-600 mt-2" style="display:none"></div>
     </div>
 
     <!-- Buttons -->
     <div class="flex gap-4 py-4 px-8 pb-8">
-      <button id="edit-submit-btn" onclick="submitEdit()" class="flex-1 py-[11px] px-4 bg-white text-[#161616] border border-[#CCCAC5] rounded-[10px] text-[13px] font-semibold cursor-pointer flex items-center justify-center gap-2 transition-colors duration-150 hover:border-[#161616]">
+      <button id="edit-submit-btn" onclick="submitEdit()" class="flex-1 py-[11px] px-4 bg-white text-brand-black border border-[#CCCAC5] rounded-xl text-[13px] font-semibold cursor-pointer flex items-center justify-center gap-2 transition-colors duration-150 hover:border-brand-black">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487z"/></svg>
         <span id="edit-submit-label">Edit</span>
       </button>
-      <button id="edit-close-btn" onclick="closeEditModal()" class="flex-1 py-[11px] px-4 bg-white text-[#161616] border border-[#CCCAC5] rounded-[10px] text-[13px] font-semibold cursor-pointer transition-colors duration-150 hover:border-[#161616]">Save and close</button>
+      <button id="edit-close-btn" onclick="closeEditModal()" class="flex-1 py-[11px] px-4 bg-white text-brand-black border border-[#CCCAC5] rounded-xl text-[13px] font-semibold cursor-pointer transition-colors duration-150 hover:border-brand-black">Save and close</button>
     </div>
 
   </div>
@@ -383,51 +395,51 @@
 
 <!-- ── Character Picker Overlay ── -->
 <div id="picker-overlay" onclick="pickerBgClick(event)" class="hidden fixed inset-0 bg-black/40 z-[100] items-center justify-center p-6">
-  <div class="bg-white rounded-[20px] w-full max-w-[960px] max-h-[90vh] flex flex-col shadow-[0_24px_64px_rgba(0,0,0,0.18)] overflow-hidden">
+  <div class="bg-white rounded-5xl w-full max-w-[960px] max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
     <!-- Header -->
     <div class="flex items-center justify-between pt-7 px-8 pb-6 shrink-0">
-      <span class="text-[22px] font-normal text-[#161616]">Choose Your Character</span>
-      <button class="w-8 h-8 bg-transparent border-0 cursor-pointer text-[#6b7280] flex items-center justify-center rounded-lg transition-colors duration-150 shrink-0 hover:bg-[#f3f4f6] hover:text-[#161616]" onclick="closePicker()" title="Close">
+      <span class="text-[22px] font-normal text-brand-black">Choose Your Character</span>
+      <button class="w-8 h-8 bg-transparent border-0 cursor-pointer text-gray-500 flex items-center justify-center rounded-lg transition-colors duration-150 shrink-0 hover:bg-gray-100 hover:text-brand-black" onclick="closePicker()" title="Close">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
-    <div class="h-px bg-[#e5e7eb] shrink-0"></div>
+    <div class="h-px bg-gray-200 shrink-0"></div>
 
     <!-- Filters -->
     <div class="pt-4 px-8 pb-2 shrink-0 relative">
-      <button class="picker-filter-btn inline-flex items-center gap-2 py-2 px-4 bg-white border-[1.5px] border-[#CCCAC5] rounded-lg text-[13px] font-semibold text-[#374151] cursor-pointer transition-colors duration-150 hover:border-[#161616] hover:text-[#161616]" id="picker-filter-btn" onclick="toggleFilterPopover(event)">
+      <button class="picker-filter-btn inline-flex items-center gap-2 py-2 px-4 bg-white border-[1.5px] border-[#CCCAC5] rounded-lg text-[13px] font-semibold text-gray-700 cursor-pointer transition-colors duration-150 hover:border-brand-black hover:text-brand-black" id="picker-filter-btn" onclick="toggleFilterPopover(event)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
         Filters
-        <span class="items-center justify-center min-w-[18px] h-[18px] bg-[#161616] text-white rounded-[9px] text-[11px] font-bold px-1 leading-none" id="filter-badge" style="display:none"></span>
+        <span class="items-center justify-center min-w-[18px] h-[18px] bg-brand-black text-white rounded-full text-2xs font-bold px-1 leading-none" id="filter-badge" style="display:none"></span>
       </button>
-      <div class="absolute top-[calc(100%+4px)] left-8 bg-white border border-[#e5e7eb] rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] w-[288px] p-4 z-10" id="filter-popover" style="display:none">
+      <div class="absolute top-[calc(100%+4px)] left-8 bg-white border border-gray-200 rounded-xl shadow-xl w-[288px] p-4 z-10" id="filter-popover" style="display:none">
         <div class="mb-4">
-          <div class="text-[11px] font-bold text-[#9ca3af] uppercase tracking-[0.06em] mb-2">Gender</div>
+          <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Gender</div>
           <div class="flex flex-wrap gap-1.5">
-            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-male"   class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('gender','male',this.checked)"> Male</label>
-            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-female" class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('gender','female',this.checked)"> Female</label>
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-gray-200 rounded-md text-[13px] text-gray-700 cursor-pointer select-none transition-colors duration-[120ms] hover:border-gray-400"><input type="checkbox" id="f-male"   class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-brand-black" onchange="toggleFilter('gender','male',this.checked)"> Male</label>
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-gray-200 rounded-md text-[13px] text-gray-700 cursor-pointer select-none transition-colors duration-[120ms] hover:border-gray-400"><input type="checkbox" id="f-female" class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-brand-black" onchange="toggleFilter('gender','female',this.checked)"> Female</label>
           </div>
         </div>
         <div class="mb-4">
-          <div class="text-[11px] font-bold text-[#9ca3af] uppercase tracking-[0.06em] mb-2">Age</div>
+          <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Age</div>
           <div class="flex flex-wrap gap-1.5">
-            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-child" class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('age','child',this.checked)"> Child</label>
-            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-teen"  class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('age','teen',this.checked)"> Teen</label>
-            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-adult" class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('age','adult',this.checked)"> Adult</label>
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-gray-200 rounded-md text-[13px] text-gray-700 cursor-pointer select-none transition-colors duration-[120ms] hover:border-gray-400"><input type="checkbox" id="f-child" class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-brand-black" onchange="toggleFilter('age','child',this.checked)"> Child</label>
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-gray-200 rounded-md text-[13px] text-gray-700 cursor-pointer select-none transition-colors duration-[120ms] hover:border-gray-400"><input type="checkbox" id="f-teen"  class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-brand-black" onchange="toggleFilter('age','teen',this.checked)"> Teen</label>
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-gray-200 rounded-md text-[13px] text-gray-700 cursor-pointer select-none transition-colors duration-[120ms] hover:border-gray-400"><input type="checkbox" id="f-adult" class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-brand-black" onchange="toggleFilter('age','adult',this.checked)"> Adult</label>
           </div>
         </div>
         <div>
-          <div class="text-[11px] font-bold text-[#9ca3af] uppercase tracking-[0.06em] mb-2">Skin Tone</div>
+          <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Skin Tone</div>
           <div class="flex flex-wrap gap-1.5">
-            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-light"        class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('skinTone','light',this.checked)"> Light</label>
-            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-light-medium" class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('skinTone','light-medium',this.checked)"> Light-Medium</label>
-            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-medium"       class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('skinTone','medium',this.checked)"> Medium</label>
-            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-tan"          class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('skinTone','tan',this.checked)"> Tan</label>
-            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-[#e5e7eb] rounded-md text-[13px] text-[#374151] cursor-pointer select-none transition-colors duration-[120ms] hover:border-[#9ca3af]"><input type="checkbox" id="f-deep"         class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-[#161616]" onchange="toggleFilter('skinTone','deep',this.checked)"> Deep</label>
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-gray-200 rounded-md text-[13px] text-gray-700 cursor-pointer select-none transition-colors duration-[120ms] hover:border-gray-400"><input type="checkbox" id="f-light"        class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-brand-black" onchange="toggleFilter('skinTone','light',this.checked)"> Light</label>
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-gray-200 rounded-md text-[13px] text-gray-700 cursor-pointer select-none transition-colors duration-[120ms] hover:border-gray-400"><input type="checkbox" id="f-light-medium" class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-brand-black" onchange="toggleFilter('skinTone','light-medium',this.checked)"> Light-Medium</label>
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-gray-200 rounded-md text-[13px] text-gray-700 cursor-pointer select-none transition-colors duration-[120ms] hover:border-gray-400"><input type="checkbox" id="f-medium"       class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-brand-black" onchange="toggleFilter('skinTone','medium',this.checked)"> Medium</label>
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-gray-200 rounded-md text-[13px] text-gray-700 cursor-pointer select-none transition-colors duration-[120ms] hover:border-gray-400"><input type="checkbox" id="f-tan"          class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-brand-black" onchange="toggleFilter('skinTone','tan',this.checked)"> Tan</label>
+            <label class="inline-flex items-center gap-1.5 py-1 px-2.5 border border-gray-200 rounded-md text-[13px] text-gray-700 cursor-pointer select-none transition-colors duration-[120ms] hover:border-gray-400"><input type="checkbox" id="f-deep"         class="w-3.5 h-3.5 cursor-pointer shrink-0 accent-brand-black" onchange="toggleFilter('skinTone','deep',this.checked)"> Deep</label>
           </div>
         </div>
-        <div class="mt-4 pt-3 border-t border-[#f3f4f6] text-right">
-          <button class="bg-transparent border-0 text-xs font-medium text-[#9ca3af] cursor-pointer p-0 transition-colors duration-[120ms] hover:text-[#161616]" onclick="clearAllFilters()">Clear all</button>
+        <div class="mt-4 pt-3 border-t border-gray-100 text-right">
+          <button class="bg-transparent border-0 text-xs font-medium text-gray-400 cursor-pointer p-0 transition-colors duration-[120ms] hover:text-brand-black" onclick="clearAllFilters()">Clear all</button>
         </div>
       </div>
     </div>
@@ -438,8 +450,8 @@
     </div>
 
     <!-- Footer -->
-    <div class="pt-3.5 px-8 pb-6 flex justify-end border-t border-[#f3f4f6] shrink-0">
-      <button class="py-[11px] px-12 bg-white border-[1.5px] border-[#CCCAC5] rounded-[10px] text-sm font-semibold text-[#161616] cursor-pointer transition-colors duration-150 hover:border-[#161616]" onclick="savePickerSelection()">Save</button>
+    <div class="pt-3.5 px-8 pb-6 flex justify-end border-t border-gray-100 shrink-0">
+      <button class="py-[11px] px-12 bg-white border-[1.5px] border-[#CCCAC5] rounded-xl text-sm font-semibold text-brand-black cursor-pointer transition-colors duration-150 hover:border-brand-black" onclick="savePickerSelection()">Save</button>
     </div>
   </div>
 </div>
@@ -454,10 +466,10 @@
 
     const genTab = document.getElementById('tab-generator');
     const edTab  = document.getElementById('tab-editor');
-    genTab.classList.toggle('text-[#161616]', isGen);
-    genTab.classList.toggle('text-[#9ca3af]', !isGen);
-    edTab.classList.toggle('text-[#161616]', !isGen);
-    edTab.classList.toggle('text-[#9ca3af]', isGen);
+    genTab.classList.toggle('text-brand-black', isGen);
+    genTab.classList.toggle('text-gray-400', !isGen);
+    edTab.classList.toggle('text-brand-black', !isGen);
+    edTab.classList.toggle('text-gray-400', isGen);
 
     document.getElementById('tab-generator-indicator').classList.toggle('hidden', !isGen);
     document.getElementById('tab-editor-indicator').classList.toggle('hidden', isGen);
@@ -856,19 +868,19 @@
     gallery.innerHTML = "";
 
     if (filtered.length === 0) {
-      gallery.innerHTML = '<div class="flex items-center justify-center w-full min-h-[220px] text-sm text-[#9ca3af]">No characters match the selected filters.</div>';
+      gallery.innerHTML = '<div class="flex items-center justify-center w-full min-h-[220px] text-sm text-gray-400">No characters match the selected filters.</div>';
       return;
     }
 
     filtered.forEach(ch => {
       const card = document.createElement("div");
       const isSelected = ch.id === pickerTempSelected;
-      card.className = "picker-card relative w-[200px] min-h-[272px] border-[1.5px] border-[#e5e7eb] rounded-[14px] bg-[#F8F5EF] cursor-pointer flex items-center justify-center shrink-0 transition-shadow duration-150 overflow-visible hover:border-[#9ca3af] hover:shadow-[0_2px_8px_rgba(0,0,0,0.07)]" + (isSelected ? " selected" : "");
+      card.className = "picker-card relative w-[200px] min-h-[272px] border-[1.5px] border-gray-200 rounded-3xl bg-beige cursor-pointer flex items-center justify-center shrink-0 transition-shadow duration-150 overflow-visible hover:border-gray-400 hover:shadow-hover-card" + (isSelected ? " selected" : "");
       // Use cached transparent blob URL if available; otherwise cache-bust the file path
       const imgSrc = ch.blobUrl || (ch.refPath + "?cb=" + Date.now());
       card.innerHTML = `
         <img src="${imgSrc}" alt="${ch.label}" loading="lazy" class="w-[160px] h-[240px] object-contain block pointer-events-none" onerror="this.style.display='none'" />
-        <div class="picker-check absolute -bottom-[9px] -right-[9px] w-[26px] h-[26px] bg-[#161616] rounded-full border-[2.5px] border-white items-center justify-center z-[2]" style="display:none">
+        <div class="picker-check absolute -bottom-[9px] -right-[9px] w-[26px] h-[26px] bg-brand-black rounded-full border-[2.5px] border-white items-center justify-center" style="display:none">
           <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><polyline points="2,7 6,11 12,3" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
       `;
@@ -1288,7 +1300,7 @@
     const regenLabel = document.getElementById("regen-btn-label");
     if (on) {
       regenBtn.disabled = true;
-      if (regenIcon)  regenIcon.innerHTML  = '<div class="w-3.5 h-3.5 border-2 border-[#e5e7eb] border-t-[#9ca3af] rounded-full anim-spin shrink-0"></div>';
+      if (regenIcon)  regenIcon.innerHTML  = '<div class="w-3.5 h-3.5 border-2 border-gray-200 border-t-gray-400 rounded-full anim-spin shrink-0"></div>';
       if (regenLabel) regenLabel.textContent = "Regenerating…";
     } else {
       regenBtn.disabled = false;
@@ -1336,22 +1348,23 @@
     const el = document.getElementById("gen-error");
     el.textContent = "";
 
-    // SVG icon (static, safe to set once)
+    // SVG icon (static, safe to set once). Color via `currentColor` so the
+    // text-bip-red-600 utility on the SVG drives the stroke + fill.
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("class", "shrink-0 mt-px");
+    svg.setAttribute("class", "shrink-0 mt-px text-bip-red-600");
     svg.setAttribute("width", "15"); svg.setAttribute("height", "15");
     svg.setAttribute("viewBox", "0 0 16 16"); svg.setAttribute("fill", "none");
     svg.innerHTML =
-      '<circle cx="8" cy="8" r="7" stroke="#dc2626" stroke-width="1.5"/>' +
-      '<line x1="8" y1="4.5" x2="8" y2="8.5" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round"/>' +
-      '<circle cx="8" cy="11" r="0.8" fill="#dc2626"/>';
+      '<circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>' +
+      '<line x1="8" y1="4.5" x2="8" y2="8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' +
+      '<circle cx="8" cy="11" r="0.8" fill="currentColor"/>';
 
     const body = document.createElement("div");
     body.className = "flex-1";
     const msgDiv = document.createElement("div");
     msgDiv.textContent = msg;
     const retryBtn = document.createElement("button");
-    retryBtn.className = "mt-1.5 inline-block bg-transparent border border-[#dc2626] rounded-md text-[#dc2626] text-xs font-semibold py-[3px] px-2.5 cursor-pointer hover:bg-[#fecaca]";
+    retryBtn.className = "mt-1.5 inline-block bg-transparent border border-bip-red-600 rounded-md text-bip-red-600 text-xs font-semibold py-[3px] px-2.5 cursor-pointer hover:bg-bip-red-100";
     retryBtn.textContent = "Try again";
     retryBtn.addEventListener("click", generateImage);
     body.appendChild(msgDiv);
